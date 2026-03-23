@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>anon:zadan (dmd) v1.1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        body { background: #0a0a0b; color: #e4e4e7; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .card { background: #161618; border: 1px solid #27272a; border-radius: 24px; overflow: hidden; }
+        .tab { display: none; animation: slideUp 0.3s ease; }
+        .tab.active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .btn-main { background: #27272a; border-radius: 16px; transition: 0.2s; font-weight: 600; }
+        .btn-main:active { scale: 0.96; background: #3f3f46; }
+        .btn-accent { background: #ffffff; color: #000; border-radius: 16px; font-weight: 800; }
+        .input-dark { background: #0f0f10 !important; border: 1px solid #27272a !important; color: white !important; border-radius: 14px !important; outline: none; }
+        .up-border { border: 2px solid #fbbf24 !important; box-shadow: 0 0 15px rgba(251, 191, 36, 0.1); }
+        
+        /* Стили для красной точки уведомления */
+        .notification-dot {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 8px;
+            height: 8px;
+            background-color: #ef4444; /* red-500 */
+            border-radius: 50%;
+            border: 2px solid #000;
+            display: none; /* Скрыта по умолчанию */
+        }
+        nav button { position: relative; } /* Для позиционирования точки */
+    </style>
+</head>
+<body class="pb-28">
+
+    <header class="p-5 flex justify-between items-center sticky top-0 bg-[#0a0a0b]/80 backdrop-blur-md z-50 border-b border-zinc-900/50">
+        <h1 class="text-lg font-extrabold tracking-tighter italic">anon:<span class="text-zinc-500">zadan</span></h1>
+        <div class="flex gap-3 items-center">
+            <div id="u-bal-head" class="bg-zinc-900 px-3 py-1 rounded-full text-[10px] font-bold">0.00₽</div>
+            <button onclick="setTab('admin_login')" class="w-8 h-8 flex items-center justify-center opacity-20"><i class="fa-solid fa-gear text-xs"></i></button>
+        </div>
+    </header>
+
+    <div class="px-5 mb-4 mt-2">
+        <div class="relative">
+            <i class="fa-solid fa-location-dot absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 text-xs"></i>
+            <input id="search-addr" oninput="renderHome()" class="w-full bg-zinc-900 border border-zinc-800 py-4 pl-10 pr-4 rounded-2xl text-xs outline-none focus:border-zinc-500" placeholder="Поиск по адресу (РФ)...">
+        </div>
+    </div>
+
+    <section id="home" class="tab active px-5 space-y-4">
+        <div id="zadan-list" class="space-y-4">
+            </div>
+    </section>
+
+    <section id="create" class="tab px-5">
+        <div class="card p-6 space-y-4">
+            <h2 class="font-bold text-sm uppercase tracking-widest opacity-40">Новое задание</h2>
+            <input id="z-title" class="input-dark w-full p-4 text-xs" placeholder="Заголовок">
+            <textarea id="z-desc" class="input-dark w-full p-4 text-xs h-24" placeholder="Описание задачи"></textarea>
+            <input id="z-img" class="input-dark w-full p-4 text-xs" placeholder="Ссылка на фото">
+            <div class="grid grid-cols-2 gap-3">
+                <input id="z-price" type="number" class="input-dark w-full p-4 text-xs" placeholder="Цена (₽)">
+                <input id="z-addr" class="input-dark w-full p-4 text-xs" placeholder="Адрес (РФ)">
+            </div>
+            <p class="text-[9px] opacity-30 italic">* Спишется сумма + 3% комиссии сервиса</p>
+            <button onclick="createZadan()" class="w-full btn-accent py-5 text-xs uppercase">Отправить на модерацию</button>
+        </div>
+    </section>
+
+    <section id="chats" class="tab px-5 space-y-4">
+        <h2 class="text-xs font-bold opacity-30 uppercase tracking-widest">Активные сделки</h2>
+        <div id="deal-list" class="space-y-3"></div>
+        <hr class="border-zinc-800 my-6">
+        <h2 class="text-xs font-bold opacity-30 uppercase tracking-widest">Поддержка</h2>
+        <div onclick="openSupport()" class="card p-5 flex justify-between items-center cursor-pointer">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-circle-check text-blue-500"></i>
+                <span class="text-xs font-bold">Поддержка anon:zadan</span>
+            </div>
+            <i class="fa-solid fa-chevron-right opacity-20 text-[10px]"></i>
+        </div>
+    </section>
+
+    <section id="me" class="tab px-5">
+        <div class="card p-8 text-center">
+            <div class="w-20 h-20 bg-zinc-800 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl border border-zinc-700">👤</div>
+            <h3 id="u-nick" class="font-black text-xl mb-1">...</h3>
+            <p id="u-id" class="text-[10px] opacity-30 mb-6 tracking-widest uppercase">ID: 000000</p>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800">
+                    <p class="text-[8px] opacity-40 uppercase">Баланс</p>
+                    <p id="u-bal-main" class="font-bold text-white">0₽</p>
+                </div>
+                <button onclick="withdraw()" class="btn-main p-4 text-[10px] flex items-center justify-center text-white/70">ВЫВОД</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="admin_login" class="tab px-5 pt-20">
+        <div class="max-w-xs mx-auto">
+            <input type="password" id="admin-pass-input" oninput="checkAdminPass(this.value)" class="w-full p-6 text-center text-2xl tracking-[10px] card outline-none border-zinc-700 focus:border-zinc-500" placeholder="••••">
+            <p class="text-center text-[10px] opacity-20 mt-4 uppercase font-bold tracking-widest">Панель управления</p>
+        </div>
+    </section>
+
+    <section id="admin" class="tab px-5 pb-32 space-y-6">
+        <div class="flex justify-between items-center">
+            <h2 class="font-black text-sm text-zinc-500 uppercase">ADMIN PANEL</h2>
+            <button onclick="setTab('me')" class="text-[9px] opacity-50 uppercase">Выйти</button>
+        </div>
+        
+        <div class="card p-5 space-y-3">
+            <p class="text-[10px] font-bold opacity-40 tracking-widest uppercase">Модерация заявок (<span id="mod-count">0</span>)</p>
+            <div id="adm-mod-list" class="space-y-3"></div>
+        </div>
+
+        <div class="card p-5 space-y-3">
+            <p class="text-[10px] font-bold opacity-40 tracking-widest uppercase">Пользователи</p>
+            <div id="adm-user-list" class="max-h-60 overflow-y-auto space-y-2 pr-2"></div>
+        </div>
+    </section>
+
+    <nav class="fixed bottom-0 left-0 right-0 h-24 bg-black/95 backdrop-blur-2xl border-t border-zinc-900 flex justify-around items-center px-6 z-[100]">
+        <button onclick="setTab('home')" id="btn-home" class="flex flex-col items-center gap-1 transition-all">
+            <div class="relative">
+                <i class="fa-solid fa-rectangle-list text-xl"></i>
+                <div id="dot-home" class="notification-dot"></div>
+            </div>
+            <span class="text-[8px] font-bold">Лента</span>
+        </button>
+        <button onclick="setTab('create')" id="btn-create" class="flex flex-col items-center gap-1 opacity-30 transition-all">
+            <i class="fa-solid fa-circle-plus text-xl"></i>
+            <span class="text-[8px] font-bold">Создать</span>
+        </button>
+        <button onclick="setTab('chats')" id="btn-chats" class="flex flex-col items-center gap-1 opacity-30 transition-all">
+            <div class="relative">
+                <i class="fa-solid fa-comment-dots text-xl"></i>
+                <div id="dot-chats" class="notification-dot"></div>
+            </div>
+            <span class="text-[8px] font-bold">Сделки</span>
+        </button>
+        <button onclick="setTab('me')" id="btn-me" class="flex flex-col items-center gap-1 opacity-30 transition-all">
+            <i class="fa-solid fa-user text-xl"></i>
+            <span class="text-[8px] font-bold">Профиль</span>
+        </button>
+    </nav>
+
+    <script>
+        // ТВОИ КЛЮЧИ FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI",
+            authDomain: "dogx-base.firebaseapp.com",
+            databaseURL: "https://dogx-base-default-rtdb.firebaseio.com",
+            projectId: "dogx-base",
+            storageBucket: "dogx-base.firebasestorage.app",
+            messagingSenderId: "81713249793",
+            appId: "1:81713249793:web:540bb07ec6bf97b9a78a00"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const rdb = firebase.database();
+        // Используем новую ветку базы v1.1
+        const DB_PATH = 'anon_zadan_v1_1'; 
+        let db = { users: {}, tasks: {}, deals: {} };
+        let me = null;
+        let lastSeenTasks = localStorage.getItem('last_seen_tasks') || 0;
+        let lastSeenDeals = localStorage.getItem('last_seen_deals') || 0;
+
+        function init() {
+            rdb.ref(DB_PATH).on('value', (s) => {
+                db = s.val() || { users: {}, tasks: {}, deals: {} };
+                const uid = localStorage.getItem('anon_uid');
+                if(uid && db.users[uid]) {
+                    me = db.users[uid];
+                    if(me.banned) return document.body.innerHTML = "<div style='color:white;text-align:center;padding-top:150px;font-family:sans-serif;font-weight:bold'><h1>ДОСТУП ОГРАНИЧЕН</h1><p style='opacity:0.5;font-size:12px'>Вы заблокированы администрацией</p></div>";
+                    
+                    checkNotifications(); // Проверка красных точек
+                    renderHome();
+                    renderChats();
+                    renderProfile();
+                    renderAdmin();
+                } else { showReg(); }
+            });
+        }
+
+        // Логика уведомлений (Красные точки)
+        function checkNotifications() {
+            const now = Date.now();
+            
+            // 1. Точка на Ленте (если админ одобрил твоё задание)
+            const myApprovedTasks = Object.values(db.tasks || {}).filter(t => t.owner === me.id && t.status === 'active' && t.approved_at > lastSeenTasks);
+            document.getElementById('dot-home').style.display = myApprovedTasks.length > 0 ? 'block' : 'none';
+
+            // 2. Точка на Сделках (если партнер подтвердил или сделка закрыта)
+            const myActiveDeals = Object.values(db.deals || {}).filter(d => (d.owner === me.id || d.worker === me.id) && d.last_update > lastSeenDeals && d.last_updater !== me.id);
+            document.getElementById('dot-chats').style.display = myActiveDeals.length > 0 ? 'block' : 'none';
+        }
+
+        // РЕГИСТРАЦИЯ
+        async function showReg() {
+            const { value: r } = await Swal.fire({
+                title: 'anon:zadan',
+                html: '<input id="r-n" class="swal2-input input-dark" style="color:black" placeholder="Никнейм"><input id="r-p" type="password" class="swal2-input input-dark" style="color:black" placeholder="Пароль">',
+                background: '#161618', color: '#fff',
+                confirmButtonText: 'НАЧАТЬ',
+                confirmButtonColor: '#fff',
+                preConfirm: () => [document.getElementById('r-n').value, document.getElementById('r-p').value]
+            });
+            if(!r || !r[0]) return showReg();
+            
+            let u = Object.values(db.users || {}).find(x => x.nick === r[0] && x.pass === r[1]);
+            if(!u) {
+                const id = Math.floor(100000 + Math.random() * 900000).toString();
+                u = { id, nick: r[0], pass: r[1], bal: 500, items: [] }; // 500₽ бонусом
+                rdb.ref(DB_PATH + '/users/' + id).set(u);
+            }
+            localStorage.setItem('anon_uid', u.id);
+            location.reload();
+        }
+
+        // СОЗДАНИЕ ЗАДАНИЯ
+        function createZadan() {
+            const title = document.getElementById('z-title').value;
+            const desc = document.getElementById('z-desc').value;
+            const img = document.getElementById('z-img').value;
+            const price = parseInt(document.getElementById('z-price').value);
+            const addr = document.getElementById('z-addr').value;
+            if(!title || !desc || !price || !addr) return Swal.fire('Error', 'Заполни поля', 'warning');
+            const total = Math.ceil(price * 1.03);
+
+            if(me.bal < total) return Swal.fire('Баланс', 'Недостаточно денег (Цена + 3%)', 'error');
+            
+            const tid = Date.now().toString();
+            const task = {
+                id: tid, owner: me.id, title, desc, img, price, addr, 
+                status: 'mod', up: false, up_until: 0, // Время закрепа
+                date: new Date().toLocaleString(), created_at: Date.now()
+            };
+
+            me.bal -= total;
+            rdb.ref(DB_PATH + '/users/' + me.id).update({ bal: me.bal });
+            rdb.ref(DB_PATH + '/tasks/' + tid).set(task);
+            
+            Swal.fire('Успешно', 'Отправлено на модерацию', 'success');
+            setTab('home');
+        }
+
+        // ЛЕНТА (с учетом срока закрепа)
+        function renderHome() {
+            const now = Date.now();
+            const search = document.getElementById('search-addr').value.toLowerCase();
+            const list = Object.values(db.tasks || {})
+                .filter(t => t.status === 'active' && (t.addr.toLowerCase().includes(search) || t.title.toLowerCase().includes(search)));
+
+            // Сортировка: сначала активный закреп (up), потом обычные по дате
+            list.sort((a, b) => {
+                const aUp = a.up && a.up_until > now;
+                const bUp = b.up && b.up_until > now;
+                if (aUp && !bUp) return -1;
+                if (!aUp && bUp) return 1;
+                return b.created_at - a.created_at; // Сортировка по новизне внутри групп
+            });
+
+            document.getElementById('zadan-list').innerHTML = list.map(t => {
+                const isUp = t.up && t.up_until > now; // Проверка, активен ли закреп сейчас
+                return `
+                <div class="card ${isUp ? 'up-border' : ''}">
+                    ${t.img ? `<img src="${t.img}" class="w-full h-40 object-cover">` : ''}
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="font-bold text-sm text-white">${t.title}</h4>
+                                ${isUp ? `<span class="text-[8px] text-amber-500 font-bold uppercase tracking-wider">В топе</span>` : ''}
+                            </div>
+                            <span class="text-green-500 font-black text-sm">${t.price}₽</span>
+                        </div>
+                        <p class="text-[10px] opacity-50 mb-5 leading-relaxed">${t.desc}</p>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-[9px] opacity-30"><i class="fa-solid fa-location-dot mr-1.5"></i>${t.addr}</span>
+                            ${t.owner !== me.id ? `<button onclick="startDeal('${t.id}')" class="btn-accent px-5 py-2.5 text-[10px]">ВЗЯТЬ</button>` : `<span class="text-[9px] opacity-20">Ваше</span>`}
+                        </div>
+                        ${t.owner === me.id && !isUp ? `<button onclick="upTask('${t.id}')" class="w-full mt-4 bg-amber-500/10 text-amber-400 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest border border-amber-500/20">Апнуть на месяц за 25₽</button>` : ''}
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        // АП ЗАДАНИЯ (НА МЕСЯЦ)
+        function upTask(tid) {
+            Swal.fire({
+                title: 'Закреп на 30 дней',
+                text: 'Списать 25₽ за поднятие в ТОП?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Да, апнуть',
+                background: '#161618', color: '#fff'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if(me.bal < 25) return Swal.fire('Ошибка', 'Недостаточно средств', 'error');
+                    
+                    const oneMonthMs = 30 * 24 * 60 * 60 * 1000; // 30 дней в миллисекундах
+                    const upUntil = Date.now() + oneMonthMs;
+
+                    me.bal -= 25;
+                    rdb.ref(DB_PATH + '/users/' + me.id).update({ bal: me.bal });
+                    // Обновляем статус up и время действия
+                    rdb.ref(DB_PATH + '/tasks/' + tid).update({ 
+                        up: true, 
+                        up_until: upUntil 
+                    });
+                    Swal.fire('Готово', 'Задание поднято в ТОП на 30 дней!', 'success');
+                }
+            });
+        }
+
+        // СДЕЛКИ
+        function startDeal(tid) {
+            const t = db.tasks[tid];
+            const did = 'deal_' + Date.now();
+            const deal = {
+                id: did, tid, owner: t.owner, worker: me.id, 
+                title: t.title, price: t.price, 
+                status: 'working', o_ok: false, w_ok: false,
+                last_update: Date.now(), last_updater: me.id
+            };
+            rdb.ref(DB_PATH + '/deals/' + did).set(deal);
+            rdb.ref(DB_PATH + '/tasks/' + tid).update({ status: 'in_progress' });
+            Swal.fire('Принято', 'Выполняйте задание. Деньги заморожены.', 'success');
+            setTab('chats');
+        }
+
+        function renderChats() {
+            const deals = Object.values(db.deals || {}).filter(d => d.owner === me.id || d.worker === me.id);
+            
+            if(deals.length === 0) {
+                document.getElementById('deal-list').innerHTML = `<p class="text-center text-xs opacity-20 py-10">Нет активных сделок</p>`;
+                return;
+            }
+
+            document.getElementById('deal-list').innerHTML = deals.map(d => `
+                <div class="card p-5 flex justify-between items-center ${d.status === 'finished' ? 'opacity-50' : ''}">
+                    <div>
+                        <p class="text-[11px] font-bold uppercase text-white">${d.title}</p>
+                        <p class="text-[9px] opacity-40 mt-1">${d.status === 'working' ? 'В работе • '+d.price+'₽' : '✅ Завершена'}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        ${d.status === 'working' ? `
+                            <button onclick="confirmDeal('${d.id}')" class="px-4 py-2.5 rounded-xl text-[9px] font-bold transition-all ${ (me.id === d.owner ? d.o_ok : d.w_ok) ? 'bg-green-600 text-white' : 'bg-zinc-800 text-white/80' }">
+                                ${(me.id === d.owner ? d.o_ok : d.w_ok) ? '<i class="fa-solid fa-hourglass mr-1"></i>Ждем второго' : 'ПОДТВЕРДИТЬ'}
+                            </button>
+                        ` : '<i class="fa-solid fa-circle-check text-green-500 text-xl mr-2"></i>'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function confirmDeal(did) {
+            const d = db.deals[did];
+            let updates = { last_update: Date.now(), last_updater: me.id };
+            
+            if(me.id === d.owner) updates.o_ok = true;
+            if(me.id === d.worker) updates.w_ok = true;
+
+            // Проверяем, подтвердили ли оба
+            const final_o_ok = me.id === d.owner ? true : d.o_ok;
+            const final_w_ok = me.id === d.worker ? true : d.w_ok;
+
+            if(final_o_ok && final_w_ok) {
+                // Выплата исполнителю (за вычетом 3%)
+                const workerBal = db.users[d.worker].bal || 0;
+                const cleanPay = Math.floor(d.price * 0.97);
+                rdb.ref(DB_PATH + '/users/' + d.worker).update({ bal: workerBal + cleanPay });
+                
+                updates.status = 'finished';
+                Swal.fire('Сделка закрыта', 'Деньги зачислены исполнителю (+'+cleanPay+'₽)', 'success');
+            } else {
+                Swal.fire('Принято', 'Ожидаем подтверждения от второго участника', 'info');
+            }
+            rdb.ref(DB_PATH + '/deals/' + did).update(updates);
+        }
+
+        // ПРОФИЛЬ
+        function renderProfile() {
+            document.getElementById('u-nick').innerText = me.nick;
+            document.getElementById('u-id').innerText = 'ID: ' + me.id;
+            document.getElementById('u-bal-head').innerText = me.bal.toLocaleString() + '₽';
+            document.getElementById('u-bal-main').innerText = me.bal.toLocaleString() + '₽';
+        }
+
+        function withdraw() {
+            if(me.bal < 350) return Swal.fire('Лимит', 'Минимальный вывод от 350₽', 'warning');
+            Swal.fire('Вывод', 'Введите реквизиты в чат поддержки', 'info');
+        }
+
+        // АДМИНКА
+        function checkAdminPass(val) { if(val.toLowerCase() === 'kalubxq') setTab('admin'); }
+
+        function renderAdmin() {
+            // Модерация заданий
+            const mods = Object.values(db.tasks || {}).filter(t => t.status === 'mod');
+            document.getElementById('mod-count').innerText = mods.length;
+            document.getElementById('adm-mod-list').innerHTML = mods.map(t => `
+                <div class="bg-zinc-900 p-4 rounded-xl space-y-3 border border-zinc-800">
+                    <div class="flex justify-between">
+                        <p class="text-[11px] font-bold text-white">${t.title} (${t.price}₽)</p>
+                        <p class="text-[9px] opacity-30">${t.addr}</p>
+                    </div>
+                    ${t.img ? `<img src="${t.img}" class="w-full h-20 object-cover rounded-lg">` : ''}
+                    <p class="text-[9px] opacity-50 leading-relaxed">${t.desc}</p>
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <button onclick="admTask('${t.id}', 'active')" class="bg-green-600/20 text-green-400 py-2.5 rounded-lg text-[9px] font-bold uppercase">ОДОБРИТЬ</button>
+                        <button onclick="admTask('${t.id}', 'reject')" class="bg-red-600/20 text-red-400 py-2.5 rounded-lg text-[9px] font-bold uppercase">ОТКЛОНИТЬ</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Юзеры
+            document.getElementById('adm-user-list').innerHTML = Object.values(db.users || {}).map(u => `
+                <div class="flex justify-between items-center text-[9px] bg-zinc-900 p-3 rounded-lg border border-zinc-800">
+                    <span>${u.nick} (ID:<b>${u.id}</b>) <span class="text-zinc-600">P:${u.pass}</span></span>
+                    <div class="flex gap-2 items-center">
+                        <span class="font-bold text-green-400 mr-2">${u.bal}₽</span>
+                        <button onclick="admUser('${u.id}')" class="text-red-500 font-bold">УПРАВЛЕНИЕ</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function admTask(tid, status) { 
+            let updates = { status };
+            if(status === 'active') updates.approved_at = Date.now(); // Время одобрения для уведомлений
+            rdb.ref(DB_PATH + '/tasks/' + tid).update(updates); 
+        }
+        
+        async function admUser(uid) {
+            const u = db.users[uid];
+            const { value: act } = await Swal.fire({
+                title: u.nick,
+                text: 'Выберите действие для ID:' + uid,
+                input: 'select',
+                background: '#161618', color: '#fff',
+                inputOptions: { 'none': '---', 'ban': 'ЗАБАНИТЬ', 'unban': 'РАЗБАНИТЬ', 'del_tasks': 'Удалить задания' },
+                confirmButtonColor: '#fff', confirmButtonText: 'ОК'
+            });
+            if(act === 'ban') rdb.ref(DB_PATH + '/users/' + uid).update({ banned: true });
+            if(act === 'unban') rdb.ref(DB_PATH + '/users/' + uid).update({ banned: false });
+            if(act === 'del_tasks') {
+                Object.values(db.tasks).forEach(t => { if(t.owner === uid) rdb.ref(DB_PATH + '/tasks/'+t.id).remove(); });
+                Swal.fire('Готово', 'Задания удалены', 'success');
+            }
+        }
+
+        // Переключение табов
+        function setTab(t) {
+            document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+            document.getElementById(t).classList.add('active');
+            document.querySelectorAll('nav button').forEach(b => b.classList.add('opacity-30'));
+            
+            const currentBtn = document.getElementById('btn-'+t);
+            if(currentBtn) currentBtn.classList.remove('opacity-30');
+
+            // Сброс уведомлений при заходе во вкладку
+            if(t === 'home') {
+                lastSeenTasks = Date.now();
+                localStorage.setItem('last_seen_tasks', lastSeenTasks);
+                document.getElementById('dot-home').style.display = 'none';
+            }
+            if(t === 'chats') {
+                lastSeenDeals = Date.now();
+                localStorage.setItem('last_seen_deals', lastSeenDeals);
+                document.getElementById('dot-chats').style.display = 'none';
+            }
+            if(t === 'admin_login') document.getElementById('admin-pass-input').value = '';
+            
+            window.scrollTo(0, 0); // Вверх страницы
+        }
+
+        function openSupport() { Swal.fire('Поддержка', 'Пишите админу в ТГ: @sswckk', 'info'); }
+
+        init();
+    </script>
+</body>
+</html>
