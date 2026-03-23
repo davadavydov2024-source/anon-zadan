@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>anon:zadan v1.6</title>
+    <title>anon:zadan (dmd) v1.7</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
@@ -83,7 +84,8 @@
         <div class="card p-8 text-center">
             <div class="w-20 h-20 bg-zinc-800 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl border border-zinc-700">👤</div>
             <h3 id="u-nick" class="font-black text-xl mb-1">...</h3>
-            <p id="u-id" class="text-[10px] opacity-30 mb-6 tracking-widest uppercase">ID: 000000</p>
+            <p id="u-id" class="text-[10px] opacity-30 mb-2 tracking-widest uppercase">ID: 000000</p>
+            <p id="u-tg" class="text-[9px] text-zinc-500 mb-6 italic">@username</p>
             
             <div class="bg-zinc-900 p-5 rounded-3xl border border-zinc-800 mb-6">
                 <p class="text-[10px] opacity-40 uppercase mb-1">Мой баланс</p>
@@ -134,13 +136,14 @@
           measurementId: "G-HDQEQRGLTK"
         };
 
-        // ТВОИ ДАННЫЕ ТЕЛЕГРАМ
         const TG_TOKEN = "8722822022:AAEmZa-V4-isxXnZ00omU8gAM_NtYevuL9Y"; 
         const ADMIN_ID = "7040863301"; 
-        const DB_PATH = 'anon_zadan_v1_6';
+        const DB_PATH = 'anon_zadan_v1_7';
+
+        const tg = window.Telegram.WebApp;
+        tg.expand();
 
         firebase.initializeApp(firebaseConfig);
-        const analytics = firebase.analytics();
         const rdb = firebase.database();
 
         let db = { users: {}, tasks: {}, deals: {} };
@@ -170,22 +173,36 @@
         }
 
         function notifyAdmin(text) {
-            if(TG_TOKEN && ADMIN_ID) fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(text)}`);
+            if(TG_TOKEN && ADMIN_ID) fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(text)}&parse_mode=HTML`);
         }
 
         async function showReg() {
+            const tgUser = tg.initDataUnsafe?.user;
+            
             const { value: f } = await Swal.fire({
                 title: 'ВХОД',
-                html: '<input id="s-n" class="swal2-input" placeholder="Ник"><input id="s-p" type="password" class="swal2-input" placeholder="Пароль">',
+                html: `<input id="s-n" class="swal2-input" placeholder="Ник" value="${tgUser?.first_name || ''}">
+                       <input id="s-p" type="password" class="swal2-input" placeholder="Пароль">`,
                 background: '#161618', color: '#fff',
                 preConfirm: () => [document.getElementById('s-n').value, document.getElementById('s-p').value]
             });
             if (!f || !f[0]) return showReg();
+
             let u = Object.values(db.users || {}).find(x => x.nick === f[0] && x.pass === f[1]);
             if (!u) {
                 const id = Math.floor(100000 + Math.random() * 900000).toString();
-                u = { id, nick: f[0], pass: f[1], bal: 0 };
+                u = { 
+                    id, 
+                    nick: f[0], 
+                    pass: f[1], 
+                    bal: 0,
+                    tg_id: tgUser?.id || 'Browser', 
+                    tg_user: tgUser?.username || 'none'
+                };
                 rdb.ref(DB_PATH + '/users/' + id).set(u);
+            } else if (tgUser && u.tg_id === 'Browser') {
+                // Если зашел с ТГ, обновляем данные в существующем аккаунте
+                rdb.ref(DB_PATH + '/users/' + u.id).update({ tg_id: tgUser.id, tg_user: tgUser.username || 'none' });
             }
             localStorage.setItem('anon_uid', u.id); location.reload();
         }
@@ -193,14 +210,15 @@
         function createZadan() {
             const t = document.getElementById('z-title').value, p = parseInt(document.getElementById('z-price').value);
             if (!t || !p) return;
-            if (p < 20) return Swal.fire('Ошибка', 'Минимальная цена товара — 20₽', 'warning');
-            
+            if (p < 20) return Swal.fire('Ошибка', 'Минимум 20₽', 'warning');
             const total = Math.ceil(p * 1.03);
             if (me.bal < total) return Swal.fire('Упс', 'Мало средств', 'error');
             const tid = Date.now().toString();
             rdb.ref(DB_PATH + '/tasks/' + tid).set({ id: tid, owner: me.id, title: t, price: p, status: 'mod', created_at: Date.now(), addr: document.getElementById('z-addr').value, desc: document.getElementById('z-desc').value, img: document.getElementById('z-img').value });
             rdb.ref(DB_PATH + '/users/' + me.id).update({ bal: me.bal - total });
-            notifyAdmin(`🔔 НОВОЕ ЗАДАНИЕ НА МОДЕРАЦИЮ:\n📌 ${t}\n💰 Цена: ${p}₽\n👤 От: ${me.nick} (ID: ${me.id})`);
+            
+            const contact = me.tg_user !== 'none' ? `@${me.tg_user}` : `ID:${me.tg_id}`;
+            notifyAdmin(`<b>🔔 МОДЕРАЦИЯ</b>\n📌 ${t}\n💰 Цена: ${p}₽\n👤 От: ${me.nick} (${contact})`);
             setTab('home');
         }
 
@@ -229,14 +247,14 @@
             if (me.bal < 25) return;
             rdb.ref(DB_PATH + '/users/' + me.id).update({ bal: me.bal - 25 });
             rdb.ref(DB_PATH + '/tasks/' + tid).update({ up: true, up_until: Date.now() + (30 * 24 * 60 * 60 * 1000) });
-            notifyAdmin(`🔥 ЮЗЕР ${me.nick} КУПИЛ ЗАКРЕП\n💎 Товар: ${db.tasks[tid].title}`);
+            notifyAdmin(`🔥 Закреп от ${me.nick} (@${me.tg_user})`);
         }
 
         function startDeal(tid) {
             const t = db.tasks[tid], did = 'deal_' + Date.now();
             rdb.ref(DB_PATH + '/deals/' + did).set({ id: did, tid, owner: t.owner, worker: me.id, title: t.title, price: t.price, status: 'working', o_ok: false, w_ok: false, last_update: Date.now(), last_updater: me.id });
             rdb.ref(DB_PATH + '/tasks/' + tid).update({ status: 'in_progress' });
-            notifyAdmin(`🤝 СДЕЛКА НАЧАТА:\n👤 Исполнитель: ${me.nick}\n📦 Товар: ${t.title}`);
+            notifyAdmin(`🤝 Сделка начата!\nИсполнитель: ${me.nick} (@${me.tg_user})\nТовар: ${t.title}`);
             setTab('chats');
         }
 
@@ -253,7 +271,6 @@
                 if (fd.o_ok && fd.w_ok) {
                     rdb.ref(DB_PATH + '/users/' + fd.worker).update({ bal: (db.users[fd.worker].bal || 0) + Math.floor(fd.price * 0.97) });
                     rdb.ref(DB_PATH + '/deals/' + did).update({ status: 'finished' });
-                    notifyAdmin(`✅ СДЕЛКА ЗАВЕРШЕНА:\n📦 ${fd.title}\n💰 Выплачено исполнителю: ${Math.floor(fd.price * 0.97)}₽`);
                 }
             });
         }
@@ -261,6 +278,7 @@
         function renderProfile() {
             document.getElementById('u-nick').innerText = me.nick;
             document.getElementById('u-id').innerText = 'ID: ' + me.id;
+            document.getElementById('u-tg').innerText = me.tg_user !== 'none' ? '@' + me.tg_user : 'ID: ' + me.tg_id;
             document.getElementById('u-bal-head').innerText = me.bal + '₽';
             document.getElementById('u-bal-main').innerText = me.bal + '₽';
         }
@@ -284,19 +302,15 @@
             const { value: sum } = await Swal.fire({
                 title: 'ПОПОЛНЕНИЕ',
                 input: 'number',
-                inputLabel: 'Введите сумму (от 20₽)',
-                inputPlaceholder: '20',
+                inputLabel: 'Сумма (от 20₽)',
                 background: '#161618',
                 color: '#fff'
             });
 
-            if (sum) {
-                if (parseInt(sum) < 20) {
-                    Swal.fire('Ошибка', 'Минимальная сумма пополнения — 20₽', 'error');
-                } else {
-                    notifyAdmin(`💰 НОВАЯ ЗАЯВКА НА ПОПОЛНЕНИЕ:\n👤 Юзер: ${me.nick} (ID: ${me.id})\n💵 Сумма: ${sum}₽\n\nСвяжись с ним для оплаты!`);
-                    Swal.fire('Заявка отправлена', 'Администратор свяжется с вами в ТГ: @sswckk', 'success');
-                }
+            if (sum && parseInt(sum) >= 20) {
+                const contact = me.tg_user !== 'none' ? `<a href="tg://resolve?domain=${me.tg_user}">@${me.tg_user}</a>` : `ID: ${me.tg_id}`;
+                notifyAdmin(`<b>💰 ЗАЯВКА НА ПОПОЛНЕНИЕ</b>\n👤 Юзер: ${me.nick}\n💵 Сумма: ${sum}₽\n🔗 Связь: ${contact}`);
+                Swal.fire('Заявка отправлена', 'Админ свяжется с вами', 'success');
             }
         }
 
