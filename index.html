@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>anon:zadan (dmd) v2.3 ULTIMATE</title>
+    <title>anon:zadan (dmd) v2.3.1 - Full Info</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -25,8 +25,6 @@
         .swal-input-custom { color: #000 !important; font-weight: 600 !important; }
         .msg-support { border-left: 3px solid #3b82f6; background: #1d1d21; padding: 12px; border-radius: 14px; margin-bottom: 8px; }
         .msg-user { border-right: 3px solid #71717a; background: #27272a; padding: 12px; border-radius: 14px; margin-bottom: 8px; text-align: right; }
-        
-        /* Стили для бана */
         #ban-screen { display:none; position:fixed; inset:0; background:#0a0a0b; z-index:9999; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; }
     </style>
 </head>
@@ -34,7 +32,7 @@
 
     <div id="ban-screen">
         <h1 class="text-6xl font-black mb-4">Error: 404</h1>
-        <img src="https://cataas.com/cat/cute" class="w-64 h-64 object-cover rounded-3xl mb-6 border-4 border-red-500/50 shadow-2xl">
+        <img src="https://cataas.com/cat/cute" class="w-64 h-64 object-cover rounded-3xl mb-6 border-4 border-red-500/50">
         <p class="text-xl font-bold text-red-500 mb-2">ВАШ АККАУНТ ЗАБЛОКИРОВАН ❤️‍🩹</p>
         <p id="ban-timer" class="text-zinc-400 mb-8">Осталось дней: ...</p>
         <button onclick="window.open('https://t.me/sswckk')" class="btn-accent px-8 py-4">ОСПОРТИТЬ БАН</button>
@@ -45,7 +43,7 @@
         <div id="u-bal-head" class="bg-zinc-900 px-4 py-1.5 rounded-full text-[11px] font-bold border border-zinc-800">0.00₽</div>
     </header>
 
-    <section id="home" class="tab active px-5 pt-4"><div id="zadan-list" class="space-y-4"></div></section>
+    <section id="home" class="tab active px-5 pt-4"><div id="zadan-list" class="space-y-4 pb-10"></div></section>
     
     <section id="create" class="tab px-5 pt-4">
         <div class="card p-6 space-y-4">
@@ -65,7 +63,7 @@
 
     <section id="chats" class="tab px-5 pt-4">
         <div class="card p-5 border-blue-900/20 flex flex-col h-[65vh]">
-            <div id="support-messages" class="flex-1 overflow-y-auto space-y-3 mb-4 flex flex-col"></div>
+            <div id="support-messages" class="flex-1 overflow-y-auto space-y-3 mb-4 flex flex-col pr-1"></div>
             <div class="flex gap-2">
                 <input id="user-msg-input" class="input-dark flex-1 p-3.5 text-[11px]" placeholder="Ваш вопрос...">
                 <button onclick="userSendMessage()" class="bg-blue-600 w-12 h-11 rounded-xl flex items-center justify-center"><i class="fa-solid fa-paper-plane"></i></button>
@@ -94,13 +92,12 @@
             <h2 class="text-[10px] font-bold text-red-500 uppercase">Управление пользователем</h2>
             <input id="adm-user-nick" class="input-dark w-full p-3 text-[10px]" placeholder="Ник пользователя">
             <div class="grid grid-cols-2 gap-2">
-                <button onclick="adminChangeBal()" class="bg-zinc-800 py-3 rounded-lg text-[9px] font-bold">ИЗМЕНИТЬ БАЛАНС</button>
-                <button onclick="adminBanUser()" class="bg-red-900/40 py-3 rounded-lg text-[9px] font-bold text-red-500">ЗАБАНИТЬ</button>
-                <button onclick="adminUnbanUser()" class="bg-green-900/40 py-3 rounded-lg text-[9px] font-bold text-green-500">РАЗБАНИТЬ</button>
-                <button onclick="adminDeleteUser()" class="bg-black py-3 rounded-lg text-[9px] font-bold text-white border border-white/10">УДАЛИТЬ АКК</button>
+                <button onclick="adminChangeBal()" class="bg-zinc-800 py-3 rounded-lg text-[9px] font-bold">БАЛАНС</button>
+                <button onclick="adminBanUser()" class="bg-red-900/40 py-3 rounded-lg text-[9px] font-bold text-red-500">БАН</button>
+                <button onclick="adminUnbanUser()" class="bg-green-900/40 py-3 rounded-lg text-[9px] font-bold text-green-500">РАЗБАН</button>
+                <button onclick="adminDeleteUser()" class="bg-black py-3 rounded-lg text-[9px] font-bold border border-white/10">УДАЛИТЬ</button>
             </div>
         </div>
-
         <div class="card p-5 space-y-3">
             <h2 class="text-[10px] font-bold text-blue-500 uppercase">Модерация товаров</h2>
             <div id="adm-mod-list" class="space-y-3"></div>
@@ -143,21 +140,14 @@
                 const uid = localStorage.getItem('anon_uid');
                 if (uid && db.users && db.users[uid]) {
                     me = db.users[uid];
-                    checkBan();
+                    if (me.ban_until && me.ban_until > Date.now()) {
+                        const days = Math.ceil((me.ban_until - Date.now()) / 86400000);
+                        document.getElementById('ban-screen').style.display = 'flex';
+                        document.getElementById('ban-timer').innerText = `Осталось дней: ${days}`;
+                    }
                     renderAll();
-                } else {
-                    showReg();
-                }
+                } else { showReg(); }
             });
-        }
-
-        function checkBan() {
-            if (me.ban_until && me.ban_until > Date.now()) {
-                const days = Math.ceil((me.ban_until - Date.now()) / (1000 * 60 * 60 * 24));
-                document.getElementById('ban-screen').style.display = 'flex';
-                document.getElementById('ban-timer').innerText = `Ваш аккаунт находится в бане на ${days} дней!`;
-                document.body.style.overflow = 'hidden';
-            }
         }
 
         async function sendTG(txt) {
@@ -173,12 +163,12 @@
                        <button onclick="Swal.clickConfirm(); window.toggleMode()" class="mt-4 text-blue-400 text-xs font-bold underline uppercase block w-full">
                          ${isLogin ? 'Создать новый аккаунт' : 'Войти в существующий'}
                        </button>`,
-                confirmButtonText: isLogin ? 'ВОЙТИ' : 'ЗАГРЕАТЬСЯ',
+                confirmButtonText: isLogin ? 'ВОЙТИ' : 'ГОТОВО',
                 allowOutsideClick: false,
                 preConfirm: () => [document.getElementById('s-n').value.trim(), document.getElementById('s-p').value.trim()]
             });
 
-            if (f && f[0]) {
+            if (f) {
                 const [n, p] = f;
                 let user = Object.values(db.users || {}).find(x => x.nick === n);
                 if (isLogin) {
@@ -196,97 +186,40 @@
         }
         window.toggleMode = () => { const isL = Swal.getTitle().innerText === 'ВХОД'; showReg(!isL); };
 
-        // АДМИН ФУНКЦИИ
+        function userSendMessage() {
+            const txt = document.getElementById('user-msg-input').value.trim();
+            if(!txt) return;
+            rdb.ref(`${DB_VER}/notifications/${me.id}/${Date.now()}`).set({ text: txt, from: 'user', time: Date.now() });
+            sendTG(`📩 <b>ПОДДЕРЖКА</b>\n<b>От:</b> ${me.nick} (ID: ${me.id})\n<b>Текст:</b> ${txt}`);
+            document.getElementById('user-msg-input').value = '';
+        }
+
+        function createZadan() {
+            const t = document.getElementById('z-title').value, p = Number(document.getElementById('z-price').value);
+            if (!t || p < 20 || me.bal < p) return Swal.fire('Ошибка','Данные или баланс','error');
+            const tid = Date.now().toString();
+            rdb.ref(`${DB_VER}/tasks/${tid}`).set({ id: tid, owner: me.id, nick: me.nick, title: t, price: p, status: 'mod', img: tempPhoto, created: Date.now() });
+            rdb.ref(`${DB_VER}/users/${me.id}`).update({ bal: me.bal - p });
+            sendTG(`📦 <b>НОВЫЙ ТОВАР</b>\n<b>Автор:</b> ${me.nick}\n<b>Название:</b> ${t}\n<b>Цена:</b> ${p}₽`);
+            setTab('home');
+        }
+
+        function deposit() { sendTG(`💰 <b>ПОПОЛНЕНИЕ</b>\n<b>Юзер:</b> ${me.nick}\n<b>ID:</b> ${me.id}`); Swal.fire('Заявка отправлена','','success'); }
+        function withdraw() { sendTG(`💸 <b>ВЫВОД</b>\n<b>Юзер:</b> ${me.nick}\n<b>Баланс:</b> ${me.bal}₽`); Swal.fire('Заявка принята','','info'); }
+
+        // АДМИН
+        function modAction(id, status, word) {
+            const task = db.tasks[id];
+            rdb.ref(`${DB_VER}/tasks/${id}`).update({ status });
+            rdb.ref(`${DB_VER}/notifications/${task.owner}/${Date.now()}`).set({ 
+                text: `🛒 Товар "${task.title}" ${word} администрацией.`, from: 'support', time: Date.now() 
+            });
+            if (status === 'rejected') rdb.ref(`${DB_VER}/users/${task.owner}/bal`).transaction(b => b + task.price);
+        }
+
         async function adminChangeBal() {
             const nick = document.getElementById('adm-user-nick').value;
             const user = Object.values(db.users).find(u => u.nick === nick);
             if (!user) return Swal.fire('Не найден','','error');
             const { value: amount } = await Swal.fire({ title: 'Новый баланс', input: 'number', inputValue: user.bal });
-            if (amount !== undefined) rdb.ref(`${DB_VER}/users/${user.id}`).update({ bal: Number(amount) });
-        }
-
-        async function adminBanUser() {
-            const nick = document.getElementById('adm-user-nick').value;
-            const user = Object.values(db.users).find(u => u.nick === nick);
-            const { value: days } = await Swal.fire({ title: 'На сколько дней бан?', input: 'number' });
-            if (days) rdb.ref(`${DB_VER}/users/${user.id}`).update({ ban_until: Date.now() + (days * 86400000) });
-        }
-
-        function adminUnbanUser() {
-            const nick = document.getElementById('adm-user-nick').value;
-            const user = Object.values(db.users).find(u => u.nick === nick);
-            rdb.ref(`${DB_VER}/users/${user.id}`).update({ ban_until: 0 });
-            Swal.fire('Разбанен','','success');
-        }
-
-        function adminDeleteUser() {
-            const nick = document.getElementById('adm-user-nick').value;
-            const user = Object.values(db.users).find(u => u.nick === nick);
-            if (confirm('УДАЛИТЬ АККАУНТ?')) rdb.ref(`${DB_VER}/users/${user.id}`).remove();
-        }
-
-        // МОДЕРАЦИЯ И УВЕДОМЛЕНИЯ
-        function createZadan() {
-            const t = document.getElementById('z-title').value, p = Number(document.getElementById('z-price').value);
-            if (!t || p < 20 || me.bal < p) return Swal.fire('Ошибка','Проверьте данные или баланс','error');
-            const tid = Date.now().toString();
-            rdb.ref(`${DB_VER}/tasks/${tid}`).set({ id: tid, owner: me.id, nick: me.nick, title: t, price: p, status: 'mod', img: tempPhoto, created: Date.now() });
-            rdb.ref(`${DB_VER}/users/${me.id}`).update({ bal: me.bal - p });
-            sendTG(`📦 НОВЫЙ ТОВАР!\nЮзер: ${me.nick}\nНазвание: ${t}\nЦена: ${p}₽`);
-            setTab('home');
-        }
-
-        function renderAdmin() {
-            const mods = Object.values(db.tasks || {}).filter(t => t.status === 'mod');
-            document.getElementById('adm-mod-list').innerHTML = mods.map(t => `
-                <div class="card p-3 bg-zinc-900/40">
-                    <p class="text-[10px] font-bold">${t.title} (${t.price}₽) от ${t.nick}</p>
-                    <div class="flex gap-2 mt-2">
-                        <button onclick="modAction('${t.id}','active','одобрен')" class="bg-green-600 flex-1 py-2 rounded text-[8px] font-bold">РАЗРЕШИТЬ</button>
-                        <button onclick="modAction('${t.id}','rejected','отклонен')" class="bg-red-600 flex-1 py-2 rounded text-[8px] font-bold">ОТКЛОНИТЬ</button>
-                    </div>
-                </div>`).join('') || '<p class="text-center opacity-20 text-[10px]">Очередь пуста</p>';
-        }
-
-        function modAction(id, status, word) {
-            const task = db.tasks[id];
-            rdb.ref(`${DB_VER}/tasks/${id}`).update({ status });
-            rdb.ref(`${DB_VER}/notifications/${task.owner}/${Date.now()}`).set({ 
-                text: `🛒 Ваш товар "${task.title}" был ${word} администрацией.`, from: 'support', time: Date.now() 
-            });
-            if (status === 'rejected') rdb.ref(`${DB_VER}/users/${task.owner}/bal`).transaction(b => b + task.price);
-        }
-
-        // ОСТАЛЬНОЕ
-        function deposit() { sendTG(`💰 ЗАЯВКА НА ПОПОЛНЕНИЕ!\nЮзер: ${me.nick} (ID: ${me.id})`); Swal.fire('Заявка отправлена','Админ свяжется с вами','success'); }
-        function withdraw() { sendTG(`💸 ЗАЯВКА НА ВЫВОД!\nЮзер: ${me.nick}\nБаланс: ${me.bal}₽`); Swal.fire('Заявка на вывод принята','','info'); }
-        function userSendMessage() {
-            const txt = document.getElementById('user-msg-input').value.trim();
-            if(!txt) return;
-            rdb.ref(`${DB_VER}/notifications/${me.id}/${Date.now()}`).set({ text: txt, from: 'user', time: Date.now() });
-            sendTG(`📩 СООБЩЕНИЕ В ПОДДЕРЖКУ!\nОт: ${me.nick}\nТекст: ${txt}`);
-            document.getElementById('user-msg-input').value = '';
-        }
-
-        function renderAll() {
-            if(!me) return;
-            document.getElementById('u-bal-head').innerText = me.bal + '₽';
-            document.getElementById('u-bal-main').innerText = me.bal + '₽';
-            document.getElementById('u-nick').innerText = me.nick;
-            
-            const tasks = Object.values(db.tasks || {}).filter(t => t.status === 'active');
-            document.getElementById('zadan-list').innerHTML = tasks.map(t => `<div class="card">${t.img ? `<img src="${t.img}" class="w-full h-44 object-cover">` : ''}<div class="p-5"><b>${t.title}</b> <span class="text-green-400">${t.price}₽</span><p class="text-[10px] opacity-40 mt-1">${t.desc || ''}</p></div></div>`).join('');
-            
-            const msgs = Object.values(db.notifications?.[me.id] || {}).sort((a,b) => a.time - b.time);
-            document.getElementById('support-messages').innerHTML = msgs.map(m => `<div class="${m.from==='user'?'msg-user':'msg-support'}"><p class="text-[10px]">${m.text}</p></div>`).join('');
-            
-            renderAdmin();
-        }
-
-        function handleFile(i) { const r = new FileReader(); r.onload=e=>{tempPhoto=e.target.result;document.getElementById('file-preview').classList.remove('hidden');}; r.readAsDataURL(i.files[0]); }
-        function setTab(t) { document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); document.getElementById(t).classList.add('active'); document.querySelectorAll('nav button').forEach(b=>b.classList.add('opacity-30')); if(document.getElementById('btn-'+t)) document.getElementById('btn-'+t).classList.remove('opacity-30'); }
-        
-        init();
-    </script>
-</body>
-</html>
+            if (
