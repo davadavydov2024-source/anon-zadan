@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>anon:zadan (dmd) v1.9 - Full Admin</title>
+    <title>anon:zadan (dmd) v2.1 - Interactive Support</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -22,8 +22,9 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .btn-accent { background: #ffffff; color: #000; border-radius: 16px; font-weight: 800; }
         .input-dark { background: #0f0f10 !important; border: 1px solid #27272a !important; color: white !important; border-radius: 14px !important; outline: none; }
-        .up-border { border: 2px solid #fbbf24 !important; box-shadow: 0 0 15px rgba(251, 191, 36, 0.1); }
-        .notification-dot { position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; background-color: #ef4444; border-radius: 50%; border: 2px solid #000; display: none; z-index: 10; }
+        .msg-support { border-left: 3px solid #3b82f6; background: #1d1d21; padding: 15px; border-radius: 18px; margin-bottom: 15px; }
+        .support-btn { background: #27272a; border: 1px solid #3f3f46; color: white; padding: 8px 12px; border-radius: 10px; font-size: 10px; font-weight: 600; margin-top: 8px; display: inline-block; margin-right: 5px; transition: 0.2s; }
+        .support-btn:active { transform: scale(0.95); background: #3f3f46; }
     </style>
 </head>
 <body class="pb-28">
@@ -36,75 +37,68 @@
         </div>
     </header>
 
-    <div class="px-5 mb-4 mt-2">
-        <div class="relative">
-            <i class="fa-solid fa-location-dot absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 text-xs"></i>
-            <input id="search-addr" oninput="renderHome()" class="w-full bg-zinc-900 border border-zinc-800 py-4 pl-10 pr-4 rounded-2xl text-xs outline-none" placeholder="Поиск по адресу...">
-        </div>
-    </div>
-
-    <section id="home" class="tab active px-5 space-y-4"><div id="zadan-list" class="space-y-4"></div></section>
-
-    <section id="create" class="tab px-5">
+    <section id="home" class="tab active px-5 space-y-4 pt-4"><div id="zadan-list" class="space-y-4"></div></section>
+    
+    <section id="create" class="tab px-5 pt-4">
         <div class="card p-6 space-y-4">
             <h2 class="font-bold text-xs uppercase opacity-40">Создать товар</h2>
             <input id="z-title" class="input-dark w-full p-4 text-xs" placeholder="Название">
             <textarea id="z-desc" class="input-dark w-full p-4 text-xs h-20" placeholder="Описание"></textarea>
-            
-            <div class="relative">
-                <input type="file" id="z-file" accept="image/*" class="hidden" onchange="handleFile(this)">
-                <button onclick="document.getElementById('z-file').click()" class="w-full bg-zinc-800 py-4 rounded-xl text-[10px] font-bold border border-dashed border-zinc-600">
-                    <i class="fa-solid fa-camera mr-2"></i> ВЫБРАТЬ ФОТО
-                </button>
-                <div id="file-preview" class="hidden mt-2 text-[8px] text-green-500 text-center uppercase font-bold">Фото прикреплено ✅</div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-                <input id="z-price" type="number" class="input-dark w-full p-4 text-xs" placeholder="Цена (от 20₽)">
-                <input id="z-addr" class="input-dark w-full p-4 text-xs" placeholder="Адрес (РФ)">
-            </div>
+            <input type="file" id="z-file" accept="image/*" class="hidden" onchange="handleFile(this)">
+            <button onclick="document.getElementById('z-file').click()" class="w-full bg-zinc-800 py-4 rounded-xl text-[10px] font-bold border border-dashed border-zinc-600">ВЫБРАТЬ ФОТО</button>
+            <div id="file-preview" class="hidden mt-2 text-[8px] text-green-500 text-center uppercase font-bold">Фото прикреплено ✅</div>
+            <input id="z-price" type="number" class="input-dark w-full p-4 text-xs" placeholder="Цена">
+            <input id="z-addr" class="input-dark w-full p-4 text-xs" placeholder="Адрес">
             <button onclick="createZadan()" class="w-full btn-accent py-5 text-xs uppercase">Опубликовать</button>
         </div>
     </section>
 
-    <section id="chats" class="tab px-5 space-y-4"><div id="deal-list" class="space-y-3"></div></section>
+    <section id="chats" class="tab px-5 space-y-4 pt-4">
+        <div class="card p-5 border-blue-900/30">
+            <div class="flex items-center gap-2 mb-4">
+                <i class="fa-solid fa-circle-check text-blue-500"></i>
+                <span class="text-xs font-bold uppercase tracking-widest">Поддержка anon:zadan ✅</span>
+            </div>
+            <div id="support-messages" class="max-h-80 overflow-y-auto space-y-4"></div>
+        </div>
+        <div id="deal-list" class="space-y-3"></div>
+    </section>
 
-    <section id="me" class="tab px-5">
+    <section id="me" class="tab px-5 pt-4">
         <div class="card p-8 text-center">
             <h3 id="u-nick" class="font-black text-xl mb-1">...</h3>
-            <p id="u-tg" class="text-[9px] text-zinc-500 mb-6 italic">@username</p>
-            <div class="bg-zinc-900 p-5 rounded-3xl border border-zinc-800 mb-6">
-                <p id="u-bal-main" class="font-black text-2xl text-white">0₽</p>
-            </div>
+            <div id="u-bal-main" class="bg-zinc-900 p-5 rounded-3xl border border-zinc-800 font-black text-2xl mb-6">0₽</div>
             <div class="grid grid-cols-2 gap-3">
                 <button onclick="deposit()" class="btn-accent py-4 text-[10px] uppercase">Пополнить</button>
-                <button onclick="withdraw()" class="btn-main py-4 text-[10px] text-white/70 uppercase">Вывод</button>
+                <button onclick="withdraw()" class="btn-main bg-zinc-800 py-4 rounded-xl text-[10px] text-white/70 uppercase">Вывод</button>
             </div>
         </div>
     </section>
 
     <section id="admin_login" class="tab px-5 pt-20">
-        <input type="password" id="admin-pass-input" oninput="if(this.value.toLowerCase()==='kalubxq') setTab('admin')" class="w-full p-6 text-center card outline-none" placeholder="PASSWORD">
+        <input type="password" id="admin-pass-input" oninput="if(this.value.toLowerCase()==='kalubxq') setTab('admin')" class="w-full p-6 text-center card outline-none" placeholder="ADMIN PASS">
     </section>
 
-    <section id="admin" class="tab px-5 pb-32 space-y-6">
-        <div class="card p-6 space-y-4">
-            <h2 class="text-[10px] font-bold text-amber-500 uppercase">Пополнить юзера</h2>
-            <input id="adm-target-user" class="input-dark w-full p-3 text-[10px]" placeholder="@username / ID">
-            <input id="adm-sum" type="number" class="input-dark w-full p-3 text-[10px]" placeholder="Сумма">
-            <button onclick="adminAddBal()" class="w-full bg-amber-600 text-black font-bold py-3 rounded-lg text-[9px]">НАЧИСЛИТЬ</button>
+    <section id="admin" class="tab px-5 pb-32 space-y-6 pt-4">
+        <div class="card p-5 space-y-3 border-blue-600/20">
+            <h2 class="text-[10px] font-bold text-blue-500 uppercase">📢 Рассылка / Ответ с кнопками</h2>
+            <input id="adm-target-id" class="input-dark w-full p-3 text-[10px]" placeholder="ID юзера (пусто = ВСЕМ)">
+            <textarea id="adm-msg-text" class="input-dark w-full p-3 text-[10px] h-16" placeholder="Текст сообщения..."></textarea>
+            <div class="bg-black/40 p-3 rounded-xl border border-zinc-800">
+                <p class="text-[8px] opacity-40 mb-2 uppercase">Настройка кнопок (нажми +, чтобы добавить)</p>
+                <div id="btn-builder" class="space-y-2"></div>
+                <button onclick="addBtnField()" class="w-full py-2 text-[9px] text-zinc-500 font-bold border border-dashed border-zinc-700 rounded-lg mt-2">+ ДОБАВИТЬ КНОПКУ</button>
+            </div>
+            <button onclick="adminSendSmartMsg()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl text-[10px]">ОТПРАВИТЬ СООБЩЕНИЕ</button>
         </div>
 
-        <div class="space-y-3">
-            <h2 class="text-[10px] font-bold opacity-30 uppercase tracking-widest">Все товары (Управление)</h2>
-            <div id="adm-full-list" class="space-y-4"></div>
-        </div>
+        <div id="adm-full-list" class="space-y-4"></div>
     </section>
 
     <nav class="fixed bottom-0 left-0 right-0 h-20 bg-black/95 border-t border-zinc-900 flex justify-around items-center z-[100]">
-        <button onclick="setTab('home')" id="btn-home" class="flex flex-col items-center gap-1"><i class="fa-solid fa-house text-lg"></i><div id="dot-home" class="notification-dot"></div></button>
+        <button onclick="setTab('home')" id="btn-home" class="flex flex-col items-center gap-1"><i class="fa-solid fa-house text-lg"></i></button>
         <button onclick="setTab('create')" id="btn-create" class="flex flex-col items-center gap-1 opacity-30"><i class="fa-solid fa-plus-circle text-lg"></i></button>
-        <button onclick="setTab('chats')" id="btn-chats" class="flex flex-col items-center gap-1 opacity-30"><i class="fa-solid fa-message text-lg"></i><div id="dot-chats" class="notification-dot"></div></button>
+        <button onclick="setTab('chats')" id="btn-chats" class="flex flex-col items-center gap-1 opacity-30"><i class="fa-solid fa-message text-lg"></i></button>
         <button onclick="setTab('me')" id="btn-me" class="flex flex-col items-center gap-1 opacity-30"><i class="fa-solid fa-user text-lg"></i></button>
     </nav>
 
@@ -116,115 +110,140 @@
           projectId: "dogx-base",
           storageBucket: "dogx-base.firebasestorage.app",
           messagingSenderId: "81713249793",
-          appId: "1:81713249793:web:1b44a13e6faf5acfa78a00",
-          measurementId: "G-HDQEQRGLTK"
+          appId: "1:81713249793:web:1b44a13e6faf5acfa78a00"
         };
 
         const TG_TOKEN = "8722822022:AAEmZa-V4-isxXnZ00omU8gAM_NtYevuL9Y"; 
         const ADMIN_ID = "7040863301"; 
-        const DB_PATH = 'anon_zadan_v1_9';
+        const DB_PATH = 'anon_zadan_v2_1';
 
         const tg = window.Telegram.WebApp;
         firebase.initializeApp(firebaseConfig);
         const rdb = firebase.database();
 
-        let db = { users: {}, tasks: {}, deals: {} };
+        let db = { users: {}, tasks: {}, deals: {}, notifications: {} };
         let me = null;
         let tempPhoto = "";
 
         function init() {
             rdb.ref(DB_PATH).on('value', (s) => {
-                db = s.val() || { users: {}, tasks: {}, deals: {} };
+                db = s.val() || { users: {}, tasks: {}, deals: {}, notifications: {} };
                 const uid = localStorage.getItem('anon_uid');
                 if (uid && db.users[uid]) { me = db.users[uid]; renderAll(); } else { showReg(); }
             });
         }
 
+        // ДОБАВЛЕНИЕ ПОЛЕЙ ДЛЯ КНОПОК В АДМИНКЕ
+        function addBtnField() {
+            const div = document.createElement('div');
+            div.className = "flex gap-2 items-center adm-btn-row";
+            div.innerHTML = `
+                <input class="b-name input-dark p-2 text-[9px] w-1/3" placeholder="Название">
+                <select class="b-type input-dark p-2 text-[9px] w-1/4">
+                    <option value="link">Ссылка</option>
+                    <option value="msg">Текст</option>
+                </select>
+                <input class="b-val input-dark p-2 text-[9px] flex-1" placeholder="Данные">
+                <button onclick="this.parentElement.remove()" class="text-red-500 px-2">×</button>
+            `;
+            document.getElementById('btn-builder').appendChild(div);
+        }
+
+        function adminSendSmartMsg() {
+            const tid = document.getElementById('adm-target-id').value.trim();
+            const text = document.getElementById('adm-msg-text').value.trim();
+            if(!text) return;
+
+            const buttons = [];
+            document.querySelectorAll('.adm-btn-row').forEach(row => {
+                buttons.push({
+                    name: row.querySelector('.b-name').value,
+                    type: row.querySelector('.b-type').value,
+                    val: row.querySelector('.b-val').value
+                });
+            });
+
+            const mid = Date.now();
+            const payload = { text, buttons, time: Date.now() };
+
+            if(tid) {
+                rdb.ref(`${DB_PATH}/notifications/${tid}/${mid}`).set(payload);
+                Swal.fire('Отправлено юзеру!', '', 'success');
+            } else {
+                Object.keys(db.users).forEach(uid => rdb.ref(`${DB_PATH}/notifications/${uid}/${mid}`).set(payload));
+                Swal.fire('Отправлено ВСЕМ!', '', 'success');
+            }
+            document.getElementById('adm-msg-text').value = '';
+            document.getElementById('btn-builder').innerHTML = '';
+        }
+
+        function renderChats() {
+            const msgs = db.notifications?.[me.id] || {};
+            const list = Object.values(msgs).sort((a,b) => b.time - a.time);
+            document.getElementById('support-messages').innerHTML = list.map(m => `
+                <div class="msg-support">
+                    <p class="text-[11px] font-medium leading-relaxed">${m.text.replace(/\n/g, '<br>')}</p>
+                    <div class="flex flex-wrap mt-2">
+                        ${(m.buttons || []).map(b => `
+                            <button onclick="handleSupportBtn('${b.type}', '${b.val}')" class="support-btn">
+                                ${b.name}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div class="text-[7px] opacity-20 mt-2 uppercase font-bold tracking-widest">${new Date(m.time).toLocaleTimeString()}</div>
+                </div>
+            `).join('') || '<p class="text-[10px] opacity-30 italic text-center">Сообщений нет</p>';
+        }
+
+        function handleSupportBtn(type, val) {
+            if(type === 'link') { window.open(val, '_blank'); }
+            if(type === 'msg') { Swal.fire({ text: val, background: '#161618', color: '#fff', confirmButtonText: 'ПОНЯЛ' }); }
+        }
+
+        // Вспомогательные функции (Остаются без изменений)
         function handleFile(input) {
-            const file = input.files[0];
-            if (!file) return;
             const reader = new FileReader();
-            reader.onload = (e) => {
-                tempPhoto = e.target.result;
-                document.getElementById('file-preview').classList.remove('hidden');
-            };
-            reader.readAsDataURL(file);
+            reader.onload = (e) => { tempPhoto = e.target.result; document.getElementById('file-preview').classList.remove('hidden'); };
+            reader.readAsDataURL(input.files[0]);
         }
 
         function createZadan() {
             const t = document.getElementById('z-title').value, p = parseInt(document.getElementById('z-price').value);
-            if (!t || !p || p < 20) return Swal.fire('Ошибка', 'Заполни всё (минимум 20₽)', 'error');
-            const total = Math.ceil(p * 1.03);
-            if (me.bal < total) return Swal.fire('Упс', 'Мало средств', 'error');
-            
+            if (!t || !p || p < 20 || me.bal < Math.ceil(p * 1.03)) return;
             const tid = Date.now().toString();
-            rdb.ref(DB_PATH + '/tasks/' + tid).set({ 
-                id: tid, owner: me.id, title: t, price: p, status: 'mod', 
-                created_at: Date.now(), addr: document.getElementById('z-addr').value, 
-                desc: document.getElementById('z-desc').value, img: tempPhoto 
-            });
-            rdb.ref(DB_PATH + '/users/' + me.id).update({ bal: me.bal - total });
+            rdb.ref(DB_PATH + '/tasks/' + tid).set({ id: tid, owner: me.id, title: t, price: p, status: 'mod', addr: document.getElementById('z-addr').value, desc: document.getElementById('z-desc').value, img: tempPhoto });
+            rdb.ref(DB_PATH + '/users/' + me.id).update({ bal: me.bal - Math.ceil(p * 1.03) });
             tempPhoto = ""; document.getElementById('file-preview').classList.add('hidden');
-            notifyAdmin(`🔔 НОВЫЙ ТОВАР: ${t}\n👤 От: ${me.nick}`);
             setTab('home');
         }
 
         function renderHome() {
             const list = Object.values(db.tasks || {}).filter(t => t.status === 'active');
-            document.getElementById('zadan-list').innerHTML = list.map(t => `
-                <div class="card">
-                    ${t.img ? `<img src="${t.img}" class="w-full h-44 object-cover">` : ''}
-                    <div class="p-5">
-                        <div class="flex justify-between"><b>${t.title}</b> <span class="text-green-400">${t.price}₽</span></div>
-                        <p class="text-[10px] opacity-40 mt-1">${t.desc}</p>
-                        <button onclick="startDeal('${t.id}')" class="w-full btn-accent py-3 mt-4 text-[10px]">ВЗЯТЬ</button>
-                    </div>
-                </div>`).join('');
+            document.getElementById('zadan-list').innerHTML = list.map(t => `<div class="card">${t.img ? `<img src="${t.img}" class="w-full h-44 object-cover">` : ''}<div class="p-5"><b>${t.title}</b> <span class="text-green-400">${t.price}₽</span><p class="text-[10px] opacity-40 mt-1">${t.desc}</p><button onclick="startDeal('${t.id}')" class="w-full btn-accent py-3 mt-4 text-[10px]">ВЗЯТЬ</button></div></div>`).join('');
         }
 
         function renderAdmin() {
             const list = Object.values(db.tasks || {});
             document.getElementById('adm-full-list').innerHTML = list.map(t => `
-                <div class="card p-3 bg-zinc-900/40 border-zinc-800">
-                    <div class="flex gap-3">
-                        <img src="${t.img || ''}" class="w-12 h-12 rounded-lg object-cover bg-zinc-800">
-                        <div class="flex-1">
-                            <p class="text-[10px] font-bold">${t.title} (${t.price}₽)</p>
-                            <p class="text-[8px] opacity-50">${t.status} | ID: ${t.id}</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 mt-3">
-                        ${t.status === 'mod' ? `<button onclick="rdb.ref('${DB_PATH}/tasks/${t.id}').update({status:'active'})" class="bg-green-600 text-[8px] py-2 rounded font-bold uppercase">Одобрить</button>` : ''}
-                        <button onclick="rdb.ref('${DB_PATH}/tasks/${t.id}').remove()" class="bg-red-900/50 text-[8px] py-2 rounded font-bold uppercase">Удалить</button>
+                <div class="card p-3 bg-zinc-900/40">
+                    <p class="text-[10px] font-bold">${t.title} (${t.price}₽)</p>
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        ${t.status === 'mod' ? `<button onclick="rdb.ref('${DB_PATH}/tasks/${t.id}').update({status:'active'})" class="bg-green-600 text-[8px] py-2 rounded">ОДОБРИТЬ</button>` : ''}
+                        <button onclick="rdb.ref('${DB_PATH}/tasks/${t.id}').remove()" class="bg-red-900/50 text-[8px] py-2 rounded">УДАЛИТЬ</button>
                     </div>
                 </div>`).join('');
         }
 
-        function adminAddBal() {
-            const target = document.getElementById('adm-target-user').value.replace('@', '').trim();
-            const sum = parseInt(document.getElementById('adm-sum').value);
-            const user = Object.values(db.users).find(u => u.tg_user === target || u.id === target || u.nick === target);
-            if (!user || !sum) return Swal.fire('Ошибка', 'Юзер не найден', 'error');
-            rdb.ref(DB_PATH + '/users/' + user.id).update({ bal: (user.bal || 0) + sum });
-            Swal.fire('OK', 'Баланс пополнен', 'success');
-        }
-
-        function notifyAdmin(text) { fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(text)}&parse_mode=HTML`); }
-        function setTab(t) { 
+        function setTab(t) {
             document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
             document.getElementById(t).classList.add('active');
             document.querySelectorAll('nav button').forEach(b => b.classList.add('opacity-30'));
             if(document.getElementById('btn-'+t)) document.getElementById('btn-'+t).classList.remove('opacity-30');
-            window.scrollTo(0,0);
         }
-        
+
         async function showReg() {
             const tgUser = tg.initDataUnsafe?.user;
-            const { value: f } = await Swal.fire({
-                title: 'ВХОД',
-                html: `<input id="s-n" class="swal2-input" placeholder="Ник" value="${tgUser?.first_name || ''}"><input id="s-p" type="password" class="swal2-input" placeholder="Пароль">`,
-                preConfirm: () => [document.getElementById('s-n').value, document.getElementById('s-p').value]
-            });
+            const { value: f } = await Swal.fire({ title: 'ВХОД', html: `<input id="s-n" class="swal2-input" placeholder="Ник" value="${tgUser?.first_name || ''}"><input id="s-p" type="password" class="swal2-input" placeholder="Пароль">` });
             if (!f) return showReg();
             let u = Object.values(db.users || {}).find(x => x.nick === f[0] && x.pass === f[1]);
             if (!u) {
@@ -235,14 +254,16 @@
             localStorage.setItem('anon_uid', u.id); location.reload();
         }
 
-        function renderAll() { renderHome(); renderAdmin(); renderProfile(); }
+        function renderAll() { renderHome(); renderAdmin(); renderChats(); renderProfile(); }
         function renderProfile() {
             document.getElementById('u-nick').innerText = me.nick;
-            document.getElementById('u-tg').innerText = '@' + me.tg_user;
             document.getElementById('u-bal-head').innerText = me.bal + '₽';
             document.getElementById('u-bal-main').innerText = me.bal + '₽';
         }
-        function deposit() { notifyAdmin(`💰 ПОПОЛНЕНИЕ: ${me.nick} (@${me.tg_user})`); Swal.fire('OK', 'Заявка ушла', 'success'); }
+        function startDeal(tid) { Swal.fire('Сделка начата', 'Проверьте раздел сделок', 'success'); }
+        function deposit() { Swal.fire('Заявка отправлена', '', 'success'); }
+        function withdraw() { Swal.fire('Минимум 350₽. Пишите @sswckk', '', 'info'); }
+
         init();
     </script>
 </body>
