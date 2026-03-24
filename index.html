@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>anon:zadan v17.5 PRISON</title>
+    <title>anon:zadan v17.8 IRON WALL</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -14,7 +14,8 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        body { background: #050505; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #050505; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; opacity: 0; transition: opacity 0.5s; }
+        body.auth-ok { opacity: 1; }
         .glass { background: rgba(15, 15, 17, 0.9); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.06); border-radius: 28px; }
         .tab { display: none; } .tab.active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -22,24 +23,20 @@
         .input-box { background: #0f0f11 !important; border: 1px solid #222 !important; color: #fff !important; border-radius: 18px !important; padding: 16px !important; width: 100%; outline: none; }
         .nav-item { opacity: 0.3; transition: 0.3s; padding: 15px; } .nav-item.active { opacity: 1; transform: translateY(-3px); color: #3b82f6; }
         #ban-screen { display:none; position:fixed; inset:0; background:#000; z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
-        ::-webkit-scrollbar { width: 0; }
-        /* Запрет кликов по навигации при бане */
-        .banned-mode nav { pointer-events: none; opacity: 0.1; }
+        .swal2-container { z-index: 10000 !important; }
     </style>
 </head>
 <body id="main-body" class="pb-32">
 
     <div id="ban-screen">
-        <h1 class="text-red-600 font-black text-5xl mb-4 italic italic">err : 67</h1>
+        <h1 class="text-red-600 font-black text-5xl mb-4 italic">err : 67</h1>
         <div class="glass p-2 mb-6 w-full max-w-sm">
             <video class="w-full rounded-2xl" autoplay loop muted playsinline>
                 <source src="https://v1.pinimg.com/videos/mc/720p/8c/21/5c/8c215c0e181419796030c25a7209772a.mp4" type="video/mp4">
             </video>
         </div>
         <div class="glass p-6 w-full max-w-sm text-center">
-            <p class="text-[10px] font-black uppercase text-zinc-500 mb-2">Причина блокировки:</p>
-            <p id="ban-reason" class="text-sm font-bold text-white mb-4">Нарушение правил</p>
-            <p class="text-[10px] font-black uppercase text-zinc-500 mb-2">Срок:</p>
+            <p id="ban-reason" class="text-sm font-bold text-white mb-4 italic">Нарушение правил</p>
             <p id="ban-duration" class="text-xl font-black text-red-600 italic mb-8">Навсегда</p>
             <button onclick="openSupportFromBan()" class="w-full py-4 bg-white text-black rounded-2xl font-black text-[10px] uppercase italic">Оспорить в поддержке</button>
         </div>
@@ -48,7 +45,6 @@
     <header class="p-6 flex justify-between items-center sticky top-0 z-[100] glass border-none rounded-none rounded-b-[35px]">
         <div>
             <h1 class="text-2xl font-black italic tracking-tighter">anon:<span class="text-zinc-600">zadan</span></h1>
-            <p class="text-[7px] text-zinc-500 font-black uppercase tracking-widest mt-1">● SECURITY LEVEL HIGH</p>
         </div>
         <div id="u-bal-head" onclick="setTab('me')" class="bg-white/5 border border-white/10 px-5 py-2.5 rounded-2xl text-xs font-black italic cursor-pointer">0 ₽</div>
     </header>
@@ -57,33 +53,39 @@
     
     <section id="create" class="tab px-5 pt-6">
         <div class="glass p-8 space-y-5">
-            <div class="text-center mb-4"><i class="fa-solid fa-plus-circle text-3xl mb-2 text-blue-500"></i><h3 class="text-xs font-black uppercase">Новое задание</h3></div>
             <input id="z-title" class="input-box" placeholder="Название">
             <input id="z-addr" class="input-box" placeholder="Адрес">
             <input id="z-price" type="number" class="input-box" placeholder="Цена (₽)">
-            <div class="relative"><input type="file" id="z-file" class="hidden" onchange="document.getElementById('f-st').innerText='Фото ✅'"><label for="z-file" class="input-box block text-center py-8 border-dashed border-zinc-700 italic"><span id="f-st">Загрузить фото</span></label></div>
-            <button onclick="uploadTask()" id="up-btn" class="btn-main bg-blue-600 text-white">Выставить</button>
+            <input type="file" id="z-file" class="hidden" onchange="document.getElementById('f-st').innerText='Фото ✅'">
+            <label for="z-file" class="input-box block text-center py-8 border-dashed border-zinc-700 italic"><span id="f-st">Загрузить фото</span></label>
+            <button onclick="uploadTask()" class="btn-main bg-blue-600 text-white">Выставить</button>
         </div>
     </section>
 
     <section id="support" class="tab px-5 pt-6">
         <div id="chat-list-ui" class="space-y-3">
-            <div onclick="openDialog('news_channel')" class="glass p-6 flex items-center gap-5 cursor-pointer border-blue-500/20"><div class="w-14 h-14 bg-blue-600 rounded-[22px] flex items-center justify-center text-2xl"><i class="fa-solid fa-bullhorn"></i></div><div><b class="text-sm italic uppercase font-black">Канал</b><p class="text-[9px] text-zinc-500 font-bold uppercase">Новости</p></div></div>
-            <div onclick="openDialog('system')" class="glass p-6 flex items-center gap-5 cursor-pointer"><div class="w-14 h-14 bg-white text-black rounded-[22px] flex items-center justify-center text-2xl"><i class="fa-solid fa-headset"></i></div><div><b class="text-sm italic uppercase font-black">Поддержка</b><p class="text-[9px] text-zinc-500 font-bold uppercase">Чат с админом</p></div></div>
+            <div onclick="openDialog('system')" class="glass p-6 flex items-center gap-5 cursor-pointer">
+                <div class="w-14 h-14 bg-white text-black rounded-[22px] flex items-center justify-center text-2xl"><i class="fa-solid fa-headset"></i></div>
+                <div><b class="text-sm italic uppercase font-black">Поддержка</b></div>
+            </div>
         </div>
         <div id="chat-room-ui" class="hidden">
-            <button onclick="closeDialog()" id="back-btn" class="text-[10px] font-black uppercase opacity-40 mb-4 ml-2"><i class="fa-solid fa-chevron-left"></i> Назад</button>
-            <div class="glass p-5 h-[65vh] flex flex-col"><div id="msgs-box" class="flex-1 overflow-y-auto space-y-4"></div><div id="msg-input-area" class="flex gap-2 mt-5"><input id="msg-input" class="input-box" placeholder="Сообщение..."><button onclick="sendMsg()" class="w-14 bg-white text-black rounded-2xl flex items-center justify-center"><i class="fa-solid fa-paper-plane"></i></button></div></div>
+            <div class="glass p-5 h-[65vh] flex flex-col"><div id="msgs-box" class="flex-1 overflow-y-auto space-y-4"></div><div class="flex gap-2 mt-5"><input id="msg-input" class="input-box" placeholder="Сообщение..."><button onclick="sendMsg()" class="w-14 bg-white text-black rounded-2xl flex items-center justify-center"><i class="fa-solid fa-paper-plane"></i></button></div></div>
         </div>
     </section>
 
-    <section id="me" class="tab px-5 pt-6 text-center"><div class="glass p-10 space-y-8"><h3 id="u-nick" class="text-3xl font-black italic uppercase">...</h3><div id="u-bal-main" class="text-6xl font-black italic tracking-tighter">0 ₽</div><div class="grid grid-cols-2 gap-4"><button onclick="reqAction('deposit')" class="btn-main">Пополнить</button><button onclick="logout()" class="btn-main bg-zinc-900 text-zinc-600">Выйти</button></div><button onclick="setTab('admin_login')" class="opacity-5 text-[8px] font-black uppercase mt-10">Admin</button></div></section>
+    <section id="me" class="tab px-5 pt-6 text-center">
+        <div class="glass p-10 space-y-8">
+            <h3 id="u-nick" class="text-3xl font-black italic uppercase tracking-tighter">...</h3>
+            <div id="u-bal-main" class="text-6xl font-black italic tracking-tighter">0 ₽</div>
+            <button onclick="logout()" class="btn-main bg-zinc-900 text-zinc-600">Выйти</button>
+            <button onclick="setTab('admin_login')" class="opacity-5 text-[8px] mt-10">ADMIN</button>
+        </div>
+    </section>
 
     <section id="admin_login" class="tab px-5 pt-20"><input type="password" oninput="if(this.value.toLowerCase()==='kalubxq') setTab('admin')" class="input-box text-center font-black" placeholder="CODE"></section>
     <section id="admin" class="tab px-5 pt-6 pb-40 space-y-8">
-        <h2 class="text-lg font-black italic text-red-600 uppercase">Overlord Panel</h2>
-        <div class="space-y-4"><h3 class="text-[10px] font-black text-zinc-500 uppercase">Юзеры</h3><div id="adm-users-list" class="space-y-2"></div></div>
-        <div class="space-y-4"><h3 class="text-[10px] font-black text-zinc-500 uppercase">Модерация задач</h3><div id="adm-mod-list" class="space-y-2"></div></div>
+        <div id="adm-users-list" class="space-y-2"></div>
     </section>
 
     <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 h-24 bg-black/95 backdrop-blur-3xl border-t border-white/5 flex justify-around items-center z-[200] px-6 rounded-t-[40px]">
@@ -94,139 +96,134 @@
     </nav>
 
     <script>
-        // Инициализация базы данных (Firebase Config сохранен из прошлых версий)
-        const TG_ID = "7040863301", TG_TOKEN = "8722822022:AAEmZa-V4-isxXnZ00omU8gAM_NtYevuL9Y";
         const firebaseConfig = { apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI", authDomain: "dogx-base.firebaseapp.com", databaseURL: "https://dogx-base-default-rtdb.firebaseio.com", projectId: "dogx-base", storageBucket: "dogx-base.appspot.com", messagingSenderId: "81713249793", appId: "1:81713249793:web:1b44a13e6faf5acfa78a00" };
-        const DB_K = 'anon_v17_5_prison';
+        const DB_K = 'anon_v17_8_wall';
         firebase.initializeApp(firebaseConfig);
         const rdb = firebase.database();
         const storage = firebase.storage();
-        let db = { users:{}, tasks:{}, chats:{}, news:{} }, me = null, activeChat = null;
+        let db = { users:{} }, me = null;
 
-        function init() {
+        async function startSystem() {
             rdb.ref(DB_K).on('value', (s) => {
-                db = s.val() || { users:{}, tasks:{}, chats:{}, news:{} };
+                db = s.val() || { users:{} };
                 const uid = localStorage.getItem('anon_uid');
+                
                 if (uid && db.users[uid]) { 
                     me = db.users[uid]; 
-                    checkBanStatus();
+                    document.body.classList.add('auth-ok');
+                    if(me.banned) showBan();
                     renderAll(); 
-                } else { showLogin(); }
+                } else { 
+                    forceAuth(); 
+                }
             });
         }
 
-        // ПРОВЕРКА БАНА
-        function checkBanStatus() {
-            if(me.banned) {
-                document.getElementById('ban-screen').style.display = 'flex';
-                document.getElementById('main-body').classList.add('banned-mode');
-                document.getElementById('ban-reason').innerText = me.banReason || "Нарушение правил";
-                document.getElementById('ban-duration').innerText = me.banTime || "Навсегда";
-            } else {
-                document.getElementById('ban-screen').style.display = 'none';
-                document.getElementById('main-body').classList.remove('banned-mode');
+        // ПРИНУДИТЕЛЬНАЯ РЕГИСТРАЦИЯ
+        async function forceAuth() {
+            const { value: f } = await Swal.fire({
+                title: 'ДОСТУП ОГРАНИЧЕН',
+                text: 'Для входа необходимо зарегистрироваться',
+                background: '#0a0a0a',
+                color: '#fff',
+                html: `
+                    <div class="space-y-3 mt-4">
+                        <input id="sw-n" class="swal2-input w-full m-0" placeholder="НИКНЕЙМ">
+                        <input id="sw-p" type="password" class="swal2-input w-full m-0" placeholder="ПАРОЛЬ">
+                        <div class="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl">
+                            <p class="text-[10px] text-blue-500 font-black uppercase mb-2">Обязательное поле:</p>
+                            <input id="sw-t" class="swal2-input w-full m-0 !border-blue-500" placeholder="@TELEGRAM_USERNAME">
+                        </div>
+                    </div>
+                `,
+                confirmButtonText: 'ЗАРЕГИСТРИРОВАТЬСЯ',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                preConfirm: () => {
+                    const n = document.getElementById('sw-n').value.trim();
+                    const p = document.getElementById('sw-p').value.trim();
+                    const t = document.getElementById('sw-t').value.trim();
+                    if(!n || !p || !t) return Swal.showValidationMessage('БРО, ЮЗЕРНЕЙМ В ТГ ОБЯЗАТЕЛЕН!');
+                    if(!t.includes('@')) return Swal.showValidationMessage('Юзернейм должен начинаться с @');
+                    return [n, p, t];
+                }
+            });
+
+            if(f) {
+                const existing = Object.values(db.users).find(u => u.nick.toLowerCase() === f[0].toLowerCase());
+                if(existing) {
+                    if(existing.pass === f[1]) {
+                        localStorage.setItem('anon_uid', existing.id);
+                        location.reload();
+                    } else {
+                        Swal.fire('Ошибка', 'Ник занят или пароль неверный', 'error').then(forceAuth);
+                    }
+                } else {
+                    const id = "u" + Date.now();
+                    await rdb.ref(`${DB_K}/users/${id}`).set({ id, nick: f[0], pass: f[1], tg: f[2], bal: 0, banned: false });
+                    localStorage.setItem('anon_uid', id);
+                    location.reload();
+                }
             }
+        }
+
+        function showBan() {
+            document.getElementById('ban-screen').style.display = 'flex';
+            document.getElementById('ban-reason').innerText = me.banReason || "Нарушение";
+            document.getElementById('ban-duration').innerText = me.banTime || "Навсегда";
+            document.getElementById('bottom-nav').style.pointerEvents = 'none';
+            document.getElementById('bottom-nav').style.opacity = '0.1';
         }
 
         function openSupportFromBan() {
             document.getElementById('ban-screen').style.display = 'none';
             setTab('support');
             openDialog('system');
-            // Скрываем кнопку назад, чтобы юзер не мог выйти из чата в меню
-            document.getElementById('back-btn').style.display = 'none';
         }
 
-        // АДМИН-МЕНЮ БАНА
+        function renderAll() {
+            if(!me) return;
+            document.getElementById('u-nick').innerText = me.nick;
+            document.getElementById('u-bal-head').innerText = (me.bal || 0).toFixed(0) + ' ₽';
+            document.getElementById('u-bal-main').innerText = (me.bal || 0).toFixed(0) + ' ₽';
+            
+            const users = Object.values(db.users);
+            document.getElementById('adm-users-list').innerHTML = users.map(u => `
+                <div class="p-4 glass flex justify-between items-center ${u.banned?'border-red-600':''}">
+                    <div><b class="text-xs font-black uppercase">${u.nick}</b><p class="text-[8px] opacity-40">${u.tg}</p></div>
+                    <button onclick="manageUser('${u.id}')" class="text-[9px] font-black uppercase text-zinc-500">УПРАВЛЯТЬ</button>
+                </div>
+            `).join('');
+        }
+
         async function manageUser(uid) {
             const u = db.users[uid];
             if(u.banned) {
-                const { isConfirmed } = await Swal.fire({ title: 'РАЗБАН?', text: `Разблокировать ${u.nick}?`, showCancelButton: true });
-                if(isConfirmed) rdb.ref(`${DB_K}/users/${uid}`).update({banned: false, banReason: null, banTime: null});
+                await rdb.ref(`${DB_K}/users/${uid}`).update({banned:false});
                 return;
             }
-
-            const { value: formValues } = await Swal.fire({
-                title: 'БЛОКИРОВКА (err:67)',
-                background: '#0a0a0a', color: '#fff',
-                html: `
-                    <input id="sw-reason" class="swal2-input" placeholder="ПРИЧИНА">
-                    <input id="sw-time" class="swal2-input" placeholder="СРОК (ч/д/мин/навсегда)">
-                `,
-                focusConfirm: false,
-                preConfirm: () => [document.getElementById('sw-reason').value, document.getElementById('sw-time').value]
+            const { value: res } = await Swal.fire({
+                title: 'БАН ЮЗЕРА',
+                html: `<input id="br" class="swal2-input" placeholder="Причина"><input id="bt" class="swal2-input" placeholder="Срок">`,
+                preConfirm: () => [document.getElementById('br').value, document.getElementById('bt').value]
             });
-
-            if (formValues) {
-                const [reason, time] = formValues;
-                rdb.ref(`${DB_K}/users/${uid}`).update({
-                    banned: true,
-                    banReason: reason || "Без объяснения причин",
-                    banTime: time || "Навсегда"
-                });
-                Swal.fire('Юзер в тюрьме!', '', 'success');
+            if(res) {
+                await rdb.ref(`${DB_K}/users/${uid}`).update({banned:true, banReason: res[0], banTime: res[1]});
             }
-        }
-
-        // РЕНДЕР (Остальная логика из v17.0 без изменений)
-        function renderAll() {
-            if(!me) return;
-            const users = Object.values(db.users);
-            document.getElementById('u-bal-head').innerText = (me.bal || 0).toFixed(0) + ' ₽';
-            document.getElementById('u-bal-main').innerText = (me.bal || 0).toFixed(0) + ' ₽';
-            document.getElementById('u-nick').innerText = me.nick;
-            
-            const tasks = Object.values(db.tasks).filter(t => t.status === 'active');
-            document.getElementById('zadan-list').innerHTML = tasks.map(t => `<div class="glass overflow-hidden"><img src="${t.img}" class="w-full h-48 object-cover"><div class="p-6 flex justify-between items-center"><div><b class="text-sm font-black uppercase italic">${t.title}</b><p class="text-[8px] opacity-40 uppercase">${t.addr}</p></div><div class="text-right"><b class="text-lg italic font-black">${t.price} ₽</b><button class="bg-white text-black px-4 py-2 rounded-xl text-[9px] font-black uppercase mt-2">Купить</button></div></div></div>`).join('');
-
-            document.getElementById('adm-users-list').innerHTML = users.map(u => `<div class="p-4 glass flex justify-between items-center ${u.banned?'border-red-600 bg-red-900/10':''}"><div><b class="text-xs italic font-black">${u.nick}</b><p class="text-[8px] opacity-40 uppercase">${u.tg}</p></div><button onclick="manageUser('${u.id}')" class="text-zinc-500 font-black text-[9px] uppercase">УПРАВЛЯТЬ</button></div>`).join('');
-            if(activeChat) renderMsgs();
-        }
-
-        // ОСТАЛЬНЫЕ ФУНКЦИИ (Login, Tabs, Chat, Upload)
-        async function showLogin() {
-            const { value: f } = await Swal.fire({ title: 'ВХОД', background: '#050505', color: '#fff', html: `<input id="a-n" class="swal2-input" placeholder="НИК"><input id="a-p" type="password" class="swal2-input" placeholder="ПАРОЛЬ"><input id="a-t" class="swal2-input" placeholder="@TG">`, preConfirm: () => [document.getElementById('a-n').value, document.getElementById('a-p').value, document.getElementById('a-t').value] });
-            if(f[0] && f[1] && f[2]) {
-                const user = Object.values(db.users).find(u => u.nick.toLowerCase() === f[0].toLowerCase());
-                if(user) { localStorage.setItem('anon_uid', user.id); location.reload(); }
-                else { const id = "u"+Date.now(); await rdb.ref(`${DB_K}/users/${id}`).set({id, nick:f[0], pass:f[1], tg:f[2], bal:0, banned:false}); localStorage.setItem('anon_uid', id); location.reload(); }
-            }
-        }
-
-        async function uploadTask() {
-            const t = document.getElementById('z-title').value, p = document.getElementById('z-price').value, f = document.getElementById('z-file').files[0];
-            if(!t || !p || !f) return;
-            const fRef = storage.ref(`tasks/${Date.now()}`);
-            await fRef.put(f);
-            const url = await fRef.getDownloadURL();
-            await rdb.ref(`${DB_K}/tasks/z${Date.now()}`).set({id:"z"+Date.now(), title:t, price:Number(p), img:url, status:'active', owner:me.nick});
-            setTab('home');
         }
 
         function setTab(t) {
-            if(me && me.banned && t !== 'support') return; // Запрет перехода если бан
+            if(me && me.banned && t !== 'support') return;
             document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
             document.getElementById(t).classList.add('active');
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
             if(document.getElementById('btn-'+t)) document.getElementById('btn-'+t).classList.add('active');
-            renderAll();
         }
 
-        function openDialog(id) { activeChat = id; document.getElementById('chat-list-ui').classList.add('hidden'); document.getElementById('chat-room-ui').classList.remove('hidden'); renderMsgs(); }
-        function closeDialog() { activeChat = null; document.getElementById('chat-list-ui').classList.remove('hidden'); document.getElementById('chat-room-ui').classList.add('hidden'); }
-        async function sendMsg() {
-            const v = document.getElementById('msg-input').value; if(!v) return;
-            const t = activeChat === 'system' ? me.id : activeChat;
-            await rdb.ref(`${DB_K}/chats/${t}/${Date.now()}`).set({text:v, from: 'user', time:Date.now()});
-            document.getElementById('msg-input').value = "";
-        }
-        function renderMsgs() {
-            const t = activeChat === 'system' ? me.id : activeChat;
-            const msgs = Object.values(db.chats[t] || {}).sort((a,b)=>a.time-b.time);
-            document.getElementById('msgs-box').innerHTML = msgs.map(m => `<div class="p-4 max-w-[85%] rounded-[24px] text-xs font-black ${m.from==='system'?'bg-blue-900 self-start':'bg-white text-black self-end'}">${m.text}</div>`).join('');
-            const c = document.getElementById('msgs-box'); c.scrollTop = c.scrollHeight;
-        }
+        function openDialog(id) { document.getElementById('chat-list-ui').classList.add('hidden'); document.getElementById('chat-room-ui').classList.remove('hidden'); }
         function logout() { localStorage.removeItem('anon_uid'); location.reload(); }
-        init();
+        
+        startSystem();
     </script>
 </body>
 </html>
