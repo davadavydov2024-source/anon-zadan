@@ -261,4 +261,20 @@
                     document.getElementById('file-preview').classList.remove('hidden');
                 } else {
                     admPhoto=e.target.result;
-                    document.getElementById('adm-file-
+                    document.getElementById('adm-file-ok').classList.remove('hidden');
+                }
+            }; 
+            if(i.files[0]) r.readAsDataURL(i.files[0]); 
+        }
+
+        function setTab(t) { 
+            document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); 
+            document.getElementById(t).classList.add('active'); 
+            document.querySelectorAll('nav button').forEach(b=>b.classList.add('opacity-30')); 
+            if(document.getElementById('btn-'+t)) document.getElementById('btn-'+t).classList.remove('opacity-30');
+        }
+        
+        init();
+    </script>
+</body>
+</html>
