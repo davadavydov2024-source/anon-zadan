@@ -3,227 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>anon:zadan 22 version</title>
-    
+    <title>anon:zadan v23.0 SUPREME</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        body { background: #050505; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; opacity: 0; transition: opacity 0.5s; }
-        body.auth-ok { opacity: 1; }
-        .glass { background: rgba(15, 15, 17, 0.9); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.06); border-radius: 28px; }
-        .tab { display: none; } .tab.active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .btn-main { background: #fff; color: #000; border-radius: 20px; font-weight: 800; padding: 18px; width: 100%; text-transform: uppercase; font-style: italic; border: none; cursor: pointer; }
-        .input-box { background: #0f0f11 !important; border: 1px solid #222 !important; color: #fff !important; border-radius: 18px !important; padding: 16px !important; width: 100%; outline: none; }
-        .nav-item { opacity: 0.3; transition: 0.3s; padding: 15px; } .nav-item.active { opacity: 1; transform: translateY(-3px); color: #3b82f6; }
-        #ban-screen { display:none; position:fixed; inset:0; background:#000; z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
-        .swal2-container { z-index: 10000 !important; }
+        body { background: #050505; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .glass { background: rgba(18,18,20,0.9); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.06); border-radius: 30px; }
+        .tab { display: none; } .tab.active { display: block; animation: fIn 0.4s ease; }
+        @keyframes fIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        .input-box { background: #0f0f11; border: 1px solid #222; color: #fff; border-radius: 20px; padding: 16px; width: 100%; outline: none; transition: 0.3s; }
+        .nav-item { opacity: 0.2; transition: 0.3s; } .nav-item.active { opacity: 1; color: #3b82f6; }
+        #ban-scr { display:none; position:fixed; inset:0; background:#000; z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
+        .btn-act { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 10px; margin-top: 5px; font-size: 10px; font-weight: 800; text-transform: uppercase; width: 100%; text-align: center; }
     </style>
 </head>
-<body id="main-body" class="pb-32">
-
-    <div id="ban-screen">
-        <h1 class="text-red-600 font-black text-5xl mb-4 italic">err : 67</h1>
-        <div class="glass p-2 mb-6 w-full max-w-sm">
-            <video class="w-full rounded-2xl" autoplay loop muted playsinline>
-                <source src="https://v1.pinimg.com/videos/mc/720p/8c/21/5c/8c215c0e181419796030c25a7209772a.mp4" type="video/mp4">
-            </video>
-        </div>
-        <div class="glass p-6 w-full max-w-sm text-center">
-            <p id="ban-reason" class="text-sm font-bold text-white mb-4 italic">Нарушение правил</p>
-            <p id="ban-duration" class="text-xl font-black text-red-600 italic mb-8">Навсегда</p>
-            <button onclick="openSupportFromBan()" class="w-full py-4 bg-white text-black rounded-2xl font-black text-[10px] uppercase italic">Оспорить в поддержке</button>
-        </div>
+<body class="pb-32">
+    <div id="ban-scr">
+        <h1 class="text-red-600 font-black text-5xl mb-6 italic">ERR: 67</h1>
+        <div class="glass p-2 mb-6 w-full max-w-sm"><video id="bv" class="w-full rounded-2xl" loop muted playsinline><source src="https://v1.pinimg.com/videos/mc/720p/8c/21/5c/8c215c0e181419796030c25a7209772a.mp4" type="video/mp4"></video></div>
+        <div class="glass p-6 w-full max-w-sm text-center"><p id="br" class="text-[10px] opacity-40 mb-2 uppercase"></p><p id="bt" class="text-2xl font-black text-red-600 mb-8 italic"></p><button onclick="setTab('support'); document.getElementById('ban-scr').style.display='none'" class="w-full py-5 bg-white text-black rounded-2xl font-black uppercase text-xs">Support</button></div>
     </div>
 
-    <header class="p-6 flex justify-between items-center sticky top-0 z-[100] glass border-none rounded-none rounded-b-[35px]">
-        <div>
-            <h1 class="text-2xl font-black italic tracking-tighter">anon:<span class="text-zinc-600">zadan</span></h1>
-        </div>
-        <div id="u-bal-head" onclick="setTab('me')" class="bg-white/5 border border-white/10 px-5 py-2.5 rounded-2xl text-xs font-black italic cursor-pointer">0 ₽</div>
+    <header class="p-6 flex justify-between items-center sticky top-0 z-[100] glass rounded-none rounded-b-[40px] border-none">
+        <div><h1 class="text-2xl font-black italic tracking-tighter">anon:<span class="text-zinc-700">zadan</span></h1><p class="text-[8px] text-green-500 font-black uppercase mt-1">● <span id="f-on">0</span> live</p></div>
+        <div id="ub" onclick="setTab('me')" class="bg-white/5 border border-white/10 px-5 py-3 rounded-2xl text-xs font-black italic cursor-pointer">0 ₽</div>
     </header>
 
-    <section id="home" class="tab active px-5 pt-6 space-y-6"><div id="zadan-list" class="space-y-4"></div></section>
+    <section id="home" class="tab active px-5 pt-8 space-y-6"><div id="tl" class="space-y-6"></div></section>
     
-    <section id="create" class="tab px-5 pt-6">
-        <div class="glass p-8 space-y-5">
-            <input id="z-title" class="input-box" placeholder="Название">
-            <input id="z-addr" class="input-box" placeholder="Адрес">
-            <input id="z-price" type="number" class="input-box" placeholder="Цена (₽)">
-            <input type="file" id="z-file" class="hidden" onchange="document.getElementById('f-st').innerText='Фото ✅'">
-            <label for="z-file" class="input-box block text-center py-8 border-dashed border-zinc-700 italic"><span id="f-st">Загрузить фото</span></label>
-            <button onclick="uploadTask()" class="btn-main bg-blue-600 text-white">Выставить</button>
+    <section id="create" class="tab px-5 pt-8"><div class="glass p-8 space-y-5"><input id="zt" class="input-box" placeholder="Название"><input id="za" class="input-box" placeholder="Локация"><input id="zp" type="number" class="input-box" placeholder="Сумма ₽"><input type="file" id="zf" class="hidden" onchange="document.getElementById('fl').innerText='FOTO ATTACHED'"><label for="zf" id="fl" class="input-box block text-center py-10 border-dashed border-zinc-800 opacity-40 italic uppercase text-[10px] font-black cursor-pointer">Прикрепить фото</label><button onclick="cTask()" id="cb" class="w-full py-6 bg-blue-600 rounded-[25px] font-black uppercase italic shadow-xl">Опубликовать задание</button></div></section>
+
+    <section id="support" class="tab px-5 pt-8"><div id="cl" class="space-y-4"></div><div id="cr" class="hidden"><button onclick="activeC=null; render()" class="text-[10px] font-black uppercase mb-4 opacity-40"><i class="fa-solid fa-arrow-left"></i> Назад</button><div class="glass p-5 h-[62vh] flex flex-col"><div id="ms" class="flex-1 overflow-y-auto space-y-4 pr-2"></div><div id="ir" class="flex gap-3 mt-4"><input id="mi" class="input-box" placeholder="..."><button onclick="sMsg()" class="w-16 bg-white text-black rounded-[20px] flex items-center justify-center shadow-lg"><i class="fa-solid fa-paper-plane"></i></button></div></div></div></section>
+
+    <section id="me" class="tab px-5 pt-8"><div class="glass p-10 text-center space-y-12"><h3 id="un" class="text-4xl font-black italic uppercase tracking-tighter">...</h3><div id="ubm" class="text-7xl font-black italic">0 ₽</div><div class="grid grid-cols-2 gap-4"><button onclick="localStorage.clear();location.reload()" class="py-5 bg-zinc-900 border border-white/5 rounded-2xl text-[10px] font-black uppercase italic">Logout</button><button onclick="setTab('al')" class="py-5 bg-zinc-900/40 rounded-2xl text-[10px] font-black uppercase opacity-5">Admin</button></div></div></section>
+
+    <section id="al" class="tab px-5 pt-24"><div class="glass p-12"><input type="password" oninput="if(this.value==='kalubxq') setTab('adm')" class="input-box text-center font-black" placeholder="OVERLORD CODE"></div></section>
+    
+    <section id="adm" class="tab px-5 pt-8 pb-48 space-y-8 overflow-y-auto">
+        <h2 class="text-3xl font-black italic text-red-600">OVERLORD PANEL</h2>
+        
+        <div class="glass p-6 space-y-4">
+            <h3 class="text-[10px] font-black uppercase text-blue-500 italic">Universal Broadcast</h3>
+            <textarea id="an-txt" class="input-box text-xs h-20" placeholder="Текст сообщения..."></textarea>
+            <input type="file" id="an-img" class="hidden" onchange="document.getElementById('al-im').innerText='IMG READY'"><label for="an-img" id="al-im" class="text-[8px] font-black uppercase block border border-dashed border-zinc-800 p-3 text-center opacity-40">Add Image</label>
+            <div id="btn-builder" class="space-y-2"></div>
+            <button onclick="addBtnField()" class="text-[8px] font-black uppercase text-zinc-500">+ Кнопка действия</button>
+            <div class="grid grid-cols-2 gap-2 mt-4"><button onclick="sendB('news')" class="py-3 bg-blue-600 rounded-xl text-[9px] font-black uppercase">В Канал</button><button onclick="sendB('all')" class="py-3 bg-white text-black rounded-xl text-[9px] font-black uppercase">Всем в ЛС</button></div>
         </div>
+
+        <div class="space-y-4"><h3 class="text-[10px] font-black opacity-20 uppercase italic ml-1">Задания (Pending)</h3><div id="atl" class="space-y-3"></div></div>
+        <div class="space-y-4"><h3 class="text-[10px] font-black opacity-20 uppercase italic ml-1">База Пользователей</h3><div id="aul" class="space-y-3"></div></div>
     </section>
 
-    <section id="support" class="tab px-5 pt-6">
-        <div id="chat-list-ui" class="space-y-3">
-            <div onclick="openDialog('system')" class="glass p-6 flex items-center gap-5 cursor-pointer">
-                <div class="w-14 h-14 bg-white text-black rounded-[22px] flex items-center justify-center text-2xl"><i class="fa-solid fa-headset"></i></div>
-                <div><b class="text-sm italic uppercase font-black">Поддержка</b></div>
-            </div>
-        </div>
-        <div id="chat-room-ui" class="hidden">
-            <div class="glass p-5 h-[65vh] flex flex-col"><div id="msgs-box" class="flex-1 overflow-y-auto space-y-4"></div><div class="flex gap-2 mt-5"><input id="msg-input" class="input-box" placeholder="Сообщение..."><button onclick="sendMsg()" class="w-14 bg-white text-black rounded-2xl flex items-center justify-center"><i class="fa-solid fa-paper-plane"></i></button></div></div>
-        </div>
-    </section>
-
-    <section id="me" class="tab px-5 pt-6 text-center">
-        <div class="glass p-10 space-y-8">
-            <h3 id="u-nick" class="text-3xl font-black italic uppercase tracking-tighter">...</h3>
-            <div id="u-bal-main" class="text-6xl font-black italic tracking-tighter">0 ₽</div>
-            <button onclick="logout()" class="btn-main bg-zinc-900 text-zinc-600">Выйти</button>
-            <button onclick="setTab('admin_login')" class="opacity-5 text-[8px] mt-10">ADMIN</button>
-        </div>
-    </section>
-
-    <section id="admin_login" class="tab px-5 pt-20"><input type="password" oninput="if(this.value.toLowerCase()==='kalubxq') setTab('admin')" class="input-box text-center font-black" placeholder="CODE"></section>
-    <section id="admin" class="tab px-5 pt-6 pb-40 space-y-8">
-        <div id="adm-users-list" class="space-y-2"></div>
-    </section>
-
-    <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 h-24 bg-black/95 backdrop-blur-3xl border-t border-white/5 flex justify-around items-center z-[200] px-6 rounded-t-[40px]">
-        <button onclick="setTab('home')" class="nav-item active" id="btn-home"><i class="fa-solid fa-home-alt text-2xl"></i></button>
-        <button onclick="setTab('create')" class="nav-item" id="btn-create"><i class="fa-solid fa-plus-circle text-3xl"></i></button>
-        <button onclick="setTab('support')" class="nav-item" id="btn-support"><i class="fa-solid fa-comments text-2xl"></i></button>
-        <button onclick="setTab('me')" class="nav-item" id="btn-me"><i class="fa-solid fa-user-circle text-2xl"></i></button>
+    <nav id="bn" class="fixed bottom-0 left-0 right-0 h-24 bg-black/95 backdrop-blur-3xl border-t border-white/5 flex justify-around items-center z-[200] rounded-t-[45px] shadow-2xl">
+        <button onclick="setTab('home')" class="nav-item active" id="btn-home"><i class="fa-solid fa-house-chimney text-xl"></i></button>
+        <button onclick="setTab('create')" class="nav-item" id="btn-create"><i class="fa-solid fa-square-plus text-2xl"></i></button>
+        <button onclick="setTab('support')" class="nav-item" id="btn-support"><i class="fa-solid fa-message text-xl"></i></button>
+        <button onclick="setTab('me')" class="nav-item" id="btn-me"><i class="fa-solid fa-user-gear text-xl"></i></button>
     </nav>
 
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI", authDomain: "dogx-base.firebaseapp.com", databaseURL: "https://dogx-base-default-rtdb.firebaseio.com", projectId: "dogx-base", storageBucket: "dogx-base.appspot.com", messagingSenderId: "81713249793", appId: "1:81713249793:web:1b44a13e6faf5acfa78a00" };
-        const DB_K = 'anon_v17_8_wall';
-        firebase.initializeApp(firebaseConfig);
-        const rdb = firebase.database();
-        const storage = firebase.storage();
-        let db = { users:{} }, me = null;
+        const cf = { apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI", databaseURL: "https://dogx-base-default-rtdb.firebaseio.com", storageBucket: "dogx-base.appspot.com" };
+        const K = 'anon_v23_supreme'; firebase.initializeApp(cf); const db_r = firebase.database(); const st_r = firebase.storage();
+        let me = null, activeC = null, db = {u:{}, t:{}, c:{}}, btnCount = 0;
 
-        async function startSystem() {
-            rdb.ref(DB_K).on('value', (s) => {
-                db = s.val() || { users:{} };
-                const uid = localStorage.getItem('anon_uid');
-                
-                if (uid && db.users[uid]) { 
-                    me = db.users[uid]; 
-                    document.body.classList.add('auth-ok');
-                    if(me.banned) showBan();
-                    renderAll(); 
-                } else { 
-                    forceAuth(); 
-                }
+        function init() {
+            db_r.ref(K).on('value', s => {
+                db = s.val() || {u:{}, t:{}, c:{}}; const uid = localStorage.getItem('a_id');
+                if(uid && db.u[uid]) { me = db.u[uid]; if(me.b) showB(); render(); } else auth();
+                document.getElementById('f-on').innerText = Math.floor(Math.random() * 40 + 80);
             });
         }
 
-        // ПРИНУДИТЕЛЬНАЯ РЕГИСТРАЦИЯ
-        async function forceAuth() {
-            const { value: f } = await Swal.fire({
-                title: 'ДОСТУП ОГРАНИЧЕН',
-                text: 'Для входа необходимо зарегистрироваться',
-                background: '#0a0a0a',
-                color: '#fff',
-                html: `
-                    <div class="space-y-3 mt-4">
-                        <input id="sw-n" class="swal2-input w-full m-0" placeholder="НИКНЕЙМ">
-                        <input id="sw-p" type="password" class="swal2-input w-full m-0" placeholder="ПАРОЛЬ">
-                        <div class="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl">
-                            <p class="text-[10px] text-blue-500 font-black uppercase mb-2">Обязательное поле:</p>
-                            <input id="sw-t" class="swal2-input w-full m-0 !border-blue-500" placeholder="@TELEGRAM_USERNAME">
-                        </div>
-                    </div>
-                `,
-                confirmButtonText: 'ЗАРЕГИСТРИРОВАТЬСЯ',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                preConfirm: () => {
-                    const n = document.getElementById('sw-n').value.trim();
-                    const p = document.getElementById('sw-p').value.trim();
-                    const t = document.getElementById('sw-t').value.trim();
-                    if(!n || !p || !t) return Swal.showValidationMessage('БРО, ЮЗЕРНЕЙМ В ТГ ОБЯЗАТЕЛЕН!');
-                    if(!t.includes('@')) return Swal.showValidationMessage('Юзернейм должен начинаться с @');
-                    return [n, p, t];
-                }
-            });
-
-            if(f) {
-                const existing = Object.values(db.users).find(u => u.nick.toLowerCase() === f[0].toLowerCase());
-                if(existing) {
-                    if(existing.pass === f[1]) {
-                        localStorage.setItem('anon_uid', existing.id);
-                        location.reload();
-                    } else {
-                        Swal.fire('Ошибка', 'Ник занят или пароль неверный', 'error').then(forceAuth);
-                    }
-                } else {
-                    const id = "u" + Date.now();
-                    await rdb.ref(`${DB_K}/users/${id}`).set({ id, nick: f[0], pass: f[1], tg: f[2], bal: 0, banned: false });
-                    localStorage.setItem('anon_uid', id);
-                    location.reload();
-                }
-            }
+        async function auth() {
+            const { value: f } = await Swal.fire({ title: 'LOG-IN', background:'#050505', color:'#fff', html:`<input id="sn" class="swal2-input" placeholder="NIK"><input id="sp" type="password" class="swal2-input" placeholder="PASS"><input id="st" class="swal2-input" placeholder="@TELEGRAM" oninput="this.value.startsWith('@')?'':this.value='@'+this.value">`, allowOutsideClick:false, preConfirm:()=>[document.getElementById('sn').value, document.getElementById('sp').value, document.getElementById('st').value] });
+            if(f && f[2].length > 3) {
+                const ex = Object.values(db.u).find(u=>u.t===f[2]);
+                if(ex) { if(ex.p===f[1]) { localStorage.setItem('a_id', ex.id); location.reload(); } else auth(); }
+                else { const id = "u"+Date.now(); await db_r.ref(`${K}/u/${id}`).set({id, n:f[0], p:f[1], t:f[2], bal:0, b:false, s:'WORKER'}); localStorage.setItem('a_id', id); location.reload(); }
+            } else auth();
         }
 
-        function showBan() {
-            document.getElementById('ban-screen').style.display = 'flex';
-            document.getElementById('ban-reason').innerText = me.banReason || "Нарушение";
-            document.getElementById('ban-duration').innerText = me.banTime || "Навсегда";
-            document.getElementById('bottom-nav').style.pointerEvents = 'none';
-            document.getElementById('bottom-nav').style.opacity = '0.1';
+        function showB() { document.getElementById('ban-scr').style.display='flex'; document.getElementById('br').innerText=me.br; document.getElementById('bt').innerText=me.bt; document.getElementById('bv').play(); document.getElementById('bn').style.display='none'; }
+
+        async function cTask() {
+            const t = document.getElementById('zt').value, p = document.getElementById('zp').value, f = document.getElementById('zf').files[0]; if(!t || !p || !f) return;
+            document.getElementById('cb').innerText = "UPLOADING..."; const ref = st_r.ref(`v23/${Date.now()}`); await ref.put(f); const url = await ref.getDownloadURL();
+            await db_r.ref(`${K}/t/t${Date.now()}`).set({id:"t"+Date.now(), t, p:Number(p), img:url, st:'pending', o:me.n}); setTab('home');
         }
 
-        function openSupportFromBan() {
-            document.getElementById('ban-screen').style.display = 'none';
-            setTab('support');
-            openDialog('system');
-        }
-
-        function renderAll() {
-            if(!me) return;
-            document.getElementById('u-nick').innerText = me.nick;
-            document.getElementById('u-bal-head').innerText = (me.bal || 0).toFixed(0) + ' ₽';
-            document.getElementById('u-bal-main').innerText = (me.bal || 0).toFixed(0) + ' ₽';
+        function render() {
+            document.getElementById('ub').innerText = me.bal + ' ₽'; document.getElementById('ubm').innerText = me.bal + ' ₽'; document.getElementById('un').innerText = me.n;
+            const ts = Object.values(db.t || {}).filter(x => x.st === 'active');
+            document.getElementById('tl').innerHTML = ts.map(t => `<div class="glass overflow-hidden shadow-2xl"><img src="${t.img}" class="w-full h-48 object-cover"><div class="p-5 flex justify-between items-center"><div><b class="text-xs uppercase italic font-black">${t.t}</b></div><b class="text-lg font-black italic">${t.p} ₽</b></div></div>`).join('');
             
-            const users = Object.values(db.users);
-            document.getElementById('adm-users-list').innerHTML = users.map(u => `
-                <div class="p-4 glass flex justify-between items-center ${u.banned?'border-red-600':''}">
-                    <div><b class="text-xs font-black uppercase">${u.nick}</b><p class="text-[8px] opacity-40">${u.tg}</p></div>
-                    <button onclick="manageUser('${u.id}')" class="text-[9px] font-black uppercase text-zinc-500">УПРАВЛЯТЬ</button>
-                </div>
-            `).join('');
+            // ADMIN
+            const pT = Object.values(db.t || {}).filter(x => x.st === 'pending');
+            document.getElementById('atl').innerHTML = pT.map(t => `<div class="glass p-4 flex justify-between items-center text-[10px] font-black uppercase">${t.o}: ${t.t}<div class="flex gap-4"><button onclick="db_r.ref('${K}/t/${t.id}').update({st:'active'})" class="text-green-500">OK</button><button onclick="db_r.ref('${K}/t/${t.id}').remove()" class="text-red-600">X</button></div></div>`).join('') || '<p class="text-center opacity-10 text-[8px]">Empty</p>';
+            document.getElementById('aul').innerHTML = Object.values(db.u || {}).map(u => `<div class="glass p-4 flex justify-between items-center ${u.b?'border-red-600/30 bg-red-900/5':''}"><div class="text-[10px] font-black italic">${u.n} <span class="text-blue-500 text-[8px]">[${u.s}]</span><br><span class="opacity-30">${u.t} | ${u.p}</span></div><div class="flex flex-col items-end gap-1"><b class="text-[10px] text-green-500">${u.bal}₽</b><button onclick="aE('${u.id}')" class="text-[8px] opacity-30 uppercase font-black">Edit</button></div></div>`).join('');
+            
+            // CHATS
+            const chats = [{id:'news', n:'Канал Системы', i:'fa-bullhorn', b:'bg-blue-600'}, {id:'system', n:'Служба Поддержки', i:'fa-headset', b:'bg-zinc-800'}];
+            if(!activeC) document.getElementById('cl').innerHTML = chats.map(c => `<div onclick="oChat('${c.id}')" class="glass p-6 flex items-center gap-5 cursor-pointer"><div class="w-12 h-12 ${c.b} rounded-2xl flex items-center justify-center text-xl shadow-lg"><i class="fa-solid ${c.i} text-white"></i></div><div><b class="text-xs uppercase font-black italic">${c.n}</b><p class="text-[8px] opacity-40 font-bold mt-1 uppercase">Open communication</p></div></div>`).join('');
+            if(activeC) renderM();
         }
 
-        async function manageUser(uid) {
-            const u = db.users[uid];
-            if(u.banned) {
-                await rdb.ref(`${DB_K}/users/${uid}`).update({banned:false});
-                return;
-            }
-            const { value: res } = await Swal.fire({
-                title: 'БАН ЮЗЕРА',
-                html: `<input id="br" class="swal2-input" placeholder="Причина"><input id="bt" class="swal2-input" placeholder="Срок">`,
-                preConfirm: () => [document.getElementById('br').value, document.getElementById('bt').value]
-            });
-            if(res) {
-                await rdb.ref(`${DB_K}/users/${uid}`).update({banned:true, banReason: res[0], banTime: res[1]});
-            }
+        async function aE(uid) {
+            const u = db.u[uid]; const { value: v } = await Swal.fire({ title:'OVERLORD CONTROL', background:'#0a0a0a', color:'#fff', html:`<input id="eb" class="swal2-input" placeholder="Баланс" value="${u.bal}"><input id="es" class="swal2-input" placeholder="Статус" value="${u.s}"><div class="grid grid-cols-2 gap-2 mt-4"><button onclick="window.act='b'" class="swal2-confirm swal2-styled !bg-red-600">${u.b?'UNBAN':'BAN'}</button><button onclick="window.act='d'" class="swal2-confirm swal2-styled !bg-zinc-800">DELETE</button></div>`, preConfirm:()=>({bal:document.getElementById('eb').value, s:document.getElementById('es').value}) });
+            if(v) { if(window.act==='b') db_r.ref(`${K}/u/${uid}`).update({b:!u.b, br:'Violation', bt:'Forever'}); else if(window.act==='d') db_r.ref(`${K}/u/${uid}`).remove(); else db_r.ref(`${K}/u/${uid}`).update({bal:Number(v.bal), s:v.s}); window.act=null; }
         }
 
-        function setTab(t) {
-            if(me && me.banned && t !== 'support') return;
-            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-            document.getElementById(t).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-            if(document.getElementById('btn-'+t)) document.getElementById('btn-'+t).classList.add('active');
+        function addBtnField() {
+            const id = "b" + btnCount++;
+            const div = document.createElement('div'); div.id = id; div.className = "flex gap-2";
+            div.innerHTML = `<input class="input-box text-[9px] p-2" placeholder="Текст кнопки"><input class="input-box text-[9px] p-2" placeholder="Ответ/Ссылка"><button onclick="this.parentElement.remove()" class="text-red-500 text-[10px]">X</button>`;
+            document.getElementById('btn-builder').appendChild(div);
         }
 
-        function openDialog(id) { document.getElementById('chat-list-ui').classList.add('hidden'); document.getElementById('chat-room-ui').classList.remove('hidden'); }
-        function logout() { localStorage.removeItem('anon_uid'); location.reload(); }
-        
-        startSystem();
+        async function sendB(target) {
+            const txt = document.getElementById('an-txt').value, img = document.getElementById('an-img').files[0];
+            let url = null; if(img) { const ref = st_r.ref(`an/${Date.now()}`); await ref.put(img); url = await ref.getDownloadURL(); }
+            const btns = []; document.querySelectorAll('#btn-builder div').forEach(d => { const inp = d.querySelectorAll('input'); btns.push({t:inp[0].value, a:inp[1].value}); });
+            const msg = { text:txt, img:url, btns:btns, from:'system', time:Date.now() };
+            if(target === 'news') await db_r.ref(`${K}/c/news/${Date.now()}`).set(msg);
+            else Object.keys(db.u).forEach(uid => db_r.ref(`${K}/c/${uid}/${Date.now()}`).set(msg));
+            Swal.fire('OK', 'Broadcast sent', 'success');
+        }
+
+        function setTab(t) { if(me && me.b && t !== 'support') return; document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); document.getElementById(t).classList.add('active'); document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active')); if(document.getElementById('btn-'+t)) document.getElementById('btn-'+t).classList.add('active'); }
+        function oChat(id) { activeC = id; document.getElementById('cl').classList.add('hidden'); document.getElementById('cr').classList.remove('hidden'); document.getElementById('ir').style.display = (id==='news') ? 'none' : 'flex'; renderM(); }
+        async function sMsg() { const v = document.getElementById('mi').value; if(!v) return; const p = (activeC === 'system' || db.u[activeC]) ? (activeC === 'system' ? me.id : activeC) : activeC; await db_r.ref(`${K}/c/${p}/${Date.now()}`).set({text:v, from: (me.id === activeC || activeC === 'system' ? 'user' : 'system'), time:Date.now()}); document.getElementById('mi').value=""; }
+        function renderM() {
+            const p = (activeC === 'system' || db.u[activeC]) ? (activeC === 'system' ? me.id : activeC) : activeC; const ms = Object.values(db.c[p] || {}).sort((a,b)=>a.time-b.time);
+            document.getElementById('ms').innerHTML = ms.map(m => `
+                <div class="p-4 max-w-[90%] rounded-[24px] text-[11px] font-black italic shadow-lg ${m.from==='system'?'bg-blue-600 self-start text-white':'bg-white text-black self-end'}">
+                    ${m.img ? `<img src="${m.img}" class="w-full rounded-xl mb-2">` : ''}
+                    ${m.text}
+                    ${m.btns ? m.btns.map(b => `<button onclick="handleAct('${b.a}')" class="btn-act">${b.t}</button>`).join('') : ''}
+                </div>`).join('');
+            const b = document.getElementById('ms'); b.scrollTop = b.scrollHeight;
+        }
+
+        window.handleAct = (a) => {
+            if(a.startsWith('http')) window.open(a, '_blank');
+            else Swal.fire({ title: 'System', text: a, background: '#0a0a0a', color: '#fff' });
+        };
+        init();
     </script>
 </body>
 </html>
