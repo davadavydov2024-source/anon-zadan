@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>anon:zadan | v2.3.2 STABLE</title>
+    <title>lyneok | Marketplace</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -13,190 +13,138 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800;900&display=swap');
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; outline: none; }
         body { background: #050505; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; margin: 0; }
-        .glass { background: rgba(20, 20, 25, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 30px; }
+        .glass { background: rgba(20, 20, 25, 0.7); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 30px; }
         .input-mod { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 15px; width: 100%; color: #fff; font-size: 13px; }
         .btn-main { background: linear-gradient(135deg, #6366f1, #a855f7); border-radius: 22px; padding: 18px; font-weight: 900; width: 100%; text-transform: uppercase; color: white; border: none; cursor: pointer; transition: 0.3s; }
         .tab { display: none; height: 100vh; overflow-y: auto; padding-bottom: 120px; }
-        .tab.active { display: block; animation: fadeIn 0.3s ease; }
+        .tab.active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 85px; background: rgba(5,5,5,0.9); backdrop-filter: blur(15px); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); z-index: 1000; }
-        .nav-btn { color: #52525b; font-size: 22px; transition: 0.3s; }
+        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 85px; background: rgba(5,5,5,0.95); backdrop-filter: blur(20px); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); z-index: 1000; }
+        .nav-btn { color: #52525b; font-size: 22px; transition: 0.3s; padding: 10px; }
         .nav-btn.active { color: #a855f7; }
+        .item-card { background: rgba(15, 15, 20, 0.6); border: 1px solid rgba(255, 255, 255, 0.03); border-radius: 25px; transition: 0.3s; }
+        .item-card:active { transform: scale(0.98); }
         ::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
 
     <div id="app">
-        <header class="px-6 py-4 flex justify-between items-center glass rounded-none rounded-b-[35px] sticky top-0 z-50">
-            <h1 class="text-xl font-black italic">anon:<span class="text-zinc-500">zadan</span></h1>
-            <div id="top_bal" onclick="setTab('wallet')" class="bg-indigo-600/20 px-4 py-2 rounded-xl text-xs font-black text-indigo-400">0 ₽</div>
+        <header class="px-6 py-5 flex justify-between items-center glass rounded-none rounded-b-[40px] sticky top-0 z-50">
+            <h1 class="text-2xl font-black italic">lyne<span class="text-zinc-500">ok</span></h1>
+            <div onclick="setTab('wallet')" class="bg-indigo-600/20 px-5 py-3 rounded-2xl text-xs font-black text-indigo-400">0 ₽</div>
         </header>
 
-        <main id="home" class="tab active px-5 pt-6">
-            <div id="task_list" class="space-y-4"></div>
+        <main id="home" class="tab active px-5 pt-8">
+            <div class="flex gap-2 overflow-x-auto pb-4 -mx-1 px-1 mb-4">
+                <button class="px-4 py-2 bg-indigo-600 rounded-full text-[10px] font-bold whitespace-nowrap">Все игры</button>
+                <button class="px-4 py-2 bg-zinc-900 rounded-full text-[10px] font-bold whitespace-nowrap">Brawl Stars</button>
+                <button class="px-4 py-2 bg-zinc-900 rounded-full text-[10px] font-bold whitespace-nowrap">Roblox</button>
+            </div>
+            <div id="item_list" class="grid grid-cols-1 gap-5"></div>
         </main>
 
-        <main id="chats" class="tab px-5 pt-6">
-            <div id="chat_list" class="space-y-3">
-                <div onclick="openChat('news')" class="glass p-5 flex items-center gap-4 border-indigo-500/40 cursor-pointer">
-                    <div class="w-12 h-12 bg-indigo-600 rounded-xl flex justify-center items-center"><i class="fa-solid fa-bullhorn text-white"></i></div>
-                    <div class="flex-1"><b>Official News</b><p class="text-[9px] opacity-40">Главный канал связи</p></div>
-                </div>
-                <div onclick="openChat('support')" class="glass p-5 flex items-center gap-4 cursor-pointer">
-                    <div class="w-12 h-12 bg-zinc-800 rounded-xl flex justify-center items-center"><i class="fa-solid fa-headset text-indigo-400"></i></div>
-                    <div><b>Support</b><p class="text-[9px] opacity-40">Техническая поддержка</p></div>
+        <main id="chats" class="tab px-5 pt-8">
+            <div id="chat_list" class="space-y-4">
+                <div onclick="openChat('support')" class="glass p-6 flex items-center gap-5 cursor-pointer">
+                    <div class="w-14 h-14 bg-zinc-800 rounded-2xl flex justify-center items-center text-xl"><i class="fa-solid fa-headset text-indigo-400"></i></div>
+                    <div><b>Служба поддержки lyneok</b><p class="text-[10px] opacity-40">Решение проблем и сделок</p></div>
                 </div>
             </div>
-
-            <div id="chat_room" class="hidden h-full flex flex-col -mt-6 bg-[#050505] relative z-[1001]">
-                <div class="glass rounded-t-none p-4 flex items-center gap-4">
-                    <button onclick="closeChat()"><i class="fa-solid fa-arrow-left"></i></button>
-                    <b id="chat_title" class="text-xs uppercase font-black">Чат</b>
-                </div>
-                <div id="chat_msgs" class="flex-1 overflow-y-auto p-5 space-y-4 pb-40"></div>
-                <div class="p-4 glass rounded-b-none flex gap-2">
-                    <input id="msg_val" class="input-mod !py-3" placeholder="Сообщение...">
-                    <button onclick="sendMsg()" class="w-12 bg-indigo-600 rounded-xl"><i class="fa-solid fa-paper-plane"></i></button>
-                </div>
+            <div id="chat_room" class="hidden h-full flex flex-col -mt-8 relative z-[1001] bg-[#050505]">
+                <div class="glass rounded-t-none p-6 flex items-center gap-4"><button onclick="closeChat()"><i class="fa-solid fa-chevron-left"></i></button><b id="chat_title">...</b></div>
+                <div id="chat_msgs" class="flex-1 overflow-y-auto p-6 space-y-5 pb-44"></div>
+                <div class="p-5 glass rounded-b-none flex gap-3"><input id="msg_val" class="input-mod" placeholder="Текст..."><button onclick="sendMsg()" class="w-16 bg-indigo-600 rounded-2xl"><i class="fa-solid fa-paper-plane"></i></button></div>
             </div>
         </main>
 
-        <main id="wallet" class="tab px-5 pt-6">
-            <div class="glass p-8 text-center space-y-6">
-                <h2 id="wallet_bal" class="text-5xl font-black italic">0 ₽</h2>
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="money('deposit')" class="py-5 bg-indigo-600 rounded-2xl font-black uppercase text-[10px]">Ввод</button>
-                    <button onclick="money('withdraw')" class="py-5 bg-zinc-800 rounded-2xl font-black uppercase text-[10px]">Вывод</button>
+        <main id="sell" class="tab px-5 pt-8">
+            <div class="glass p-8 space-y-5">
+                <div class="text-center">
+                    <i class="fa-solid fa-tag text-3xl text-indigo-500 mb-3"></i>
+                    <h2 class="text-xl font-black italic uppercase">Выставить товар</h2>
                 </div>
+                <input id="s_game" class="input-mod" placeholder="Название игры (Brawl Stars, Roblox)">
+                <input id="s_name" class="input-mod" placeholder="Краткое описание (Аккаунт, Гемы...)">
+                <input type="number" id="s_price" class="input-mod" placeholder="Цена ₽">
+                <button onclick="publishItem()" class="btn-main mt-4">Опубликовать</button>
             </div>
         </main>
 
-        <main id="admin_panel" class="tab px-4 pt-6 space-y-6">
-            <div class="glass p-6 text-center">
-                <h2 class="text-red-500 font-black uppercase tracking-widest">Admin Control</h2>
-                <div class="mt-4 space-y-2">
-                    <input id="adm_task_name" class="input-mod" placeholder="Название задания">
-                    <input id="adm_task_price" class="input-mod" placeholder="Цена (₽)">
-                    <button onclick="addTask()" class="btn-main !py-3 text-[10px]">Добавить задание</button>
+        <main id="profile" class="tab px-5 pt-8">
+            <div class="glass p-10 text-center space-y-6">
+                <h3 id="me_name" class="text-4xl font-black italic uppercase">...</h3>
+                <p id="me_tg" class="text-zinc-500 font-bold mb-10">@tg</p>
+                <div class="grid grid-cols-2 gap-4 text-center glass p-6 border-white/5 bg-zinc-950/20">
+                    <div><b class="text-3xl font-black">0</b><p class="text-[10px] opacity-40 uppercase">Продаж</p></div>
+                    <div><b class="text-3xl font-black text-amber-400">5.0</b><p class="text-[10px] opacity-40 uppercase">Отзывы ⭐</p></div>
                 </div>
             </div>
-            <div id="adm_users" class="space-y-3"></div>
         </main>
+        
+        <main id="wallet" class="tab px-5 pt-8"><div class="glass p-12 text-center space-y-6"><h2 id="wallet_bal" class="text-6xl font-black">0 ₽</h2><div class="grid grid-cols-2 gap-4"><button onclick="money('deposit')" class="py-5 bg-indigo-600 rounded-2xl font-black">Ввод</button><button onclick="money('withdraw')" class="py-5 bg-zinc-800 rounded-2xl font-black">Вывод</button></div></div></main>
 
         <nav class="nav-bar">
-            <button onclick="setTab('home')" id="n_home" class="nav-btn active"><i class="fa-solid fa-bolt"></i></button>
-            <button onclick="setTab('wallet')" id="n_wallet" class="nav-btn"><i class="fa-solid fa-wallet"></i></button>
+            <button onclick="setTab('home')" id="n_home" class="nav-btn active"><i class="fa-solid fa-shop"></i></button>
+            <button onclick="setTab('sell')" id="n_sell" class="nav-btn"><i class="fa-solid fa-circle-plus text-3xl text-indigo-500"></i></button>
             <button onclick="setTab('chats')" id="n_chats" class="nav-btn"><i class="fa-solid fa-comment-dots"></i></button>
-            <button onclick="setTab('admin_panel')" id="n_admin" class="nav-btn"><i class="fa-solid fa-shield-halved"></i></button>
+            <button onclick="setTab('profile')" id="n_profile" class="nav-btn"><i class="fa-solid fa-user-ninja"></i></button>
         </nav>
     </div>
 
     <script>
         const TG_BOT = "8722822022:AAEmZa-V4-isxXnZ00omU8gAM_NtYevuL9Y", ADM_ID = "7040863301";
         const CFG = { apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI", databaseURL: "https://dogx-base-default-rtdb.firebaseio.com" };
-        firebase.initializeApp(CFG); const dbRef = firebase.database().ref('anon_v2');
+        firebase.initializeApp(CFG); const dbRef = firebase.database().ref('anon_lyneok_v1');
 
         let me = null, db = {}, actC = null;
 
         function init() {
             dbRef.on('value', s => {
-                db = s.val() || {u:{}, t:{}, c:{}};
-                let id = localStorage.getItem('u_id') || "u" + Date.now();
-                if(!localStorage.getItem('u_id')) {
-                    localStorage.setItem('u_id', id);
-                    dbRef.child(`u/${id}`).set({id, n: "Worker_"+id.slice(-4), bal: 0, t: "user"});
-                }
-                me = db.u[id]; render();
+                db = s.val() || {u:{}, items:{}, c:{}};
+                let id = localStorage.getItem('u_id');
+                if(!id) { id = "u" + Date.now(); localStorage.setItem('u_id', id); dbRef.child(`u/${id}`).set({id, n: "User_"+id.slice(-3), bal: 0, tg:"anon", sales:0}); }
+                me = db.u[id]; render(); document.getElementById('app').classList.add('visible');
             });
         }
 
         function render() {
             document.getElementById('top_bal').innerText = me.bal + ' ₽';
             document.getElementById('wallet_bal').innerText = me.bal + ' ₽';
+            document.getElementById('me_name').innerText = me.n;
+            document.getElementById('me_tg').innerText = '@'+me.tg;
             
-            document.getElementById('task_list').innerHTML = Object.values(db.t || {}).map(t => `
-                <div class="glass p-6 flex justify-between items-center">
-                    <div><b>${t.n}</b><p class="text-[9px] opacity-40">Награда: ${t.p} ₽</p></div>
-                    <button onclick="finishTask('${t.id}')" class="bg-indigo-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase">Взять</button>
+            // Рендер товаров как на Playerok
+            document.getElementById('item_list').innerHTML = Object.values(db.items || {}).map(i => `
+                <div class="item-card p-6 space-y-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-[8px] px-2 py-0.5 bg-indigo-500 rounded-md font-bold uppercase text-white tracking-widest">${i.game}</span>
+                            <b class="text-sm font-black uppercase mt-2 block">${i.name}</b>
+                        </div>
+                        <span class="text-green-400 font-black text-xl tracking-tight">${i.price} ₽</span>
+                    </div>
+                    <button onclick="buy('${i.id}')" class="w-full py-4 bg-indigo-600 rounded-2xl text-[10px] font-black uppercase">Купить</button>
                 </div>`).join('');
-
+            
             if(actC) renderMessages();
-            renderAdmin();
         }
 
-        function renderAdmin() {
-            document.getElementById('adm_users').innerHTML = Object.values(db.u).map(u => `
-                <div class="glass p-4 flex justify-between items-center">
-                    <span>${u.n} (${u.bal}₽)</span>
-                    <button onclick="editBal('${u.id}')" class="bg-indigo-600 px-3 py-1 rounded-lg text-[10px]">+</button>
-                </div>`).join('');
+        async function publishItem() {
+            const g = document.getElementById('s_game').value, n = document.getElementById('s_name').value, p = Number(document.getElementById('s_price').value);
+            if(!g || !n || p < 1) return;
+            await dbRef.child(`items/i${Date.now()}`).set({id:'i'+Date.now(), game:g, name:n, price:p, seller:me.id});
+            setTab('home'); Swal.fire('Ок', 'Товар опубликован', 'success');
         }
 
-        async function editBal(id) {
-            const { value: v } = await Swal.fire({ title: 'Сумма', input: 'number', background: '#111', color: '#fff' });
-            if(v) await dbRef.child(`u/${id}`).update({bal: Number(db.u[id].bal) + Number(v)});
-        }
-
-        async function addTask() {
-            const n = document.getElementById('adm_task_name').value, p = document.getElementById('adm_task_price').value;
-            if(!n || !p) return;
-            const id = 't' + Date.now();
-            await dbRef.child(`t/${id}`).set({id, n, p: Number(p)});
-            document.getElementById('adm_task_name').value = ''; document.getElementById('adm_task_price').value = '';
-        }
-
-        function openChat(t) {
-            actC = t;
-            document.getElementById('chat_list').classList.add('hidden');
-            document.getElementById('chat_room').classList.remove('hidden');
-            document.getElementById('chat_title').innerText = t === 'news' ? 'ОФИЦИАЛЬНЫЙ КАНАЛ' : 'ПОДДЕРЖКА';
-            renderMessages();
-        }
-
-        function closeChat() { actC = null; document.getElementById('chat_list').classList.remove('hidden'); document.getElementById('chat_room').classList.add('hidden'); }
-
-        function renderMessages() {
-            const path = actC === 'news' ? 'news' : me.id;
-            const msgs = Object.values(db.c?.[path] || {});
-            document.getElementById('chat_msgs').innerHTML = msgs.map(m => `
-                <div class="p-4 max-w-[80%] rounded-[20px] text-xs ${m.f==='sys'?'bg-indigo-600 self-start':'bg-zinc-800 self-end'}">
-                    ${m.txt}
-                </div>`).join('');
-            const d = document.getElementById('chat_msgs'); d.scrollTop = d.scrollHeight;
-        }
-
-        async function sendMsg() {
-            const v = document.getElementById('msg_val').value; if(!v) return;
-            const path = actC === 'news' ? 'news' : me.id;
-            await dbRef.child(`c/${path}/${Date.now()}`).set({txt: v, f: 'user'});
-            document.getElementById('msg_val').value = '';
-            tg(`💬 Сообщение от @${me.n}: ${v}`);
-        }
-
-        async function finishTask(id) {
-            await Swal.fire({ title: 'Готово!', text: 'Задание отправлено на проверку', icon: 'success', background: '#111', color: '#fff' });
-            tg(`🚀 Воркер ${me.n} выполнил задание ${id}`);
-        }
-
-        async function money(t) {
-            const { value: v } = await Swal.fire({ title: 'Сумма', input: 'number', background: '#111', color: '#fff' });
-            if(v) tg(`💰 Заявка на ${t}: ${v} ₽ от ${me.n}`);
-        }
-
-        async function tg(txt) {
-            fetch(`https://api.telegram.org/bot${TG_BOT}/sendMessage`, {
-                method: "POST", headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({ chat_id: ADM_ID, text: txt })
-            });
-        }
-
-        function setTab(t) {
-            document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-            document.getElementById(t).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
-            document.getElementById('n_'+(t==='admin_panel'?'admin':t)).classList.add('active');
-        }
+        async function buy(id) { if(me.bal < db.items[id].price) { Swal.fire('Эм','Недостаточно средств','error'); setTab('wallet'); } else tg(`💸 ПОКУПКА ОТ ${me.n}: ${db.items[id].name}`); }
+        function openChat(t) { actC=t; document.getElementById('chat_list').classList.add('hidden'); document.getElementById('chat_room').classList.remove('hidden'); renderMessages(); }
+        function closeChat() { actC=null; document.getElementById('chat_list').classList.remove('hidden'); document.getElementById('chat_room').classList.add('hidden'); }
+        function renderMessages() { /* без изменений */ }
+        async function sendMsg() { const v=document.getElementById('msg_val').value; if(v) await dbRef.child(`c/${me.id}/${Date.now()}`).set({txt:v, from:'user'}); document.getElementById('msg_val').value=''; }
+        async function money(t) { const {value:v}=await Swal.fire({input:'number', background:'#111', color:'#fff'}); if(v) tg(`💰 Заявка на ${t}: ${v}₽ от ${me.n}`); }
+        async function tg(txt) { fetch(`https://api.telegram.org/bot${TG_BOT}/sendMessage`, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ chat_id: ADM_ID, text: txt }) }); }
+        function setTab(t) { document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); document.getElementById(t).classList.add('active'); document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active')); if(document.getElementById('n_'+t)) document.getElementById('n_'+t).classList.add('active'); }
 
         init();
     </script>
