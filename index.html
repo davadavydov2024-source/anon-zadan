@@ -3,50 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>LYNEOK V44 — TIME LORD</title>
+    <title>LYNEOK V41 — EMAIL CONNECTED</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap');
         :root { --bg: #050506; --card: #111113; --blue: #3b82f6; --red: #ef4444; }
         body { background: var(--bg); color: #fff; font-family: 'Manrope', sans-serif; overflow: hidden; height: 100vh; margin: 0; }
-        .tab-content { display: none; height: 100%; overflow-y: auto; padding-bottom: 160px; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 85px; background: rgba(10,10,12,0.9); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.05); display: flex; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-btn { flex: 1; color: #52525b; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        .tab-content { display: none; height: 100%; overflow-y: auto; padding-bottom: 140px; }
+        .tab-content.active { display: block; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 85px; background: rgba(10,10,12,0.95); backdrop-filter: blur(25px); border-top: 1px solid rgba(255,255,255,0.05); display: flex; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-btn { flex: 1; color: #52525b; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 9px; font-weight: 800; text-transform: uppercase; }
         .nav-btn.active { color: var(--blue); }
-        .tile { background: var(--card); border-radius: 24px; border: 1px solid rgba(255,255,255,0.05); }
-        input, textarea, select { background: #18181b; border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; padding: 16px; color: white; width: 100%; outline: none; }
+        .tile { background: var(--card); border-radius: 24px; border: 1px solid rgba(255,255,255,0.04); }
+        input, textarea, select { background: #18181b; border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 16px; color: white; width: 100%; outline: none; font-size: 14px; }
         .btn-main { background: var(--blue); padding: 18px; border-radius: 22px; font-weight: 800; text-transform: uppercase; width: 100%; }
+        .chat-msg { max-width: 85%; padding: 12px 16px; border-radius: 20px; margin-bottom: 8px; font-size: 13px; position: relative; }
+        .msg-in { background: #1c1c1f; align-self: flex-start; border-bottom-left-radius: 4px; }
+        .msg-out { background: var(--blue); align-self: flex-end; border-bottom-right-radius: 4px; }
+        .msg-admin { background: var(--red); align-self: center; border-radius: 12px; text-align: center; font-weight: 800; width: 90%; }
         ::-webkit-scrollbar { width: 0; }
-        .chat-msg { max-width: 85%; padding: 12px 16px; border-radius: 20px; margin-bottom: 8px; font-size: 13px; }
-        .msg-in { background: #1c1c1f; align-self: flex-start; }
-        .msg-out { background: var(--blue); align-self: flex-end; }
     </style>
 </head>
 <body>
 
-    <div id="loader" class="fixed inset-0 bg-black z-[9999] flex items-center justify-center font-black text-blue-500 uppercase italic">V44_INITIALIZING...</div>
+    <div id="loader" class="fixed inset-0 bg-black z-[9999] flex items-center justify-center font-black text-blue-500 uppercase italic">V41_EMAIL_ACTIVE...</div>
 
     <div id="auth_screen" class="hidden h-screen flex flex-col items-center justify-center px-10 text-center">
-        <h1 class="text-5xl font-black italic mb-10 uppercase tracking-tighter">LYNE<span class="text-blue-500">OK</span></h1>
-        <div class="w-full max-w-sm space-y-4">
+        <h1 class="text-4xl font-black italic mb-8 uppercase text-white">LYNE<span class="text-blue-500">OK</span></h1>
+        <div class="w-full max-w-sm space-y-3">
             <input id="reg_n" placeholder="ЛОГИН">
             <input id="reg_p" type="password" placeholder="ПАРОЛЬ">
-            <button onclick="handleAuth()" class="btn-main italic">ВОЙТИ</button>
+            <button onclick="handleAuth()" class="btn-main uppercase italic font-black">Вход</button>
         </div>
     </div>
 
     <div id="app" class="hidden h-screen flex flex-col">
-        <header class="px-6 py-6 flex justify-between items-center bg-zinc-950 border-b border-white/5">
-            <span class="font-black italic text-2xl tracking-tighter">LYNEOK</span>
-            <div id="h_bal" class="bg-blue-500/10 text-blue-500 px-5 py-2 rounded-2xl font-black text-sm italic">0 ₽</div>
+        <header class="px-6 py-5 flex justify-between items-center bg-zinc-950 border-b border-white/5">
+            <span class="font-black italic text-xl tracking-tighter uppercase">LYNEOK</span>
+            <div id="h_bal" class="bg-blue-500/10 text-blue-500 px-4 py-2 rounded-2xl font-black text-sm italic">0 ₽</div>
         </header>
 
         <main id="tab_market" class="tab-content active px-5 pt-6">
@@ -58,69 +59,112 @@
         </main>
 
         <main id="tab_sell" class="tab-content px-5 pt-6">
-            <div class="space-y-3 pb-24">
+            <h2 class="text-xl font-black mb-6 italic uppercase text-blue-500">ПРОДАЖА</h2>
+            <div class="space-y-3 pb-20">
                 <input type="file" id="i_img" class="hidden" onchange="compImg(this, 'l_img')">
-                <label for="i_img" id="l_img" class="w-full h-40 bg-zinc-900 border-2 border-dashed border-white/5 rounded-3xl flex items-center justify-center font-black text-[10px] opacity-40 uppercase">ФОТО ТОВАРА</label>
+                <label for="i_img" id="l_img" class="w-full h-32 bg-zinc-900 border-2 border-dashed border-white/5 rounded-3xl flex items-center justify-center font-black text-[10px] opacity-40 uppercase">ДОБАВИТЬ ФОТО</label>
                 <select id="i_cat"></select>
                 <input id="i_title" placeholder="НАЗВАНИЕ">
-                <textarea id="i_desc" rows="3" placeholder="ДАННЫЕ ТОВАРА"></textarea>
-                <input id="i_price" type="number" placeholder="ЦЕНА В ₽">
-                <button onclick="postItem()" class="btn-main italic">ОПУБЛИКОВАТЬ</button>
+                <textarea id="i_desc" placeholder="ДАННЫЕ ТОВАРА"></textarea>
+                <input id="i_price" type="number" placeholder="ЦЕНА (₽)">
+                <button onclick="postItem()" class="btn-main uppercase italic font-black">ВЫСТАВИТЬ</button>
             </div>
         </main>
 
         <main id="tab_chats" class="tab-content px-5 pt-6">
-            <button onclick="openChatRoom('support_' + me.id)" class="w-full tile p-6 mb-5 border-blue-500/20 text-blue-500 font-black text-xs uppercase italic flex justify-between">
-                <span>ПОДДЕРЖКА</span> <i class="fa-solid fa-headset"></i>
-            </button>
-            <div id="chats_list" class="space-y-3"></div>
+            <button onclick="openChatRoom('support_' + me.id)" class="w-full tile p-5 mb-4 border-blue-500/20 text-blue-500 font-black text-[10px] uppercase italic">ПОДДЕРЖКА</button>
+            <div id="chats_list" class="space-y-2"></div>
         </main>
 
         <main id="tab_profile" class="tab-content px-5 pt-6">
-            <div class="tile p-6 mb-4 flex items-center gap-5">
-                <div class="w-16 h-16 bg-blue-600 rounded-3xl flex items-center justify-center font-black text-2xl" id="p_ava">?</div>
-                <div><div class="flex items-center gap-2"><b id="p_name" class="text-xl uppercase italic">...</b><i id="p_v_icon" class="fa-solid fa-circle-check text-blue-500 hidden"></i></div><p id="p_id" class="text-[10px] opacity-30 font-black uppercase">UID: 000000</p></div>
+            <div class="tile p-6 mb-4 flex items-center gap-4">
+                <div class="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center font-black text-xl" id="p_ava">?</div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <b id="p_name" class="text-lg uppercase italic">...</b>
+                        <i id="p_v_icon" class="fa-solid fa-circle-check text-blue-500 hidden"></i>
+                    </div>
+                    <p id="p_id" class="text-[9px] opacity-30 font-bold uppercase">UID: 000000</p>
+                </div>
             </div>
-            <button id="adm_btn" onclick="switchTab('admin')" class="hidden tile w-full p-5 font-black text-[10px] text-red-500 uppercase italic mb-4">АДМИН-ПАНЕЛЬ</button>
-            <button onclick="logout()" class="tile w-full p-5 opacity-30 font-black text-[10px] uppercase italic">ВЫХОД</button>
+            
+            <div class="tile p-5 mb-4 flex justify-between items-center">
+                <input id="u_email" placeholder="ПОЧТА" class="!p-0 bg-transparent border-none text-[10px] uppercase font-black w-full">
+                <button onclick="saveEmail()" id="email_btn" class="bg-blue-600/10 text-blue-500 px-4 py-2 rounded-xl font-black text-[8px] uppercase ml-2">ОК</button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 mb-4">
+                <button onclick="moneyReq('ПОПОЛНЕНИЕ')" class="tile p-5 font-black text-[10px] uppercase italic">ПОПОЛНИТЬ</button>
+                <button onclick="moneyReq('ВЫВОД')" class="tile p-5 font-black text-[10px] uppercase italic">ВЫВЕСТИ</button>
+            </div>
+            
+            <button onclick="reqV()" class="tile w-full p-5 font-black text-xs text-blue-500 uppercase italic mb-2">ВЕРИФИКАЦИЯ</button>
+            <button id="adm_btn" onclick="switchTab('admin')" class="hidden tile w-full p-5 font-black text-xs text-red-500 uppercase italic mb-2">АДМИН-ПАНЕЛЬ</button>
+            <button onclick="logout()" class="tile w-full p-5 opacity-30 font-black text-xs uppercase italic">ВЫХОД</button>
         </main>
 
         <main id="tab_admin" class="tab-content px-5 pt-6">
-            <h1 class="text-2xl font-black italic text-red-500 uppercase mb-6 italic">SUPREME ADMIN</h1>
-            <div class="space-y-6 pb-40">
-                <div class="tile p-5">
-                    <p class="text-[9px] font-black text-blue-500 mb-3 uppercase italic">НОВАЯ КАТЕГОРИЯ</p>
-                    <input id="cat_name" placeholder="ИМЯ ИГРЫ" class="mb-2 !p-3">
-                    <input type="file" id="cat_img" class="hidden" onchange="compImg(this, 'l_cat')">
-                    <label for="cat_img" id="l_cat" class="w-full h-10 bg-zinc-800 rounded-xl flex items-center justify-center text-[8px] font-black uppercase mb-2">ОБЛОЖКА</label>
-                    <button onclick="saveCat()" class="w-full bg-blue-600 py-3 rounded-xl font-black text-[10px] uppercase">СОЗДАТЬ</button>
-                </div>
-                <div><p class="text-[10px] font-black opacity-30 uppercase mb-3 italic">ЮЗЕРЫ (БАН/БАЛАНС/ВЕРИФ):</p><div id="adm_users" class="space-y-2"></div></div>
-                <div><p class="text-[10px] font-black opacity-30 uppercase mb-3 italic">ПРОВЕРКА ЛОТОВ:</p><div id="adm_mod" class="space-y-2"></div></div>
-                <div><p class="text-[10px] font-black opacity-30 uppercase mb-3 italic">ЧАТЫ:</p><div id="adm_chats" class="space-y-2"></div></div>
+            <div class="space-y-6 pb-32">
+                <div id="adm_mod"></div>
+                <div id="adm_v"></div>
+                <div id="adm_users"></div>
+                <div id="adm_chats"></div>
             </div>
         </main>
 
         <nav class="nav-bar">
-            <div onclick="switchTab('market')" id="n_market" class="nav-btn active"><i class="fa-solid fa-store text-xl"></i><span>МАРКЕТ</span></div>
+            <div onclick="switchTab('market')" id="n_market" class="nav-btn active"><i class="fa-solid fa-store text-xl"></i><span>РЫНОК</span></div>
             <div onclick="switchTab('sell')" id="n_sell" class="nav-btn"><i class="fa-solid fa-circle-plus text-xl"></i><span>ПРОДАТЬ</span></div>
             <div onclick="switchTab('chats')" id="n_chats" class="nav-btn"><i class="fa-solid fa-comments text-xl"></i><span>ЧАТЫ</span></div>
-            <div onclick="switchTab('profile')" id="n_profile" class="nav-btn"><i class="fa-solid fa-user-ninja text-xl"></i><span>ПРОФИЛЬ</span></div>
+            <div onclick="switchTab('profile')" id="n_profile" class="nav-btn"><i class="fa-solid fa-ghost text-xl"></i><span>ПРОФИЛЬ</span></div>
         </nav>
     </div>
 
     <div id="chat_modal" class="fixed inset-0 bg-black z-[2000] hidden flex flex-col">
-        <header class="p-6 flex justify-between items-center bg-zinc-950 border-b border-white/5"><b id="chat_title" class="text-xs uppercase italic text-blue-500">CHAT</b><button onclick="closeChat()"><i class="fa-solid fa-xmark text-2xl"></i></button></header>
-        <div id="chat_body" class="flex-1 overflow-y-auto p-6 flex flex-col gap-3"></div>
-        <div class="p-5 bg-zinc-950 flex gap-3 pb-12"><input id="chat_input" placeholder="..."><button onclick="sendTextMsg()" class="bg-blue-600 px-8 rounded-2xl font-black text-xs uppercase italic">SEND</button></div>
+        <header class="p-6 flex justify-between items-center bg-zinc-950 border-b border-white/5">
+            <b id="chat_title" class="text-[10px] uppercase italic text-blue-500">ЧАТ</b>
+            <button onclick="closeChat()"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </header>
+        <div id="adm_chat_tools" class="hidden bg-zinc-900 p-3 flex gap-2 border-b border-white/5">
+            <button onclick="adminResolve('complete')" class="bg-green-600 px-3 py-2 rounded-xl text-[8px] font-black uppercase">ЗАВЕРШИТЬ</button>
+            <button onclick="adminResolve('cancel')" class="bg-red-600 px-3 py-2 rounded-xl text-[8px] font-black uppercase">ОТМЕНИТЬ</button>
+            <select id="msg_as" class="!p-1 bg-zinc-800 text-[8px] font-black"><option value="me">Я</option><option value="admin">АДМИН</option><option value="buyer">КУПЕЦ</option><option value="seller">ПРОДАВЕЦ</option></select>
+        </div>
+        <div id="chat_body" class="flex-1 overflow-y-auto p-5 flex flex-col gap-2"></div>
+        <div class="p-4 bg-zinc-950 flex gap-2 pb-10">
+            <input id="chat_input" placeholder="...">
+            <button onclick="sendTextMsg()" class="bg-blue-600 px-6 rounded-2xl font-black text-[9px] uppercase">SEND</button>
+        </div>
     </div>
 
     <script>
+        // Инициализация EmailJS твоими данными
+        (function(){ emailjs.init("9M8GxYWeMi6hJP6Rg"); })();
+
         const CFG = { apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI", databaseURL: "https://dogx-base-default-rtdb.firebaseio.com" };
         firebase.initializeApp(CFG);
-        const db = firebase.database().ref('lyne_v44_time');
+        const db = firebase.database().ref('lyne_v41_final');
+
+        const TG_TOKEN = "8641257792:AAEsxnQWEIeozMt_gnSwJdVgSFQlOc-hnuc";
+        const TG_ADMIN_ID = "7040863301";
 
         let me = null, data = {}, curChat = null, b64 = "", b64Cat = "";
+
+        // ФУНКЦИЯ ОТПРАВКИ EMAIL
+        async function sendMail(to, subject, message) {
+            if(!to) return;
+            const params = {
+                to_email: to,
+                user_name: me.n,
+                subject: subject,
+                message: message
+            };
+            emailjs.send("service_ndr83sj", "template_q98pr7g", params)
+                .then(() => console.log('Email Sent!'))
+                .catch(err => console.error('Email Fail:', err));
+        }
+
+        async function sendTg(txt) { fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_ADMIN_ID}&text=${encodeURIComponent(txt)}&parse_mode=HTML`); }
 
         async function init() {
             db.on('value', snap => {
@@ -130,23 +174,11 @@
                 else {
                     me = data.u[sid];
                     if(!me) return logout();
-                    
-                    // ПРОВЕРКА БАНА ПО ВРЕМЕНИ
-                    const now = Date.now();
-                    if(me.banUntil && now < me.banUntil) {
-                        const mins = Math.ceil((me.banUntil - now) / 60000);
-                        document.body.innerHTML = `<div style="height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#000;color:red;font-weight:900;text-align:center;padding:40px;font-family:sans-serif;">
-                            <h1 style="font-size:40px;margin-bottom:20px;">ACCESS DENIED</h1>
-                            <p style="text-transform:uppercase;">Ты заблокирован администратором.</p>
-                            <p style="font-size:12px;opacity:0.5;margin-top:10px;">Осталось: ${mins} мин.</p>
-                            <button onclick="location.reload()" style="margin-top:30px;background:red;color:white;border:none;padding:15px 30px;border-radius:10px;font-weight:900;">ОБНОВИТЬ</button>
-                        </div>`;
-                        return;
-                    }
-
+                    if(me.banned) { document.body.innerHTML = "<h1 style='color:red;padding:20px'>BANNED</h1>"; return; }
                     document.getElementById('auth_screen').classList.add('hidden');
                     document.getElementById('app').classList.remove('hidden');
                     render();
+                    if(curChat) renderChat();
                 }
                 document.getElementById('loader').classList.add('hidden');
             });
@@ -159,9 +191,10 @@
             let uid = Object.keys(data.u || {}).find(k => data.u[k].n.toLowerCase() === n.toLowerCase());
             if(!uid) {
                 uid = 'u' + Date.now().toString().slice(-6);
-                await db.child(`u/${uid}`).set({ id: uid, n, p, bal: 0, verified: false, banUntil: 0 });
-            } else if(data.u[uid].p !== p) return Swal.fire('!', 'ПАРОЛЬ', 'error');
-            localStorage.setItem('lyne_sid', uid); location.reload();
+                await db.child(`u/${uid}`).set({ id: uid, n, p, bal: 0, verified: false, email: "" });
+            } else if(data.u[uid].p !== p) return Swal.fire('!', 'Пароль!', 'error');
+            localStorage.setItem('lyne_sid', uid);
+            location.reload();
         }
 
         function render() {
@@ -169,99 +202,131 @@
             document.getElementById('p_name').innerText = me.n;
             document.getElementById('p_id').innerText = 'UID: ' + me.id;
             document.getElementById('p_ava').innerText = me.n[0].toUpperCase();
+            
+            if(me.email) { document.getElementById('u_email').value = me.email; document.getElementById('email_btn').innerText = "ОТВЯЗАТЬ"; }
             if(me.verified) document.getElementById('p_v_icon').classList.remove('hidden');
             if(me.n === 'owner') { document.getElementById('adm_btn').classList.remove('hidden'); renderAdmin(); }
 
             const cats = Object.values(data.cat || {});
-            document.getElementById('cat_view').innerHTML = cats.map(c => `<div onclick="openCat('${c.name}')" class="tile p-6 text-center"><img src="${c.img}" class="w-14 h-14 mx-auto mb-2 rounded-2xl object-cover"><p class="text-[10px] font-black uppercase italic">${c.name}</p></div>`).join('');
-            document.getElementById('i_cat').innerHTML = '<option disabled selected>ВЫБЕРИ ИГРУ</option>' + cats.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+            document.getElementById('cat_view').innerHTML = cats.map(c => `
+                <div onclick="openCat('${c.name}')" class="tile p-6 text-center">
+                    <img src="${c.img}" class="w-12 h-12 mx-auto mb-2 rounded-xl object-cover">
+                    <p class="text-[9px] font-black uppercase opacity-60 italic">${c.name}</p>
+                </div>`).join('');
+            document.getElementById('i_cat').innerHTML = '<option disabled selected>КАТЕГОРИЯ</option>' + cats.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
 
             const myD = Object.values(data.d || {}).filter(d => d.bid === me.id || d.sid === me.id).reverse();
-            document.getElementById('chats_list').innerHTML = myD.map(d => `<div onclick="openChatRoom('${d.id}')" class="tile p-5 flex justify-between items-center"><b class="text-[10px] uppercase italic">${d.title}</b><i class="fa-solid fa-chevron-right text-[10px] opacity-20"></i></div>`).join('');
+            document.getElementById('chats_list').innerHTML = myD.map(d => `
+                <div onclick="openChatRoom('${d.id}')" class="tile p-5 flex justify-between items-center">
+                    <div><b class="text-[10px] uppercase italic tracking-wider">${d.title}</b><p class="text-[7px] opacity-40 mt-1 uppercase">${d.status}</p></div>
+                    <i class="fa-solid fa-chevron-right text-[10px] opacity-20"></i>
+                </div>`).join('');
         }
 
         function renderAdmin() {
-            const uArr = Object.values(data.u || {});
-            document.getElementById('adm_users').innerHTML = uArr.map(u => {
-                const isBanned = u.banUntil && Date.now() < u.banUntil;
-                const timeLeft = isBanned ? Math.ceil((u.banUntil - Date.now()) / 60000) : 0;
-                
-                return `<div class="tile p-4 flex justify-between items-center bg-zinc-900/50">
-                    <div class="text-[9px] font-black uppercase">
-                        ${u.n} | <span class="text-blue-500">${u.bal}₽</span>
-                        ${isBanned ? `<br><span class="text-red-500 text-[7px]">BAN: ${timeLeft} MIN</span>` : ''}
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="db.child('u/${u.id}/verified').set(${!u.verified})" class="bg-blue-600/10 text-blue-500 px-2 py-1 rounded-lg text-[7px] font-black">ВЕР</button>
-                        <button onclick="const s=prompt('БАЛАНС:'); if(s) db.child('u/${u.id}/bal').set(Number(s))" class="bg-zinc-800 px-2 py-1 rounded-lg text-[7px] font-black">+/-</button>
-                        ${isBanned 
-                            ? `<button onclick="db.child('u/${u.id}/banUntil').set(0)" class="bg-green-600 px-2 py-1 rounded-lg text-[7px] font-black text-white">UNBAN</button>`
-                            : `<button onclick="const m=prompt('МИНУТ БАНА:'); if(m) db.child('u/${u.id}/banUntil').set(Date.now() + (m * 60000))" class="bg-red-600 px-2 py-1 rounded-lg text-[7px] font-black text-white">BAN</button>`
-                        }
-                    </div>
-                </div>`;
-            }).join('');
-
             const pnd = Object.values(data.i || {}).filter(i => i.status === 'pending');
-            document.getElementById('adm_mod').innerHTML = pnd.map(i => `<div class="tile p-4 flex justify-between items-center"><span>${i.title}</span><button onclick="db.child('i/${i.id}/status').set('active')" class="text-blue-500 font-black text-[10px]">OK</button></div>`).join('') || '<p class="opacity-20 text-[8px]">ПУСТО</p>';
+            document.getElementById('adm_mod').innerHTML = pnd.map(i => `<div class="tile p-4 flex justify-between"><span>${i.title}</span><button onclick="db.child('i/${i.id}/status').set('active')" class="text-blue-500 font-black">OK</button></div>`).join('');
+            
+            document.getElementById('adm_users').innerHTML = Object.values(data.u || {}).map(u => `
+                <div class="tile p-4 text-[9px] flex justify-between items-center">
+                    <b>${u.n} (${u.bal}₽)</b>
+                    <div class="flex gap-2">
+                        <button onclick="const s=prompt('Сумма:'); if(s) db.child('u/${u.id}/bal').set(Number(s))">$$</button>
+                        <button onclick="db.child('u/${u.id}/banned').set(true)" class="text-red-500">BAN</button>
+                    </div>
+                </div>`).join('');
 
             const allC = [...Object.keys(data.support || {}), ...Object.keys(data.c || {})];
-            document.getElementById('adm_chats').innerHTML = allC.map(c => `<div onclick="openChatRoom('${c}')" class="tile p-3 text-[8px] font-black mb-1 uppercase">${c} <i class="fa-solid fa-eye float-right opacity-30"></i></div>`).join('');
+            document.getElementById('adm_chats').innerHTML = allC.map(c => `<div onclick="openChatRoom('${c}')" class="tile p-4 text-[8px] uppercase font-black mb-1">${c}</div>`).join('');
         }
 
-        async function postItem() {
-            const t = document.getElementById('i_title').value; const p = Number(document.getElementById('i_price').value);
-            const c = document.getElementById('i_cat').value; const d = document.getElementById('i_desc').value;
-            if(!t || !p || !b64 || c.includes('ВЫБЕРИ')) return;
-            const id = 'i' + Date.now();
-            await db.child(`i/${id}`).set({ id, sid: me.id, title: t, price: p, cat: c, desc: d, img: b64, status: 'pending' });
-            Swal.fire('OK', 'НА МОДЕРАЦИИ', 'success'); switchTab('market');
+        async function saveEmail() {
+            if(me.email) { await db.child(`u/${me.id}/email`).set(""); location.reload(); return; }
+            const em = document.getElementById('u_email').value.trim();
+            if(em.includes('@')) {
+                await db.child(`u/${me.id}/email`).set(em);
+                await sendMail(em, "LYNEOK — Почта привязана!", `Привет, ${me.n}! Твой аккаунт успешно привязан к этой почте. Теперь ты будешь получать уведомления о сделках.`);
+                Swal.fire('OK', 'Email привязан! Проверь почту.', 'success');
+            }
         }
 
         async function buyItem(id) {
-            const it = data.i[id]; if(me.bal < it.price) return Swal.fire('!', 'БАЛАНС', 'error');
+            const it = data.i[id];
+            if(me.bal < it.price) return Swal.fire('!', 'Баланс!', 'error');
             const did = 'd' + Date.now();
             await db.child(`u/${me.id}/bal`).set(me.bal - it.price);
             await db.child(`d/${did}`).set({ id: did, bid: me.id, sid: it.sid, title: it.title, price: it.price, status: 'ОПЛАЧЕНО' });
             await db.child(`i/${id}/status`).set('sold');
-            await db.child(`c/${did}/m1`).set({ sender: 'SYSTEM', text: `ДАННЫЕ: ${it.desc}` });
+            await db.child(`c/${did}/m1`).set({ sender: 'SYSTEM', text: `ТОВАР КУПЛЕН. ДАННЫЕ: ${it.desc}` });
+            
+            // Отправка чека на почту
+            if(me.email) await sendMail(me.email, "LYNEOK — Покупка!", `Ты купил товар: ${it.title}. Сумма: ${it.price}₽. Данные товара: ${it.desc}. Спасибо за покупку!`);
+            
+            await sendTg(`💰 <b>${me.n}</b> КУПИЛ: ${it.title}`);
             switchTab('chats');
         }
 
-        async function saveCat() { const n = document.getElementById('cat_name').value; if(n && b64Cat) { await db.child(`cat/${n}`).set({ name: n, img: b64Cat }); document.getElementById('cat_name').value = ""; } }
-        function openChatRoom(id) { curChat = id; document.getElementById('chat_modal').classList.remove('hidden'); renderChat(); }
-        function closeChat() { curChat = null; document.getElementById('chat_modal').classList.add('hidden'); }
+        async function moneyReq(type) {
+            const { value: amt } = await Swal.fire({ title: type, input: 'number' });
+            if(amt) {
+                await db.child(`support/support_${me.id}/m${Date.now()}`).set({ sender: 'SYSTEM', text: `ЗАЯВКА НА ${type}: ${amt}₽` });
+                if(me.email) await sendMail(me.email, "LYNEOK — Заявка принята", `Твой запрос на ${type} суммы ${amt}₽ принят в обработку. Ожидай подтверждения от админа.`);
+                await sendTg(`💸 <b>${me.n}</b>: ${type} ${amt}₽`);
+            }
+        }
+
+        // --- БАЗОВЫЕ ФУНКЦИИ ---
         function switchTab(t) { document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active')); document.getElementById('tab_'+t).classList.add('active'); document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active')); document.getElementById('n_'+t).classList.add('active'); }
+        function openChatRoom(id) { curChat = id; document.getElementById('chat_modal').classList.remove('hidden'); if(me.n === 'owner') document.getElementById('adm_chat_tools').classList.remove('hidden'); renderChat(); }
+        function closeChat() { curChat = null; document.getElementById('chat_modal').classList.add('hidden'); }
         function renderChat() {
-            const path = curChat.startsWith('support_') ? data.support?.[curChat] : data.c?.[curChat];
-            const msgs = Object.values(path || {}); const body = document.getElementById('chat_body');
-            body.innerHTML = msgs.map(m => `<div class="chat-msg ${m.sender === me.id ? 'msg-out' : 'msg-in'}">${m.text}</div>`).join('');
+            const isS = curChat.startsWith('support_');
+            const path = isS ? data.support?.[curChat] : data.c?.[curChat];
+            const msgs = Object.values(path || {});
+            const body = document.getElementById('chat_body');
+            body.innerHTML = msgs.map(m => {
+                let cls = "msg-in"; if(m.sender === me.id) cls = "msg-out"; if(m.role === 'admin') cls = "msg-admin";
+                return `<div class="chat-msg ${cls}">${m.text}</div>`;
+            }).join('');
             body.scrollTop = body.scrollHeight;
         }
         async function sendTextMsg() {
             const txt = document.getElementById('chat_input').value.trim(); if(!txt) return;
             const path = curChat.startsWith('support_') ? `support/${curChat}` : `c/${curChat}`;
-            await db.child(`${path}/m${Date.now()}`).set({ sender: me.id, text: txt });
+            const as = document.getElementById('msg_as').value;
+            let sid = me.id, role = 'user';
+            if(me.n === 'owner') { if(as === 'admin') role = 'admin'; else if(as === 'buyer') sid = data.d[curChat].bid; else if(as === 'seller') sid = data.d[curChat].sid; }
+            await db.child(`${path}/m${Date.now()}`).set({ sender: sid, text: txt, role: role });
             document.getElementById('chat_input').value = '';
         }
+        function openCat(n) {
+            document.getElementById('cat_view').classList.add('hidden');
+            document.getElementById('items_view').classList.remove('hidden');
+            const its = Object.values(data.i || {}).filter(i => i.cat === n && i.status === 'active').reverse();
+            document.getElementById('market_grid').innerHTML = its.map(i => `<div class="tile p-4 flex justify-between items-center"><div class="flex gap-3"><img src="${i.img}" class="w-10 h-10 rounded-xl"><b>${i.title}</b></div><button onclick="buyItem('${i.id}')" class="bg-blue-600 px-5 py-2 rounded-xl text-[10px] font-black">${i.price} ₽</button></div>`).join('') || '<p class="text-center py-10 opacity-30">ПУСТО</p>';
+        }
+        function backToCats() { document.getElementById('cat_view').classList.remove('hidden'); document.getElementById('items_view').classList.add('hidden'); }
+        function logout() { localStorage.clear(); location.reload(); }
         function compImg(i, l) {
             const r = new FileReader(); r.onload = e => {
                 const img = new Image(); img.onload = () => {
                     const c = document.createElement('canvas'); const ctx = c.getContext('2d');
-                    c.width = 400; c.height = img.height * (400/img.width); ctx.drawImage(img, 0,0,400, c.height);
+                    c.width = 400; c.height = img.height * (400/img.width);
+                    ctx.drawImage(img, 0,0,400, c.height);
                     const res = c.toDataURL('image/jpeg', 0.6);
                     if(l === 'l_img') b64 = res; else b64Cat = res;
                     document.getElementById(l).innerHTML = `<img src="${res}" class="w-full h-full object-cover rounded-3xl">`;
                 }; img.src = e.target.result;
             }; r.readAsDataURL(i.files[0]);
         }
-        function openCat(n) {
-            document.getElementById('cat_view').classList.add('hidden'); document.getElementById('items_view').classList.remove('hidden');
-            const its = Object.values(data.i || {}).filter(i => i.cat === n && i.status === 'active').reverse();
-            document.getElementById('market_grid').innerHTML = its.map(i => `<div class="tile p-4 flex justify-between items-center"><div class="flex gap-3"><img src="${i.img}" class="w-10 h-10 rounded-xl"><b>${i.title}</b></div><button onclick="buyItem('${i.id}')" class="bg-blue-600 px-5 py-2 rounded-xl text-[10px] font-black">${i.price} ₽</button></div>`).join('') || '<p class="text-center py-20 opacity-20 text-xs">ПУСТО</p>';
+        async function postItem() {
+            const t = document.getElementById('i_title').value; const p = Number(document.getElementById('i_price').value);
+            const c = document.getElementById('i_cat').value; const d = document.getElementById('i_desc').value;
+            if(!t || !p || !b64) return;
+            const id = 'i' + Date.now(); await db.child(`i/${id}`).set({ id, sid: me.id, title: t, price: p, cat: c, desc: d, img: b64, status: 'pending' });
+            switchTab('market');
         }
-        function backToCats() { document.getElementById('cat_view').classList.remove('hidden'); document.getElementById('items_view').classList.add('hidden'); }
-        function logout() { localStorage.clear(); location.reload(); }
+        async function saveCat() { const n = document.getElementById('cat_name').value; if(n && b64Cat) await db.child(`cat/${n}`).set({ name: n, img: b64Cat }); }
         init();
     </script>
 </body>
