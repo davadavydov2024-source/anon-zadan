@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>lyneok</title>
+    <title>lyneok — Digital Marketplace</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -12,300 +12,191 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap');
+        :root { --bg: #050505; --card: #0f0f12; --accent: #3b82f6; --zinc-900: #18181b; }
+        body { background: var(--bg); color: #fff; font-family: 'Manrope', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
+        
+        .tab-content { display: none; height: 100%; overflow-y: auto; padding-bottom: 140px; scroll-behavior: smooth; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        :root {
-            --bg: #050505;
-            --card: #0f0f12;
-            --accent: #3b82f6;
-            --danger: #ef4444;
-            --success: #22c55e;
-            --zinc-950: #09090b;
-        }
+        .item-card { background: var(--card); border: 1px solid rgba(255,255,255,0.03); border-radius: 24px; padding: 18px; transition: 0.2s; }
+        .item-card:active { transform: scale(0.97); background: #16161a; }
 
-        body {
-            background: var(--bg);
-            color: #fff;
-            font-family: 'Manrope', sans-serif;
-            margin: 0;
-            overflow: hidden;
-            height: 100vh;
-        }
-
-        /* Анимации появления */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .fade-in { animation: fadeIn 0.4s ease forwards; }
-
-        /* Кастомный скроллбар для внутренних панелей */
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 10px; }
-
-        .tab-content { display: none; height: 100%; overflow-y: auto; padding-bottom: 120px; }
-        .tab-content.active { display: block; }
-
-        .item-card {
-            background: var(--card);
-            border: 1px solid rgba(255,255,255,0.03);
-            border-radius: 24px;
-            padding: 18px;
-            transition: 0.2s;
-        }
-
-        /* Навигация */
-        .nav-bar {
-            position: fixed; bottom: 20px; left: 16px; right: 16px;
-            height: 75px; background: rgba(15, 15, 18, 0.9);
-            backdrop-filter: blur(25px); border-radius: 28px;
-            display: flex; justify-content: space-around; align-items: center;
-            border: 1px solid rgba(255,255,255,0.05); z-index: 1000;
-        }
+        .nav-bar { position: fixed; bottom: 20px; left: 16px; right: 16px; height: 75px; background: rgba(15, 15, 18, 0.95); backdrop-filter: blur(20px); border-radius: 28px; display: flex; justify-content: space-around; align-items: center; border: 1px solid rgba(255,255,255,0.05); z-index: 1000; }
         .nav-btn { color: #52525b; font-size: 20px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .nav-btn.active { color: var(--accent); }
         .nav-btn span { font-size: 9px; font-weight: 800; text-transform: uppercase; }
 
-        /* Админка */
-        .admin-block {
-            background: var(--zinc-950);
-            border: 1px solid rgba(59, 130, 246, 0.1);
-            border-radius: 24px;
-            overflow: hidden;
-            margin-bottom: 16px;
-        }
-        .admin-header {
-            background: rgba(59, 130, 246, 0.05);
-            padding: 12px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-            display: flex; justify-content: space-between; align-items: center;
-        }
+        .seller-header { background: linear-gradient(180deg, rgba(59,130,246,0.1) 0%, rgba(0,0,0,0) 100%); border-radius: 0 0 40px 40px; padding: 40px 20px; text-align: center; }
+        
+        .tab-content::-webkit-scrollbar { width: 0px; }
+        .btn-action { background: var(--accent); padding: 16px; border-radius: 20px; font-weight: 800; text-align: center; width: 100%; display: block; }
 
-        .btn-action {
-            background: var(--accent);
-            padding: 16px; border-radius: 20px;
-            font-weight: 800; font-size: 14px;
-            width: 100%; text-align: center;
-            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.15);
-        }
-
-        /* Чат */
-        .chat-msg { margin-bottom: 8px; max-width: 80%; padding: 10px 14px; border-radius: 18px; font-size: 13px; }
-        .msg-in { background: #1f2937; align-self: flex-start; border-bottom-left-radius: 4px; }
-        .msg-out { background: var(--accent); align-self: flex-end; border-bottom-right-radius: 4px; }
-
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
-
-        /* Логи */
-        .log-entry { font-family: 'JetBrains Mono', monospace; font-size: 10px; border-bottom: 1px solid rgba(255,255,255,0.02); padding: 8px 0; }
+        /* Кнопка Поделиться */
+        .share-pill { background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 14px; font-size: 10px; font-weight: 800; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.03); }
     </style>
 </head>
 <body>
 
-    <div id="loader" class="fixed inset-0 bg-black z-[9999] flex items-center justify-center">
-        <div class="text-center">
-            <h1 class="text-3xl font-black italic tracking-tighter mb-4">lyne<span class="text-blue-500">ok</span></h1>
-            <div class="w-10 h-10 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mx-auto"></div>
-        </div>
-    </div>
+    <div id="loader" class="fixed inset-0 bg-black z-[9999] flex items-center justify-center font-black italic text-2xl">lyne<span class="text-blue-500">ok</span></div>
 
-    <div id="auth_screen" class="hidden flex flex-col items-center justify-center h-screen px-8">
-        <div class="w-full max-w-sm space-y-6">
-            <div class="text-center">
-                <h2 class="text-4xl font-black italic">Вход</h2>
-                <p class="text-zinc-500 text-xs mt-2 uppercase tracking-widest font-bold">Система lyneok 10.0</p>
-            </div>
-            <div class="space-y-3">
-                <input id="reg_n" class="w-full bg-zinc-900/50 border border-white/5 p-5 rounded-[22px] text-sm font-bold" placeholder="Никнейм">
-                <input id="reg_tg" class="w-full bg-zinc-900/50 border border-white/5 p-5 rounded-[22px] text-sm font-bold" placeholder="Telegram @handle">
-                <input id="reg_p" type="password" class="w-full bg-zinc-900/50 border border-white/5 p-5 rounded-[22px] text-sm font-bold" placeholder="Пароль">
-                <button onclick="auth()" class="btn-action !mt-6">Начать работу</button>
-            </div>
+    <div id="auth_screen" class="hidden h-screen flex flex-col items-center justify-center px-10">
+        <h1 class="text-5xl font-black italic mb-2">lyne<span class="text-blue-500">ok</span></h1>
+        <p class="text-zinc-500 text-[10px] font-black uppercase tracking-[4px] mb-12">Digital Trading</p>
+        <div class="w-full max-w-sm space-y-3">
+            <input id="reg_n" class="w-full bg-zinc-900 border border-white/5 p-5 rounded-2xl text-sm font-bold" placeholder="Никнейм">
+            <input id="reg_tg" class="w-full bg-zinc-900 border border-white/5 p-5 rounded-2xl text-sm font-bold" placeholder="Telegram ID">
+            <input id="reg_p" type="password" class="w-full bg-zinc-900 border border-white/5 p-5 rounded-2xl text-sm font-bold" placeholder="Пароль">
+            <button onclick="auth()" class="btn-action !mt-6 shadow-xl shadow-blue-500/10">Войти или Создать</button>
         </div>
     </div>
 
     <div id="app" class="hidden h-screen flex flex-col">
         
-        <header class="p-6 flex justify-between items-center bg-black/40 backdrop-blur-md sticky top-0 z-50">
-            <div>
-                <h1 class="text-2xl font-black italic tracking-tighter">lyne<span class="text-blue-500">ok</span></h1>
-                <div class="flex items-center mt-1">
-                    <span class="status-dot bg-green-500"></span>
-                    <span class="text-[9px] font-black text-zinc-600 uppercase">Server: Moscow-1</span>
+        <main id="tab_market" class="tab-content active pt-4">
+            <header class="px-6 py-4 flex justify-between items-center sticky top-0 bg-black/80 backdrop-blur-xl z-50">
+                <h1 class="text-2xl font-black italic">lyne<span class="text-blue-500">ok</span></h1>
+                <div onclick="openFinanceMenu()" class="bg-blue-600/10 border border-blue-500/20 px-4 py-2 rounded-2xl">
+                    <b id="h_bal" class="text-lg font-black">0</b> <span class="text-[10px] text-blue-500 font-bold">₽</span>
                 </div>
-            </div>
-            <div class="flex gap-2">
-                <div id="admin_badge" class="hidden bg-red-600/10 border border-red-600/20 px-3 py-1 rounded-full flex items-center gap-2">
-                    <i class="fa-solid fa-crown text-[10px] text-red-600"></i>
-                    <span class="text-[9px] font-black text-red-600 uppercase">Admin</span>
-                </div>
-                <div class="bg-blue-600/10 border border-blue-500/20 px-4 py-2 rounded-2xl">
-                    <b id="h_bal" class="text-lg font-black tracking-tighter">0</b> <span class="text-[10px] text-blue-500 font-bold">₽</span>
-                </div>
-            </div>
-        </header>
-
-        <main id="tab_market" class="tab-content active px-5 pt-4">
-            <div class="relative mb-6">
-                <input id="m_search" oninput="searchMarket()" class="w-full bg-zinc-900 border border-white/5 p-5 rounded-[24px] pl-14 text-sm font-bold" placeholder="Поиск товаров...">
-                <i class="fa-solid fa-magnifying-glass absolute left-6 top-5.5 text-zinc-600"></i>
-            </div>
-            <div id="market_grid" class="grid grid-cols-1 gap-3"></div>
+            </header>
+            <div class="px-5 space-y-3 mt-4" id="market_grid"></div>
         </main>
 
-        <main id="tab_deals" class="tab-content px-5 pt-6">
-            <h2 class="text-2xl font-black italic mb-6">Мои покупки</h2>
-            <div id="active_deals" class="space-y-4"></div>
-            <div class="mt-10 mb-4 flex items-center gap-3">
-                <div class="h-[1px] flex-1 bg-zinc-900"></div>
-                <span class="text-[10px] font-black text-zinc-700 uppercase">Завершено</span>
-                <div class="h-[1px] flex-1 bg-zinc-900"></div>
+        <main id="tab_seller" class="tab-content">
+            <div class="seller-header relative">
+                <button onclick="switchTab('market')" class="absolute top-6 left-6 w-10 h-10 bg-black/40 rounded-full flex items-center justify-center border border-white/5">
+                    <i class="fa-solid fa-chevron-left text-sm"></i>
+                </button>
+                <button id="share_btn_top" class="absolute top-6 right-6 w-10 h-10 bg-white/5 rounded-full flex items-center justify-center border border-white/5">
+                    <i class="fa-solid fa-share-nodes text-blue-500 text-sm"></i>
+                </button>
+
+                <div class="w-24 h-24 bg-blue-600 rounded-[30px] mx-auto flex items-center justify-center text-4xl font-black mb-4 shadow-2xl" id="s_ava">?</div>
+                <h2 id="s_name" class="text-2xl font-black italic">Seller Name</h2>
+                
+                <div class="flex justify-center gap-4 mt-6">
+                    <button id="share_pill_btn" class="share-pill flex items-center gap-2 active:scale-95 transition">
+                        <i class="fa-solid fa-link"></i> Поделиться
+                    </button>
+                </div>
+
+                <div class="flex justify-center gap-4 mt-6">
+                    <div class="bg-white/5 px-4 py-2 rounded-xl border border-white/5">
+                        <span id="s_rat" class="font-black text-blue-500">0.0</span> <span class="text-[8px] font-bold text-zinc-500 uppercase">Rating</span>
+                    </div>
+                    <div class="bg-white/5 px-4 py-2 rounded-xl border border-white/5">
+                        <span id="s_rev" class="font-black text-white">0</span> <span class="text-[8px] font-bold text-zinc-500 uppercase">Reviews</span>
+                    </div>
+                </div>
             </div>
-            <div id="history_deals" class="space-y-3 opacity-50"></div>
+            <div class="px-5 mt-8">
+                <h3 class="text-xs font-black uppercase text-zinc-500 mb-4 tracking-widest">Товары продавца</h3>
+                <div id="seller_items" class="space-y-3"></div>
+            </div>
+        </main>
+
+        <main id="tab_deals" class="tab-content px-5 pt-8">
+            <h2 class="text-2xl font-black italic mb-6">Ваши заказы</h2>
+            <div id="active_deals" class="space-y-4"></div>
         </main>
 
         <main id="tab_sell" class="tab-content px-5 pt-10">
-            <div class="bg-zinc-900/40 p-8 rounded-[40px] border border-white/5">
-                <h3 class="text-2xl font-black mb-2 italic">Создать лот</h3>
-                <p class="text-zinc-500 text-xs mb-8">Мгновенная публикация на маркет</p>
+            <div class="bg-zinc-900/50 p-8 rounded-[40px] border border-white/5">
+                <h3 class="text-xl font-black mb-6">Создать объявление</h3>
                 <div class="space-y-4">
-                    <select id="l_cat" class="w-full bg-black/40 border border-white/5 p-5 rounded-2xl text-sm font-bold appearance-none">
+                    <select id="l_cat" class="w-full bg-black p-5 rounded-2xl text-sm font-bold border border-white/5 appearance-none">
                         <option value="Brawl Stars">Brawl Stars</option>
                         <option value="Roblox">Roblox</option>
-                        <option value="Steam">Steam</option>
-                        <option value="Other">Разное</option>
+                        <option value="Clash Royale">Clash Royale</option>
+                        <option value="Standoff 2">Standoff 2</option>
+                        <option value="Fortnite">Fortnite</option>
+                        <option value="CS:GO / CS2">CS:GO / CS2</option>
+                        <option value="Telegram">Telegram</option>
+                        <option value="ChatGPT">ChatGPT</option>
                     </select>
-                    <input id="l_title" class="w-full bg-black/40 border border-white/5 p-5 rounded-2xl text-sm font-bold" placeholder="Название">
-                    <input id="l_price" type="number" class="w-full bg-black/40 border border-white/5 p-5 rounded-2xl text-xl font-black text-blue-500" placeholder="Цена">
-                    <button onclick="createLot()" class="btn-action !py-5">Выставить лот</button>
+                    <input id="l_title" class="w-full bg-black p-5 rounded-2xl text-sm font-bold border border-white/5" placeholder="Название товара">
+                    <div>
+                        <input id="l_price" oninput="calcComm()" type="number" class="w-full bg-black p-5 rounded-2xl text-xl font-black text-blue-500 border border-white/5" placeholder="Цена (от 70 ₽)">
+                        <p id="comm_info" class="text-[9px] text-zinc-600 mt-2 ml-2 font-bold uppercase italic">К получению: 0 ₽</p>
+                    </div>
+                    <button onclick="createLot()" class="btn-action !py-5 shadow-lg shadow-blue-500/20">Выставить на продажу</button>
                 </div>
             </div>
         </main>
 
-        <main id="tab_profile" class="tab-content px-5 pt-4 pb-40">
-            <div class="bg-zinc-900/40 rounded-[35px] p-8 text-center border border-white/5">
-                <div class="w-20 h-20 bg-blue-600 rounded-[28px] mx-auto flex items-center justify-center text-3xl font-black mb-4 shadow-xl" id="u_ava">?</div>
-                <h3 id="u_name" class="text-xl font-black italic">User</h3>
-                <p id="u_tg" class="text-zinc-600 text-[10px] font-bold mt-1 uppercase">@handle</p>
-                
+        <main id="tab_profile" class="tab-content px-5 pt-6">
+            <div class="bg-zinc-900/20 rounded-[40px] p-8 text-center border border-white/5">
+                <div class="w-20 h-20 bg-blue-600 rounded-3xl mx-auto flex items-center justify-center text-3xl font-black mb-4 shadow-xl" id="my_ava">?</div>
+                <h3 id="my_name" class="text-xl font-black italic">Username</h3>
                 <div class="grid grid-cols-2 gap-3 mt-8">
                     <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
-                        <b id="p_bal" class="text-xl font-black">0</b>
+                        <b id="my_bal" class="text-lg font-black">0</b>
                         <p class="text-[8px] text-zinc-500 font-black uppercase">Баланс</p>
                     </div>
-                    <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
-                        <b id="p_rat" class="text-xl font-black text-blue-500">5.0</b>
-                        <p class="text-[8px] text-zinc-500 font-black uppercase">Рейтинг</p>
+                    <div onclick="openSellerProfile(me.id)" class="bg-blue-600/10 p-4 rounded-2xl border border-blue-500/10 active:bg-blue-600/20">
+                        <b class="text-lg font-black text-blue-500"><i class="fa-solid fa-eye"></i></b>
+                        <p class="text-[8px] text-zinc-500 font-black uppercase">Мой профиль</p>
                     </div>
-                </div>
-
-                <div class="flex gap-2 mt-4">
-                    <button onclick="openPromo()" class="flex-1 bg-white/5 py-4 rounded-xl text-[9px] font-black uppercase tracking-widest border border-white/5">Промокод</button>
-                    <button onclick="openSupport()" class="flex-1 bg-white/5 py-4 rounded-xl text-[9px] font-black uppercase tracking-widest border border-white/5">Поддержка</button>
                 </div>
             </div>
 
-            <div id="admin_terminal" class="hidden mt-8 space-y-4 pb-10">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="h-[1px] flex-1 bg-red-600/20"></div>
-                    <span class="text-[10px] font-black text-red-600 uppercase tracking-[4px]">Admin God Console</span>
-                    <div class="h-[1px] flex-1 bg-red-600/20"></div>
-                </div>
-
-                <div class="admin-block">
-                    <div class="admin-header">
-                        <span class="text-[10px] font-black uppercase">Управление Юзерами</span>
-                        <i class="fa-solid fa-users-gear text-blue-500"></i>
-                    </div>
+            <div id="admin_terminal" class="hidden mt-8 pb-32">
+                <div class="bg-zinc-950 border border-red-600/10 rounded-3xl overflow-hidden divide-y divide-white/5">
+                    <div class="p-4" id="adm_deposits"></div>
                     <div class="p-5 space-y-3">
-                        <input id="adm_u_search" class="w-full bg-black border border-white/10 p-4 rounded-xl text-xs" placeholder="Никнейм пользователя">
+                        <input id="adm_u_nick" class="w-full bg-black border border-white/10 p-4 rounded-xl text-xs" placeholder="Ник пользователя">
                         <div class="grid grid-cols-2 gap-2">
-                            <button onclick="admManage('bal')" class="bg-white/5 py-3 rounded-xl text-[9px] font-black uppercase">Баланс</button>
-                            <button onclick="admManage('ban')" class="bg-red-600/10 text-red-500 py-3 rounded-xl text-[9px] font-black uppercase">Бан (Мин)</button>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="admManage('unban')" class="bg-green-600/10 text-green-500 py-3 rounded-xl text-[9px] font-black uppercase">Разбанить</button>
-                            <button onclick="admManage('chats')" class="bg-white/5 py-3 rounded-xl text-[9px] font-black uppercase">Все Чаты</button>
+                            <button onclick="admAction('ban')" class="bg-red-600/10 text-red-500 py-3 rounded-xl text-[9px] font-black uppercase">Забанить</button>
+                            <button onclick="admAction('unban')" class="bg-green-600/10 text-green-500 py-3 rounded-xl text-[9px] font-black uppercase">Разбанить</button>
                         </div>
                     </div>
                 </div>
-
-                <div class="admin-block">
-                    <div class="admin-header">
-                        <span class="text-[10px] font-black uppercase">Рассылка (Global)</span>
-                        <i class="fa-solid fa-bullhorn text-amber-500"></i>
-                    </div>
-                    <div class="p-5 space-y-3">
-                        <textarea id="bc_text" class="w-full bg-black border border-white/10 p-4 rounded-xl text-xs h-20" placeholder="Текст рассылки..."></textarea>
-                        <input id="bc_img" class="w-full bg-black border border-white/10 p-4 rounded-xl text-xs" placeholder="URL картинки (опционально)">
-                        <div id="bc_btns" class="space-y-2"></div>
-                        <button onclick="addBcBtn()" class="w-full py-2 border border-dashed border-white/10 rounded-xl text-[9px] uppercase font-black">+ Добавить кнопку</button>
-                        <button onclick="sendBroadcast()" class="btn-action !py-4 !bg-amber-600">Запустить рассылку</button>
-                    </div>
-                </div>
-
-                <div class="admin-block">
-                    <div class="admin-header">
-                        <span class="text-[10px] font-black uppercase">Поддержка и Арбитраж</span>
-                        <i class="fa-solid fa-scale-balanced text-red-500"></i>
-                    </div>
-                    <div class="p-2 space-y-2">
-                        <div id="adm_support_list" class="max-h-60 overflow-y-auto custom-scroll"></div>
-                        <div id="adm_dispute_list" class="max-h-60 overflow-y-auto custom-scroll border-t border-white/5 mt-2 pt-2"></div>
-                    </div>
-                </div>
-
-                <div class="admin-block !bg-black">
-                    <div class="admin-header">
-                        <span class="text-[10px] font-black uppercase">System Logs</span>
-                        <i class="fa-solid fa-code text-zinc-600"></i>
-                    </div>
-                    <div id="adm_logs" class="p-4 h-40 overflow-y-auto custom-scroll text-[9px]"></div>
-                </div>
-
-                <button onclick="logout()" class="w-full py-10 text-zinc-800 font-black text-[10px] uppercase tracking-[8px]">Terminate Session</button>
             </div>
+            <button onclick="logout()" class="w-full py-10 opacity-10 text-[10px] font-black uppercase tracking-[10px]">Выйти</button>
         </main>
 
         <nav class="nav-bar">
             <div onclick="switchTab('market')" id="n_market" class="nav-btn active"><i class="fa-solid fa-store"></i><span>Рынок</span></div>
             <div onclick="switchTab('deals')" id="n_deals" class="nav-btn"><i class="fa-solid fa-bag-shopping"></i><span>Заказы</span></div>
-            <div onclick="switchTab('sell')" id="n_sell" class="nav-btn !text-white bg-blue-600 w-14 h-14 rounded-full !justify-center -mt-10 shadow-xl"><i class="fa-solid fa-plus"></i></div>
-            <div onclick="switchTab('profile')" id="n_profile" class="nav-btn"><i class="fa-solid fa-shield-halved"></i><span>Кабинет</span></div>
+            <div onclick="switchTab('sell')" id="n_sell" class="nav-btn !text-white bg-blue-600 w-14 h-14 rounded-full !justify-center -mt-10 shadow-xl shadow-blue-500/30"><i class="fa-solid fa-plus"></i></div>
+            <div onclick="switchTab('profile')" id="n_profile" class="nav-btn"><i class="fa-solid fa-user-gear"></i><span>Меню</span></div>
         </nav>
     </div>
 
     <script>
-        // CONFIG
-        const CFG = {
-            apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI",
-            databaseURL: "https://dogx-base-default-rtdb.firebaseio.com"
-        };
-        const BOT = { 
-            token: "8641257792:AAEsxnQWEIeozMt_gnSwJdVgSFQlOc-hnuc", 
-            chat: "7040863301" 
-        };
-
+        const CFG = { apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI", databaseURL: "https://dogx-base-default-rtdb.firebaseio.com" };
+        const BOT = { token: "8641257792:AAEsxnQWEIeozMt_gnSwJdVgSFQlOc-hnuc", chat: "7040863301" };
+        
         firebase.initializeApp(CFG);
-        const db = firebase.database().ref('lyneok_v10_final');
+        const db = firebase.database().ref('lyneok_v13');
 
-        let me = null;
-        let data = {};
-        let bcButtons = [];
+        let me = null, data = {};
 
-        // START
         function init() {
             db.on('value', snap => {
-                data = snap.val() || { u: {}, i: {}, d: {}, p: {}, s: {}, l: {}, c: {} };
-                const sid = localStorage.getItem('lyne_sid_v10');
+                data = snap.val() || { u: {}, i: {}, d: {}, dep: {} };
+                const sid = localStorage.getItem('lyne_sid_v13');
                 
-                if(!sid) {
-                    toggleAuth(true);
-                } else {
+                // Проверка Deep Link
+                const hash = window.location.hash;
+                
+                if(!sid) toggleAuth(true);
+                else {
                     me = data.u[sid];
                     if(me) {
-                        if(me.banUntil && Date.now() < me.banUntil) return showBan(me.banUntil);
-                        toggleAuth(false);
-                        render();
-                    } else { logout(); }
+                        if(me.banned) return (document.body.innerHTML = '<div class="h-screen bg-black flex items-center justify-center font-black">BANNED</div>');
+                        toggleAuth(false); render();
+
+                        // Если есть хэш типа #user_u123, открываем профиль
+                        if(hash.includes('user_')) {
+                            const targetUid = hash.replace('#user_', '');
+                            openSellerProfile(targetUid);
+                            window.location.hash = ''; // Очищаем хэш
+                        }
+                    } else logout();
                 }
                 document.getElementById('loader').style.display = 'none';
             });
@@ -320,276 +211,120 @@
             const n = document.getElementById('reg_n').value.trim();
             const t = document.getElementById('reg_tg').value.trim();
             const p = document.getElementById('reg_p').value.trim();
-            if(!n || !t) return;
+            if(!n || !t || !p) return;
 
-            // Check if exists
             let uid = Object.keys(data.u).find(k => data.u[k].n === n);
             if(uid) {
-                if(data.u[uid].p !== p) return Swal.fire('Error', 'Wrong password', 'error');
+                if(data.u[uid].p !== p) return Swal.fire('Error', 'Wrong Password', 'error');
             } else {
-                uid = 'u' + Date.now().toString().slice(-6);
-                await db.child(`u/${uid}`).set({ id: uid, n, tg: t, p, bal: 0, rating: 5, reviews: 0 });
-                tg(`🚀 New User: ${n} (${t})`);
+                uid = 'u' + Date.now().toString().slice(-7);
+                await db.child(`u/${uid}`).set({ id: uid, n, tg: t, p, bal: 0, rating: 0, reviews: 0 });
             }
-            
-            localStorage.setItem('lyne_sid_v10', uid);
+            localStorage.setItem('lyne_sid_v13', uid);
         }
 
         function render() {
-            // Stats
             document.getElementById('h_bal').innerText = me.bal.toLocaleString();
-            document.getElementById('p_bal').innerText = me.bal.toLocaleString();
-            document.getElementById('u_name').innerText = me.n;
-            document.getElementById('u_tg').innerText = me.tg;
-            document.getElementById('u_ava').innerText = me.n[0].toUpperCase();
-            document.getElementById('p_rat').innerText = Number(me.rating).toFixed(1);
+            document.getElementById('my_bal').innerText = me.bal.toLocaleString();
+            document.getElementById('my_name').innerText = me.n;
+            document.getElementById('my_ava').innerText = me.n[0].toUpperCase();
 
-            // Admin Logic
-            const isAdmin = (me.n === 'sswckk' || me.n === 'artyom' || me.id === 'u7040863301');
-            if(isAdmin) {
+            if(me.n === 'sswckk' || me.n === 'artyom') {
                 document.getElementById('admin_terminal').classList.remove('hidden');
-                document.getElementById('admin_badge').classList.remove('hidden');
                 renderAdmin();
             }
 
-            // Market
             const items = Object.values(data.i || {}).reverse();
             document.getElementById('market_grid').innerHTML = items.map(i => `
-                <div class="item-card flex justify-between items-center" onclick="buyItem('${i.id}')">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-blue-500">
-                            <i class="fa-solid fa-gamepad"></i>
-                        </div>
+                <div class="item-card flex justify-between items-center">
+                    <div class="flex items-center gap-4 flex-1" onclick="buyItem('${i.id}')">
+                        <div class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-blue-500 text-xl"><i class="${getIcon(i.cat)}"></i></div>
                         <div>
                             <h4 class="font-bold text-sm">${i.title}</h4>
-                            <p class="text-[9px] text-zinc-500 font-bold uppercase">${i.cat} • ${data.u[i.sid]?.n}</p>
+                            <p class="text-[10px] text-zinc-500 font-bold uppercase">${i.cat}</p>
                         </div>
                     </div>
-                    <b class="text-blue-500">${i.price} ₽</b>
-                </div>
-            `).join('') || '<p class="text-center py-10 opacity-20 uppercase font-black text-xs">Market is Empty</p>';
-
-            // Deals
-            const deals = Object.values(data.d || {}).reverse().filter(d => d.bid === me.id || d.sid === me.id);
-            const active = deals.filter(d => d.status !== 'done' && d.status !== 'cancelled');
-            const history = deals.filter(d => d.status === 'done' || d.status === 'cancelled');
-
-            document.getElementById('active_deals').innerHTML = active.map(d => `
-                <div class="item-card border-blue-500/20">
-                    <div class="flex justify-between mb-3">
-                        <span class="text-[9px] font-black text-amber-500 uppercase">${d.status}</span>
-                        <b class="text-xs">${d.price} ₽</b>
-                    </div>
-                    <p class="text-xs font-bold mb-4">${d.title}</p>
-                    ${d.bid === me.id ? `
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="confirmDeal('${d.id}')" class="bg-green-600 py-2 rounded-xl text-[9px] font-black uppercase">Получил</button>
-                            <button onclick="openDispute('${d.id}')" class="bg-red-600/10 text-red-500 py-2 rounded-xl text-[9px] font-black uppercase">Спор</button>
-                        </div>
-                    ` : '<p class="text-center text-[9px] text-zinc-600 font-black py-2 uppercase">Ожидание действий покупателя</p>'}
-                </div>
-            `).join('') || '<p class="text-center py-5 text-zinc-800 text-[10px] font-black uppercase">No active orders</p>';
-
-            document.getElementById('history_deals').innerHTML = history.map(d => `
-                <div class="bg-white/5 p-4 rounded-xl flex justify-between items-center">
-                    <span class="text-xs font-bold text-zinc-500">${d.title}</span>
-                    <span class="text-xs font-black text-zinc-600">${d.status}</span>
-                </div>
-            `).join('');
-        }
-
-        // MARKET ACTIONS
-        async function buyItem(id) {
-            const i = data.i[id];
-            if(i.sid === me.id) return;
-            if(me.bal < i.price) return Swal.fire('Oops', 'Not enough balance', 'error');
-
-            const did = 'd' + Date.now();
-            await db.child(`u/${me.id}/bal`).set(me.bal - i.price);
-            await db.child(`d/${did}`).set({ id: did, bid: me.id, sid: i.sid, title: i.title, price: i.price, status: 'hold' });
-            await db.child(`i/${id}`).remove();
-            
-            tg(`💰 Order: ${i.title} for ${i.price}₽ by ${me.n}`);
-            switchTab('deals');
-        }
-
-        async function createLot() {
-            const t = document.getElementById('l_title').value;
-            const p = Number(document.getElementById('l_price').value);
-            const c = document.getElementById('l_cat').value;
-            if(!t || p < 1) return;
-            const lid = 'i' + Date.now();
-            await db.child(`i/${lid}`).set({ id: lid, sid: me.id, title: t, price: p, cat: c });
-            switchTab('market');
-            tg(`📢 New Lot: ${t} (${p}₽) by ${me.n}`);
-        }
-
-        // ADMIN POWER FUNCTIONS
-        function renderAdmin() {
-            // Support
-            const tickets = Object.values(data.s || {}).filter(s => !s.resolved);
-            document.getElementById('adm_support_list').innerHTML = tickets.map(s => `
-                <div class="p-4 border-b border-white/5 flex justify-between items-center">
-                    <div>
-                        <p class="text-[10px] font-black text-blue-500 uppercase">${data.u[s.uid]?.n}</p>
-                        <p class="text-xs font-bold">${s.msg}</p>
-                    </div>
-                    <button onclick="replySupport('${s.id}')" class="bg-blue-600 px-3 py-1 rounded text-[9px] font-black uppercase">Ответить</button>
-                </div>
-            `).join('');
-
-            // Disputes
-            const disputes = Object.values(data.d || {}).filter(d => d.status === 'dispute');
-            document.getElementById('adm_dispute_list').innerHTML = disputes.map(d => `
-                <div class="p-4 border-b border-red-600/10 bg-red-600/5">
-                    <p class="text-[9px] font-black text-red-500 uppercase">Спор #${d.id}</p>
-                    <p class="text-xs font-bold mb-2">${d.title} (${d.price}₽)</p>
-                    <div class="flex gap-2">
-                        <button onclick="admForceDeal('${d.id}', 'confirm')" class="flex-1 bg-green-600 py-1.5 rounded text-[8px] font-black uppercase">Выплатить</button>
-                        <button onclick="admForceDeal('${d.id}', 'cancel')" class="flex-1 bg-red-600 py-1.5 rounded text-[8px] font-black uppercase">Вернуть</button>
+                    <div class="text-right">
+                        <b class="text-blue-500 block">${i.price} ₽</b>
+                        <span onclick="openSellerProfile('${i.sid}')" class="text-[9px] font-black text-zinc-600 uppercase underline decoration-zinc-800 underline-offset-4">${data.u[i.sid]?.n || 'System'}</span>
                     </div>
                 </div>
             `).join('');
-
-            // Logs
-            const logs = Object.values(data.l || {}).reverse().slice(0, 30);
-            document.getElementById('adm_logs').innerHTML = logs.map(l => `
-                <div class="log-entry"><span class="text-zinc-600">[${new Date(l.t).toLocaleTimeString()}]</span> ${l.m}</div>
-            `).join('');
         }
 
-        async function admManage(type) {
-            const nick = document.getElementById('adm_u_search').value.trim();
-            const targetUid = Object.keys(data.u).find(k => data.u[k].n === nick);
-            if(!targetUid) return Swal.fire('Error', 'User not found', 'error');
-            const target = data.u[targetUid];
+        function getIcon(cat) {
+            const icons = { 'Brawl Stars': 'fa-solid fa-star', 'Roblox': 'fa-solid fa-cube', 'Clash Royale': 'fa-solid fa-chess-king', 'Standoff 2': 'fa-solid fa-gun', 'Fortnite': 'fa-solid fa-person-rifle', 'CS:GO / CS2': 'fa-solid fa-shield-halved', 'Telegram': 'fa-brands fa-telegram', 'ChatGPT': 'fa-solid fa-robot' };
+            return icons[cat] || 'fa-solid fa-gamepad';
+        }
 
-            if(type === 'bal') {
-                const { value: val } = await Swal.fire({ title: 'Edit Balance', input: 'number', inputValue: target.bal, background: '#0f0f12', color: '#fff' });
-                if(val !== undefined) {
-                    await db.child(`u/${targetUid}/bal`).set(Number(val));
-                    logAdmin(`Изменил баланс ${nick} на ${val}₽`);
+        function openSellerProfile(uid) {
+            const seller = data.u[uid];
+            if(!seller) return;
+
+            document.getElementById('s_name').innerText = seller.n;
+            document.getElementById('s_ava').innerText = seller.n[0].toUpperCase();
+            document.getElementById('s_rat').innerText = Number(seller.rating || 0).toFixed(1);
+            document.getElementById('s_rev').innerText = seller.reviews || 0;
+
+            // Настройка кнопок "Поделиться"
+            const shareFn = () => shareProfile(uid, seller.n);
+            document.getElementById('share_btn_top').onclick = shareFn;
+            document.getElementById('share_pill_btn').onclick = shareFn;
+
+            const items = Object.values(data.i || {}).filter(i => i.sid === uid).reverse();
+            document.getElementById('seller_items').innerHTML = items.map(i => `
+                <div class="item-card flex justify-between items-center" onclick="buyItem('${i.id}')">
+                    <div class="flex items-center gap-4">
+                        <div class="w-11 h-11 bg-white/5 rounded-2xl flex items-center justify-center text-blue-500"><i class="${getIcon(i.cat)}"></i></div>
+                        <div><h4 class="font-bold text-xs">${i.title}</h4><p class="text-[9px] text-zinc-600 font-bold uppercase">${i.cat}</p></div>
+                    </div>
+                    <b class="text-blue-500 text-sm">${i.price} ₽</b>
+                </div>
+            `).join('') || '<p class="text-center py-10 opacity-20 text-[10px] font-black uppercase tracking-widest">Нет товаров</p>';
+
+            switchTab('seller');
+        }
+
+        async function shareProfile(uid, name) {
+            const shareData = {
+                title: `Профиль продавца ${name} на lyneok`,
+                text: `Посмотри товары от ${name} на маркетплейсе lyneok!`,
+                url: `${window.location.origin}${window.location.pathname}#user_${uid}`
+            };
+
+            try {
+                if (navigator.share) {
+                    await navigator.share(shareData);
+                } else {
+                    await navigator.clipboard.writeText(shareData.url);
+                    Swal.fire({
+                        title: 'Ссылка скопирована!',
+                        text: 'Отправь её друзьям, чтобы они увидели твой профиль.',
+                        icon: 'success',
+                        background: '#0f0f12', color: '#fff',
+                        confirmButtonColor: '#3b82f6',
+                        timer: 2000
+                    });
                 }
-            }
-
-            if(type === 'ban') {
-                const { value: mins } = await Swal.fire({ title: 'Ban duration (min)', input: 'number', inputValue: 60, background: '#0f0f12', color: '#fff' });
-                if(mins) {
-                    const until = Date.now() + (mins * 60000);
-                    await db.child(`u/${targetUid}/banUntil`).set(until);
-                    logAdmin(`Забанил ${nick} на ${mins} мин.`);
-                }
-            }
-
-            if(type === 'unban') {
-                await db.child(`u/${targetUid}/banUntil`).remove();
-                logAdmin(`Разбанил пользователя ${nick}`);
-                Swal.fire('OK', 'User Unbanned', 'success');
-            }
-
-            if(type === 'chats') {
-                const chats = Object.values(data.c || {}).filter(c => c.u1 === targetUid || c.u2 === targetUid);
-                Swal.fire({
-                    title: `Чаты ${nick}`,
-                    html: `<div class="text-left max-h-60 overflow-y-auto">${chats.map(c => `<div class="p-2 border-b border-white/5 text-[10px]"><b>${c.id}</b>: ${c.lastMsg}</div>`).join('') || 'Нет чатов'}</div>`,
-                    background: '#0f0f12', color: '#fff'
-                });
-            }
-        }
-
-        // BROADCASTER
-        function addBcBtn() {
-            Swal.fire({
-                title: 'Настройка кнопки',
-                html: `<input id="btn_t" class="swal2-input" placeholder="Текст кнопки"><input id="btn_u" class="swal2-input" placeholder="URL или Действие">`,
-                preConfirm: () => ({ t: document.getElementById('btn_t').value, u: document.getElementById('btn_u').value })
-            }).then(r => {
-                if(r.value) {
-                    bcButtons.push(r.value);
-                    document.getElementById('bc_btns').innerHTML += `<div class="bg-white/5 p-2 rounded text-[10px] font-bold">${r.value.t} -> ${r.value.u}</div>`;
-                }
-            });
-        }
-
-        async function sendBroadcast() {
-            const text = document.getElementById('bc_text').value;
-            const img = document.getElementById('bc_img').value;
-            if(!text) return;
-
-            const bId = 'bc' + Date.now();
-            // В реальной системе мы бы пушили уведомление каждому юзеру
-            // Здесь имитируем запись в глобальную ленту уведомлений
-            await db.child(`broadcasts/${bId}`).set({ text, img, btns: bcButtons, t: Date.now() });
-            
-            logAdmin(`Запустил глобальную рассылку: ${text.slice(0, 20)}...`);
-            Swal.fire('OK', 'Mailing Started', 'success');
-            document.getElementById('bc_text').value = '';
-            bcButtons = [];
-            document.getElementById('bc_btns').innerHTML = '';
-        }
-
-        // HELPERS
-        async function logAdmin(msg) {
-            const lid = 'l' + Date.now();
-            await db.child(`l/${lid}`).set({ m: msg, t: Date.now(), a: me.n });
-        }
-
-        async function openSupport() {
-            const { value: msg } = await Swal.fire({ title: 'Support', input: 'textarea', placeholder: 'Опишите проблему...', background: '#0f0f12', color: '#fff' });
-            if(msg) {
-                const sid = 's' + Date.now();
-                await db.child(`s/${sid}`).set({ id: sid, uid: me.id, msg, resolved: false });
-                Swal.fire('Sent', 'Wait for admin reply', 'success');
-            }
-        }
-
-        async function replySupport(sid) {
-            const { value: reply } = await Swal.fire({ title: 'Reply', input: 'textarea', background: '#0f0f12', color: '#fff' });
-            if(reply) {
-                await db.child(`s/${sid}/resolved`).set(true);
-                // Тут можно добавить логику отправки сообщения юзеру в чат
-                logAdmin(`Ответил на тикет ${sid}`);
-            }
-        }
-
-        async function admForceDeal(did, act) {
-            const d = data.d[did];
-            if(act === 'confirm') {
-                const seller = data.u[d.sid];
-                await db.child(`u/${seller.id}/bal`).set((seller.bal || 0) + d.price);
-                await db.child(`d/${did}/status`).set('done');
-                logAdmin(`Принудительно подтвердил сделку ${did}`);
-            } else {
-                const buyer = data.u[d.bid];
-                await db.child(`u/${buyer.id}/bal`).set((buyer.bal || 0) + d.price);
-                await db.child(`d/${did}/status`).set('cancelled');
-                logAdmin(`Принудительно отменил сделку ${did}`);
-            }
+            } catch (err) { console.log(err); }
         }
 
         function switchTab(t) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
             document.getElementById('tab_'+t).classList.add('active');
-            if(t !== 'sell') document.getElementById('n_'+t).classList.add('active');
+            if(t !== 'sell' && t !== 'seller') document.getElementById('n_'+t).classList.add('active');
+            document.getElementById('tab_'+t).scrollTop = 0;
         }
 
-        function showBan(t) {
-            const date = new Date(t).toLocaleString();
-            document.body.innerHTML = `<div class="h-screen bg-black flex flex-col items-center justify-center p-10 text-center">
-                <i class="fa-solid fa-hand text-red-600 text-6xl mb-6"></i>
-                <h1 class="text-3xl font-black italic mb-2 uppercase">You are Banned</h1>
-                <p class="text-zinc-600 text-xs font-bold uppercase tracking-widest leading-loose">Срок разблокировки:<br><span class="text-white">${date}</span></p>
-                <button onclick="location.reload()" class="mt-10 text-[10px] font-black text-blue-500 uppercase">Check Again</button>
-            </div>`;
-        }
-
+        // Остальные функции (createLot, buyItem, finance и т.д.) остаются из прошлых версий
+        function calcComm() { const p = document.getElementById('l_price').value; const net = p > 0 ? Math.floor(p * 0.97) : 0; document.getElementById('comm_info').innerText = `К получению: ${net} ₽ (Комиссия 3%)`; }
+        async function createLot() { const t = document.getElementById('l_title').value; const p = Number(document.getElementById('l_price').value); const c = document.getElementById('l_cat').value; if(p < 70 || !t) return Swal.fire('Упс', 'Мин. цена 70₽', 'warning'); const lid = 'i' + Date.now(); await db.child(`i/${lid}`).set({ id: lid, sid: me.id, title: t, price: p, cat: c }); switchTab('market'); }
+        async function buyItem(id) { const i = data.i[id]; if(i.sid === me.id) return Swal.fire('Инфо', 'Это ваш товар', 'info'); if(me.bal < i.price) return Swal.fire('Ошибка', 'Мало средств', 'error'); const { isConfirmed } = await Swal.fire({ title: 'Купить?', text: `${i.title} - ${i.price}₽`, showCancelButton: true, background: '#0f0f12', color: '#fff' }); if(isConfirmed) { const did = 'd' + Date.now(); await db.child(`u/${me.id}/bal`).set(me.bal - i.price); await db.child(`d/${did}`).set({ id: did, bid: me.id, sid: i.sid, title: i.title, price: i.price, status: 'hold' }); await db.child(`i/${id}`).remove(); switchTab('deals'); } }
+        async function openFinanceMenu() { const { value: act } = await Swal.fire({ title: 'Кошелек', background: '#0f0f12', color: '#fff', showDenyButton: true, confirmButtonText: 'Пополнить', denyButtonText: 'Вывести' }); if(act === true) { const { value: amount } = await Swal.fire({ title: 'Сумма', input: 'number', background: '#0f0f12', color: '#fff' }); if(amount > 0) { const depId = 'dep' + Date.now(); await db.child(`dep/${depId}`).set({ id: depId, uid: me.id, n: me.n, sum: amount, status: 'wait' }); Swal.fire('Ок', 'Заявка у админа', 'success'); } } }
+        function renderAdmin() { const deps = Object.values(data.dep || {}).filter(d => d.status === 'wait'); document.getElementById('adm_deposits').innerHTML = deps.map(d => `<div class="p-4 flex justify-between items-center bg-white/2"><div class="text-[10px] font-bold">${d.n} • ${d.sum}₽</div><button onclick="approveDep('${d.id}')" class="bg-blue-600 px-4 py-2 rounded-xl text-[9px] font-black uppercase">Одобрить</button></div>`).join(''); }
+        async function approveDep(id) { const d = data.dep[id]; const u = data.u[d.uid]; await db.child(`u/${d.uid}/bal`).set((u.bal || 0) + Number(d.sum)); await db.child(`dep/${id}/status`).set('ok'); }
         function logout() { localStorage.clear(); location.reload(); }
-        function tg(m) { fetch(`https://api.telegram.org/bot${BOT.token}/sendMessage?chat_id=${BOT.chat}&text=${encodeURIComponent(m)}`); }
-        function searchMarket() {
-            const q = document.getElementById('m_search').value.toLowerCase();
-            document.querySelectorAll('#market_grid .item-card').forEach(c => c.style.display = c.innerText.toLowerCase().includes(q) ? 'flex' : 'none');
-        }
 
         init();
     </script>
