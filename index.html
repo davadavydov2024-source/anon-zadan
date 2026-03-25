@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>lyneok | Professional Marketplace</title>
-    
+    <title>lyneok | Elite Framework</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -12,301 +12,390 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-        
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap');
+
         :root {
-            --bg-main: #07070a;
-            --bg-card: #111118;
-            --accent: #3b82f6;
-            --text-gray: #71717a;
+            --primary: #3b82f6;
+            --bg-black: #07070a;
+            --bg-card: #121218;
+            --accent-red: #ef4444;
+            --accent-amber: #f59e0b;
+            --accent-green: #22c55e;
+            --promo-purple: #8b5cf6;
         }
 
-        * { 
-            -webkit-tap-highlight-color: transparent; 
-            outline: none; 
-            box-sizing: border-box; 
-            user-select: none;
-        }
-
-        body { 
-            background: var(--bg-main); 
-            color: #fff; 
-            font-family: 'Inter', sans-serif; 
-            overflow: hidden; 
-            margin: 0; 
-        }
-
+        * { -webkit-tap-highlight-color: transparent; outline: none; box-sizing: border-box; }
+        body { background: var(--bg-black); color: #fff; font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
         ::-webkit-scrollbar { display: none; }
 
-        /* Экраны Auth & Ban */
-        .full-screen {
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        .glass-card { 
+            background: var(--bg-card); border-radius: 30px; 
+            border: 1px solid rgba(255,255,255,0.05); padding: 22px; margin-bottom: 15px; 
+        }
+        
+        .btn-action {
+            width: 100%; padding: 16px; border-radius: 20px; font-weight: 900;
+            text-transform: uppercase; letter-spacing: 1px; font-size: 10px;
+            transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;
         }
 
-        #auth_screen { 
-            background: radial-gradient(circle at top right, #1e3a8a 0%, #07070a 60%); 
+        #auth_screen {
+            position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center;
+            background: radial-gradient(circle at top right, #1e3a8a 0%, #07070a 75%);
         }
 
-        .auth-card {
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 40px;
-            padding: 40px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        .nav-dock {
+            position: fixed; bottom: 25px; left: 20px; right: 20px; height: 85px;
+            background: rgba(18, 18, 24, 0.95); backdrop-filter: blur(30px);
+            border: 1px solid rgba(255,255,255,0.05); border-radius: 35px;
+            display: flex; justify-content: space-around; align-items: center; z-index: 1000;
         }
+        .nav-item { color: #52525b; font-size: 20px; flex-direction: column; display: flex; align-items: center; }
+        .nav-item.active { color: var(--primary); }
+        .nav-item span { font-size: 8px; font-weight: 900; text-transform: uppercase; margin-top: 5px; }
 
-        .input-lyne {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 18px;
-            padding: 16px 20px;
-            width: 100%;
-            color: #fff;
-            font-size: 14px;
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        .preloader { position: fixed; inset: 0; background: #000; z-index: 20000; display: flex; align-items: center; justify-content: center; }
+        .loader-bar { width: 140px; height: 2px; background: #111; position: relative; overflow: hidden; }
+        .loader-bar::after { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 50%; background: var(--primary); animation: load 1.5s infinite ease-in-out; }
+        @keyframes load { 0% { left: -50%; } 100% { left: 100%; } }
 
-        .input-lyne:focus {
-            border-color: var(--accent);
-            background: rgba(0, 0, 0, 0.6);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-        }
-
-        .btn-blue {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            border-radius: 20px;
-            padding: 18px;
-            font-weight: 800;
-            width: 100%;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
-            transition: 0.2s;
-        }
-
-        .btn-blue:active { transform: scale(0.97); opacity: 0.9; }
-
-        /* Контейнеры приложения */
-        .tab { 
-            display: none; 
-            height: 100vh; 
-            overflow-y: auto; 
-            padding-bottom: 110px; 
-            animation: slideUp 0.4s ease-out;
-        }
-
-        .tab.active { display: block; }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 85px;
-            background: rgba(10, 10, 15, 0.95);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 1000;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
-        .nav-btn {
-            color: #52525b;
-            font-size: 22px;
-            transition: 0.3s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            position: relative;
-        }
-
-        .nav-btn.active { color: var(--accent); }
-        .nav-btn span { font-size: 9px; font-weight: 700; text-transform: uppercase; }
-
-        /* Карточки и Элементы */
-        .glass-card {
-            background: var(--bg-card);
-            border: 1px solid rgba(255, 255, 255, 0.03);
-            border-radius: 24px;
-            padding: 20px;
-            transition: 0.3s;
-        }
-
-        .lot-card {
-            border-left: 4px solid var(--accent);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        /* Чаты */
-        .chat-bubble {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 18px;
-            font-size: 13px;
-            line-height: 1.5;
-            margin-bottom: 8px;
-        }
-
-        .bubble-me { background: var(--accent); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
-        .bubble-them { background: #1f1f2e; color: #fff; align-self: flex-start; border-bottom-left-radius: 4px; }
-
-        /* Админка Модалка */
-        #admin_modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.9);
-            z-index: 9000;
-            padding: 20px;
-            overflow-y: auto;
-        }
+        .promo-admin-box { border: 1px dashed var(--promo-purple); background: rgba(139, 92, 246, 0.05); }
     </style>
 </head>
 <body>
 
-    <div id="auth_screen" class="full-screen hidden">
-        <div class="auth-card">
-            <div class="w-16 h-16 bg-blue-600 rounded-3xl mx-auto flex items-center justify-center mb-6 shadow-2xl rotate-3">
-                <i class="fa-solid fa-shield-halved text-white text-3xl"></i>
+    <div id="loader" class="preloader"><div class="loader-bar"></div></div>
+
+    <div id="auth_screen" class="hidden">
+        <div class="w-[90%] max-w-[410px] bg-white/5 backdrop-blur-3xl border border-white/10 rounded-[45px] p-12">
+            <div class="w-20 h-20 bg-blue-600 rounded-[28px] mx-auto flex items-center justify-center mb-8 shadow-2xl">
+                <i class="fa-solid fa-fire-glow text-white text-3xl"></i>
             </div>
-            <h1 class="text-3xl font-black italic text-center mb-1">lyneok<span class="text-blue-400">:access</span></h1>
-            <p class="text-[9px] text-zinc-500 uppercase font-black tracking-[4px] mb-10 text-center">secure marketplace access</p>
+            <h1 class="text-3xl font-black italic text-center">lyneok<span class="text-blue-500">:v7</span></h1>
+            <p class="text-[9px] text-zinc-600 text-center font-black uppercase tracking-[5px] mb-12">Advanced Marketplace</p>
             
-            <div class="space-y-4">
-                <input id="reg_n" class="input-lyne" placeholder="Желаемый никнейм">
-                <input id="reg_tg" class="input-lyne" placeholder="Ваш Telegram (@username)">
-                <input id="reg_p" type="password" class="input-lyne" placeholder="Придумайте пароль">
-                <button onclick="authAction()" class="btn-blue mt-4">Начать торговлю</button>
+            <div class="space-y-3">
+                <input id="reg_n" class="w-full bg-black/40 border border-white/5 p-5 rounded-2xl text-sm font-bold" placeholder="Username">
+                <input id="reg_tg" class="w-full bg-black/40 border border-white/5 p-5 rounded-2xl text-sm font-bold" placeholder="Telegram @handle">
+                <input id="reg_p" type="password" class="w-full bg-black/40 border border-white/5 p-5 rounded-2xl text-sm font-bold" placeholder="Secret Key">
             </div>
+
+            <button onclick="handleAuth()" class="w-full bg-blue-600 p-5 rounded-[24px] font-black uppercase text-xs tracking-widest mt-10">Initialize</button>
         </div>
-        <p class="text-[10px] text-zinc-700 font-bold uppercase mt-8 tracking-widest italic opacity-50">v4.0 encrypted node</p>
     </div>
 
-    <div id="ban_screen" class="full-screen bg-black hidden">
-        <div class="w-24 h-24 bg-red-600/10 rounded-full flex items-center justify-center mb-8 border border-red-600/20">
-            <i class="fa-solid fa-user-lock text-red-500 text-5xl"></i>
-        </div>
-        <h2 class="text-3xl font-black uppercase tracking-tighter">Доступ заблокирован</h2>
-        <p class="text-zinc-500 mt-2 text-sm px-10 text-center">Вы нарушили правила сообщества lyneok.</p>
-        <div id="ban_timer" class="text-5xl font-black text-red-600 mt-10 tabular-nums">00:00</div>
-    </div>
-
-    <div id="app" class="hidden">
-        
-        <header class="px-6 py-5 flex justify-between items-center sticky top-0 bg-[#07070a]/90 backdrop-blur-lg z-[500]">
+    <div id="app" class="flex flex-col h-screen hidden">
+        <header class="px-6 py-8 flex justify-between items-center sticky top-0 z-50 bg-black/50 backdrop-blur-lg">
             <div>
                 <h1 class="text-2xl font-black italic tracking-tighter">lyne<span class="text-blue-500">ok</span></h1>
-                <p class="text-[8px] text-zinc-600 font-bold uppercase tracking-widest">Marketplace</p>
+                <span class="text-[8px] font-black text-zinc-500 uppercase tracking-widest block">v7.0.0 Stable</span>
             </div>
-            <div onclick="setTab('profile')" class="bg-blue-600/10 border border-blue-600/20 px-4 py-2 rounded-2xl flex items-center gap-3">
-                <i class="fa-solid fa-wallet text-blue-500 text-xs"></i>
-                <span class="text-xs font-black tabular-nums" id="user_bal_top">0</span>
-                <span class="text-[10px] font-bold text-blue-500">₽</span>
+            <div class="bg-white/5 px-5 py-3 rounded-2xl border border-white/5">
+                <span id="h_bal" class="text-xl font-black tracking-tighter">0</span>
+                <span class="text-[10px] text-blue-500 font-black ml-1">₽</span>
             </div>
         </header>
 
-        <main id="home" class="tab active px-6 pt-2">
-            <div class="relative mb-8">
-                <input class="w-full bg-[#111118] border border-white/5 p-4.5 rounded-2xl pl-12 text-sm text-zinc-300 focus:border-blue-600/50" placeholder="Поиск игр, скинов, валюты...">
-                <i class="fa-solid fa-magnifying-glass absolute left-5 top-5 text-zinc-600"></i>
+        <main id="tab_market" class="tab-content active overflow-y-auto px-5 pb-32">
+            <div class="relative my-6">
+                <input id="search" oninput="marketSearch()" class="w-full bg-[#121218] border border-white/5 p-5 rounded-[22px] pl-14 text-sm font-bold" placeholder="Поиск товаров...">
+                <i class="fa-solid fa-magnifying-glass absolute left-6 top-5.5 text-zinc-600"></i>
             </div>
-
-            <div class="flex justify-between items-end mb-5">
-                <h2 class="font-black text-lg tracking-tight">Популярные игры</h2>
-                <span class="text-[10px] text-zinc-500 font-black uppercase">Все категории</span>
-            </div>
-            <div class="grid grid-cols-4 gap-4 mb-10" id="game_grid">
-                </div>
-
-            <div class="flex items-center gap-2 mb-4">
-                <div class="w-1 h-5 bg-blue-600 rounded-full"></div>
-                <h2 class="font-black text-lg">Свежие предложения</h2>
-            </div>
-            <div id="items_container" class="space-y-4 pb-10">
-                </div>
+            <div id="market_feed" class="space-y-2"></div>
         </main>
 
-        <main id="sell" class="tab px-6 pt-6">
-            <div class="glass-card mb-6">
-                <h2 class="text-xl font-black mb-6 text-center uppercase tracking-widest">Выставить товар</h2>
+        <main id="tab_deals" class="tab-content hidden overflow-y-auto px-5 pb-32">
+            <h2 class="text-2xl font-black italic py-6">Сделки</h2>
+            <div id="hold_list" class="space-y-3 mb-8"></div>
+            <p class="text-[10px] font-black text-zinc-700 uppercase mb-4">История</p>
+            <div id="history_list" class="space-y-2"></div>
+        </main>
+
+        <main id="tab_sell" class="tab-content hidden px-5 pt-6">
+            <div class="glass-card">
+                <h2 class="text-xl font-black mb-6">Создать объявление</h2>
                 <div class="space-y-4">
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-zinc-500 uppercase ml-2">Выберите игру</label>
-                        <select id="lot_game" class="input-lyne appearance-none">
-                            <option>Brawl Stars</option><option>Roblox</option><option>Standoff 2</option><option>Steam</option><option>Telegram</option><option>Genshin Impact</option>
-                        </select>
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-zinc-500 uppercase ml-2">Название лота</label>
-                        <input id="lot_title" class="input-lyne" placeholder="Напр: Аккаунт 50 скинов + почта">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-zinc-500 uppercase ml-2">Описание (инструкция)</label>
-                        <textarea id="lot_desc" class="input-lyne h-24" placeholder="Опишите товар подробно..."></textarea>
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-zinc-500 uppercase ml-2">Цена продажи (₽)</label>
-                        <input id="lot_price" type="number" class="input-lyne" placeholder="0" oninput="updateFee(this.value)">
-                        <p id="fee_calc" class="text-[9px] text-zinc-500 text-center mt-2 font-medium">Комиссия lyneok: 3.5% | К зачислению: 0 ₽</p>
-                    </div>
-                    <button onclick="createLot()" class="btn-blue !py-4 mt-4">Опубликовать</button>
+                    <input id="l_title" class="w-full bg-black/40 border border-white/5 p-5 rounded-2xl text-sm font-bold" placeholder="Что продаем?">
+                    <input id="l_price" type="number" class="w-full bg-black/40 border border-white/5 p-5 rounded-2xl text-xl font-black text-blue-500" placeholder="Цена ₽">
+                    <button onclick="postLot()" class="btn-action bg-blue-600 shadow-xl mt-4">Выставить на продажу</button>
                 </div>
             </div>
         </main>
 
-        <main id="chats" class="tab px-6 pt-6">
-            <div id="chat_list_view" class="space-y-3">
-                <div onclick="openSupport()" class="glass-card flex items-center gap-4 border-l-4 border-blue-600 cursor-pointer active:scale-95 transition">
-                    <div class="w-12 h-12 bg-blue-600/20 rounded-full flex items-center justify-center text-blue-500"><i class="fa-solid fa-headset text-xl"></i></div>
-                    <div class="flex-1">
-                        <div class="flex justify-between items-center"><b class="text-sm">Поддержка lyneok</b><span class="text-[10px] text-zinc-500 uppercase">24/7</span></div>
-                        <p class="text-[11px] text-zinc-500 mt-1 truncate">Помощь по сделками и балансу</p>
+        <main id="tab_profile" class="tab-content hidden overflow-y-auto px-5 pb-32">
+            <div class="glass-card text-center relative mt-6">
+                <div class="w-24 h-24 bg-blue-600 rounded-[35px] mx-auto flex items-center justify-center text-4xl font-black mb-6 shadow-2xl" id="p_ava">?</div>
+                <h3 id="p_name" class="text-2xl font-black italic">Artyom</h3>
+                <p id="p_tg" class="text-xs text-zinc-600 font-bold mt-1 tracking-tight">@sswckk</p>
+                
+                <div class="grid grid-cols-2 gap-4 mt-10">
+                    <div class="bg-white/5 p-5 rounded-3xl border border-white/5">
+                        <b id="s_bal" class="text-xl font-black tracking-tighter">0</b>
+                        <p class="text-[8px] text-zinc-500 font-black uppercase mt-1">Баланс ₽</p>
+                    </div>
+                    <div class="bg-white/5 p-5 rounded-3xl border border-white/5">
+                        <b id="s_deals" class="text-xl font-black tracking-tighter text-blue-500">0</b>
+                        <p class="text-[8px] text-zinc-500 font-black uppercase mt-1">Отзывы</p>
                     </div>
                 </div>
-                <div class="text-center py-10 opacity-20">
-                    <i class="fa-solid fa-comments text-5xl mb-4"></i>
-                    <p class="text-xs font-bold uppercase tracking-widest">Активных сделок нет</p>
-                </div>
+
+                <button onclick="redeemPromoUI()" class="w-full bg-indigo-600/10 text-indigo-500 py-4 rounded-2xl font-black text-[9px] uppercase mt-6 border border-indigo-500/20 tracking-widest">
+                    <i class="fa-solid fa-ticket mr-2"></i> Активировать промокод
+                </button>
             </div>
 
-            <div id="active_chat_view" class="hidden fixed inset-0 bg-[#07070a] z-[2000] flex flex-col">
-                <div class="px-6 py-5 flex items-center gap-4 border-bottom border-white/5">
-                    <button onclick="closeChat()" class="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center"><i class="fa-solid fa-chevron-left"></i></button>
-                    <div><b class="text-sm" id="chat_target_name">Чат</b><p class="text-[10px] text-green-500 font-bold uppercase">Онлайн</p></div>
+            <div id="promo_admin_terminal" class="hidden mt-8 space-y-4 fade-in">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="text-[9px] font-black text-purple-500 uppercase tracking-[4px]">Promo Control (Secret)</span>
+                    <div class="h-[1px] flex-1 bg-purple-500/20"></div>
                 </div>
-                <div id="chat_messages" class="flex-1 overflow-y-auto p-6 flex flex-col"></div>
-                <div class="p-6 bg-[#07070a] border-t border-white/5">
-                    <div class="flex gap-2">
-                        <input id="chat_input" class="input-lyne !rounded-full" placeholder="Ваше сообщение...">
-                        <button onclick="sendMessage()" class="w-14 h-14 bg-blue-600 rounded-full flex-shrink-0 flex items-center justify-center"><i class="fa-solid fa-paper-plane"></i></button>
+                
+                <div class="glass-card promo-admin-box">
+                    <p class="text-[9px] font-black text-purple-400 uppercase mb-4">Генератор кодов</p>
+                    <input id="adm_promo_name" class="w-full bg-black/40 border border-white/5 p-4 rounded-xl text-xs mb-3 font-mono" placeholder="КОД (напр: GIFT2026)">
+                    <input id="adm_promo_sum" type="number" class="w-full bg-black/40 border border-white/5 p-4 rounded-xl text-xs mb-3" placeholder="Сумма в ₽">
+                    <button onclick="createPromo()" class="w-full bg-purple-600 py-4 rounded-xl font-black text-[9px] uppercase tracking-widest">Создать промокод</button>
+                </div>
+
+                <div id="promo_list" class="space-y-2">
                     </div>
-                </div>
             </div>
+
+            <div id="admin_terminal" class="hidden mt-8 space-y-4">
+                <p class="text-[9px] font-black text-red-600 uppercase tracking-[4px] text-center mb-6">Arbitration Mode</p>
+                <div id="dispute_list" class="space-y-3"></div>
+            </div>
+
+            <button onclick="logout()" class="w-full py-12 text-zinc-800 font-black text-[9px] uppercase tracking-[6px]">Kill Session</button>
         </main>
 
-        <main id="profile" class="tab px-6 pt-6">
-            <div class="glass-card text-center relative overflow-hidden mb-6">
-                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
-                <div class="w-24 h-24 bg-zinc-900 rounded-[32px] mx-auto flex items-center justify-center text-4xl font-black shadow-2xl mb-4 border border-white/5" id="user_avatar">?</div>
-                <h3 class="text-2xl font-black tracking-tight" id="user_name">User</h3>
-                <p class
+        <nav class="nav-dock">
+            <div onclick="nav('market')" id="n_market" class="nav-item active"><i class="fa-solid fa-shop"></i><span>Маркет</span></div>
+            <div onclick="nav('deals')" id="n_deals" class="nav-item"><i class="fa-solid fa-handshake"></i><span>Сделки</span></div>
+            <div onclick="nav('sell')" id="n_sell" class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl shadow-2xl -mt-12 border-[6px] border-[#07070a]"><i class="fa-solid fa-plus"></i></div>
+            <div onclick="nav('profile')" id="n_profile" class="nav-item"><i class="fa-solid fa-user"></i><span>Профиль</span></div>
+        </nav>
+    </div>
+
+    <script>
+        const FB_CONFIG = {
+            apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI",
+            databaseURL: "https://dogx-base-default-rtdb.firebaseio.com"
+        };
+        const TG_CONFIG = { token: "8641257792:AAEsxnQWEIeozMt_gnSwJdVgSFQlOc-hnuc", chat: "7040863301" };
+
+        firebase.initializeApp(FB_CONFIG);
+        const db = firebase.database().ref('lyneok_v7_final');
+
+        let me = null;
+        let vault = {};
+        const SECRET_PROMO_KEY = "kalubxq";
+
+        function start() {
+            db.on('value', snap => {
+                vault = snap.val() || { u: {}, i: {}, d: {}, p: {} };
+                const sid = localStorage.getItem('sswckk_sid_v7');
+                
+                if(!sid) {
+                    toggleAuth(true);
+                } else {
+                    me = vault.u[sid];
+                    if(me) {
+                        toggleAuth(false);
+                        render();
+                    } else { logout(); }
+                }
+                document.getElementById('loader').style.display = 'none';
+            });
+        }
+
+        function toggleAuth(show) {
+            document.getElementById('auth_screen').classList.toggle('hidden', !show);
+            document.getElementById('app').classList.toggle('hidden', show);
+        }
+
+        async function handleAuth() {
+            const n = document.getElementById('reg_n').value.trim();
+            const t = document.getElementById('reg_tg').value.trim();
+            const p = document.getElementById('reg_p').value.trim();
+            if(!n || !t) return;
+            const uid = 'u' + Date.now().toString().slice(-6);
+            const user = { id: uid, n, tg: t, p, bal: 0, rating: 5, reviews: 0 };
+            await db.child(`u/${uid}`).set(user);
+            localStorage.setItem('sswckk_sid_v7', uid);
+        }
+
+        function render() {
+            document.getElementById('h_bal').innerText = me.bal.toLocaleString();
+            document.getElementById('s_bal').innerText = me.bal.toLocaleString();
+            document.getElementById('s_deals').innerText = me.reviews || 0;
+            document.getElementById('p_name').innerText = me.n;
+            document.getElementById('p_tg').innerText = me.tg;
+            document.getElementById('p_ava').innerText = me.n[0].toUpperCase();
+
+            // Admin Panels
+            const isAdmin = (me.n.toLowerCase() === 'artyom' || me.n.toLowerCase() === 'sswckk' || me.id === 'u7040863301');
+            if(isAdmin) {
+                document.getElementById('admin_terminal').classList.remove('hidden');
+                renderAdminDisputes();
+            }
+
+            // Market
+            const items = Object.values(vault.i || {}).reverse();
+            document.getElementById('market_feed').innerHTML = items.map(i => `
+                <div class="lot-card glass-card flex justify-between items-center" onclick="buyProcess('${i.id}')">
+                    <div>
+                        <h4 class="font-bold text-zinc-100">${i.title}</h4>
+                        <p class="text-[9px] text-zinc-500 font-black uppercase mt-1">Продавец: ${vault.u[i.sid]?.n || 'System'}</p>
+                    </div>
+                    <b class="text-xl font-black text-blue-500">${i.price} ₽</b>
+                </div>
+            `).join('') || '<p class="text-center py-20 text-zinc-800 text-[10px] font-black uppercase">Пусто</p>';
+
+            renderDeals();
+            renderPromoAdminList();
+        }
+
+        function renderDeals() {
+            const deals = Object.values(vault.d || {}).reverse();
+            const active = deals.filter(d => (d.status === 'hold' || d.status === 'dispute') && (d.bid === me.id || d.sid === me.id));
+            document.getElementById('hold_list').innerHTML = active.map(d => `
+                <div class="glass-card ${d.status === 'dispute' ? 'border-red-600/30' : ''}">
+                    <div class="flex justify-between mb-4">
+                        <span class="text-[9px] font-black ${d.status === 'dispute' ? 'text-red-500' : 'text-amber-500'} uppercase">${d.status === 'dispute' ? 'В СПОРЕ' : 'В ХОЛДЕ'}</span>
+                        <b class="text-sm">${d.price} ₽</b>
+                    </div>
+                    <h5 class="text-xs font-bold">${d.title}</h5>
+                    ${d.bid === me.id && d.status !== 'dispute' ? `
+                        <div class="flex gap-2 mt-4">
+                            <button onclick="releaseDeal('${d.id}')" class="flex-1 bg-green-600/10 text-green-500 py-3 rounded-xl font-black text-[9px] uppercase border border-green-500/10">Принять</button>
+                            <button onclick="openDispute('${d.id}')" class="flex-1 bg-red-600/10 text-red-500 py-3 rounded-xl font-black text-[9px] uppercase border border-red-500/10">Спор</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('') || '<p class="text-center py-5 text-zinc-800 text-[9px] font-black uppercase">Нет активных сделок</p>';
+        }
+
+        // --- PROMO SYSTEM CORE ---
+
+        async function redeemPromoUI() {
+            const { value: code } = await Swal.fire({
+                title: 'Активация',
+                input: 'text',
+                inputPlaceholder: 'Введите код...',
+                confirmButtonText: 'Применить',
+                background: '#121218', color: '#fff'
+            });
+
+            if(!code) return;
+
+            // SECRET ADMIN UNLOCK
+            if(code === SECRET_PROMO_KEY) {
+                document.getElementById('promo_admin_terminal').classList.remove('hidden');
+                Swal.fire('Admin Unlocked', 'Скрытая панель промокодов активирована.', 'success');
+                return;
+            }
+
+            const promo = vault.p ? vault.p[code.toUpperCase()] : null;
+            
+            if(!promo) return Swal.fire('Ошибка', 'Промокод не существует', 'error');
+            if(promo.usedBy && promo.usedBy[me.id]) return Swal.fire('Стоп', 'Вы уже использовали этот код', 'warning');
+
+            // Process Redemption
+            await db.child(`u/${me.id}/bal`).set(me.bal + promo.amount);
+            await db.child(`p/${code.toUpperCase()}/usedBy/${me.id}`).set(true);
+            
+            tgLog(`🎟 PROMO USED\nUser: ${me.n}\nCode: ${code.toUpperCase()}\nSum: ${promo.amount}₽`);
+            Swal.fire('Успех!', `Начислено ${promo.amount} ₽`, 'success');
+        }
+
+        async function createPromo() {
+            const name = document.getElementById('adm_promo_name').value.trim().toUpperCase();
+            const sum = Number(document.getElementById('adm_promo_sum').value);
+            
+            if(!name || sum < 1) return;
+
+            await db.child(`p/${name}`).set({
+                code: name,
+                amount: sum,
+                createdBy: me.n,
+                usedBy: {}
+            });
+
+            document.getElementById('adm_promo_name').value = '';
+            document.getElementById('adm_promo_sum').value = '';
+            Swal.fire('Готово', `Промокод ${name} на ${sum}₽ создан`, 'success');
+        }
+
+        function renderPromoAdminList() {
+            const container = document.getElementById('promo_list');
+            const promos = Object.values(vault.p || {});
+            container.innerHTML = promos.map(p => `
+                <div class="bg-white/5 p-3 rounded-xl flex justify-between items-center border border-white/5">
+                    <span class="font-mono text-[10px] font-bold text-purple-400">${p.code}</span>
+                    <span class="text-[10px] font-black">${p.amount} ₽</span>
+                    <button onclick="deletePromo('${p.code}')" class="text-red-500 text-[10px] ml-4"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            `).join('');
+        }
+
+        async function deletePromo(code) {
+            await db.child(`p/${code}`).remove();
+        }
+
+        // --- MARKET LOGIC ---
+
+        async function buyProcess(id) {
+            const item = vault.i[id];
+            if(item.sid === me.id) return;
+            if(me.bal < item.price) return Swal.fire('Error', 'Недостаточно средств', 'error');
+
+            const did = 'd' + Date.now();
+            await db.child(`u/${me.id}/bal`).set(me.bal - item.price);
+            await db.child(`d/${did}`).set({ id: did, bid: me.id, sid: item.sid, title: item.title, price: item.price, status: 'hold' });
+            await db.child(`i/${id}`).remove();
+            nav('deals');
+        }
+
+        async function releaseDeal(did) {
+            const deal = vault.d[did];
+            const seller = vault.u[deal.sid];
+            await db.child(`u/${seller.id}/bal`).set((seller.bal || 0) + deal.price);
+            await db.child(`d/${did}/status`).set('done');
+            tgLog(`✅ СДЕЛКА ЗАВЕРШЕНА\n${deal.title} (${deal.price}₽)`);
+        }
+
+        async function openDispute(did) {
+            await db.child(`d/${did}/status`).set('dispute');
+            tgLog(`🚨 СПОР ОТКРЫТ\nСделка: ${did}\nПокупатель: ${me.n}`);
+        }
+
+        async function postLot() {
+            const t = document.getElementById('l_title').value;
+            const p = Number(document.getElementById('l_price').value);
+            if(!t || p < 1) return;
+            const lid = 'i' + Date.now();
+            await db.child(`i/${lid}`).set({ id: lid, title: t, price: p, sid: me.id });
+            document.getElementById('l_title').value = '';
+            document.getElementById('l_price').value = '';
+            nav('market');
+        }
+
+        function nav(t) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab_'+t).classList.remove('hidden');
+            if(t !== 'sell') document.getElementById('n_'+t).classList.add('active');
+        }
+
+        function logout() { localStorage.clear(); location.reload(); }
+        function tgLog(m) { fetch(`https://api.telegram.org/bot${TG_CONFIG.token}/sendMessage?chat_id=${TG_CONFIG.chat}&text=${encodeURIComponent(m)}`); }
+        function marketSearch() {
+            const q = document.getElementById('search').value.toLowerCase();
+            document.querySelectorAll('.lot-card').forEach(c => c.style.display = c.innerText.toLowerCase().includes(q) ? 'flex' : 'none');
+        }
+
+        start();
+    </script>
+</body>
+</html>
