@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>LYNEOK V37 — SIGNAL</title>
-
+    <title>LYNEOK V40 — MONETIZATION</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -13,7 +12,7 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap');
-        :root { --bg: #050506; --card: #111113; --blue: #3b82f6; }
+        :root { --bg: #050506; --card: #111113; --blue: #3b82f6; --red: #ef4444; --green: #22c55e; }
         body { background: var(--bg); color: #fff; font-family: 'Manrope', sans-serif; overflow: hidden; height: 100vh; margin: 0; }
         .tab-content { display: none; height: 100%; overflow-y: auto; padding-bottom: 120px; }
         .tab-content.active { display: block; animation: fadeIn 0.2s ease; }
@@ -24,22 +23,24 @@
         .tile { background: var(--card); border-radius: 24px; border: 1px solid rgba(255,255,255,0.04); }
         input, textarea, select { background: #18181b; border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 16px; color: white; width: 100%; outline: none; font-size: 14px; }
         .btn-main { background: var(--blue); padding: 18px; border-radius: 22px; font-weight: 800; text-transform: uppercase; width: 100%; transition: all 0.2s; }
-        .btn-main:active { transform: scale(0.97); opacity: 0.9; }
-        .chat-msg { max-width: 80%; padding: 12px 16px; border-radius: 20px; margin-bottom: 8px; font-size: 13px; line-height: 1.4; }
+        .chat-msg { max-width: 80%; padding: 12px 16px; border-radius: 20px; margin-bottom: 8px; font-size: 13px; position: relative; }
         .msg-in { background: #1c1c1f; align-self: flex-start; border-bottom-left-radius: 4px; }
         .msg-out { background: var(--blue); align-self: flex-end; border-bottom-right-radius: 4px; }
+        .msg-admin { background: var(--red); align-self: center; border-radius: 12px; text-align: center; font-weight: 800; font-size: 11px; }
+        .star-active { color: #fbbf24; }
+        ::-webkit-scrollbar { width: 0; }
     </style>
 </head>
 <body>
 
-    <div id="loader" class="fixed inset-0 bg-black z-[9999] flex flex-col items-center justify-center font-black text-blue-500 italic uppercase">Connecting_TG_Signal_V37...</div>
+    <div id="loader" class="fixed inset-0 bg-black z-[9999] flex items-center justify-center font-black text-blue-500 italic uppercase tracking-widest">V40_MONETIZE_LOAD...</div>
 
     <div id="auth_screen" class="hidden h-screen flex flex-col items-center justify-center px-10 text-center">
         <h1 class="text-4xl font-black italic mb-8 uppercase tracking-tighter">LYNE<span class="text-blue-500">OK</span></h1>
         <div class="w-full max-w-sm space-y-3">
-            <input id="reg_n" placeholder="НИКНЕЙМ">
+            <input id="reg_n" placeholder="ЛОГИН">
             <input id="reg_p" type="password" placeholder="ПАРОЛЬ">
-            <button onclick="handleAuth()" class="btn-main mt-4">Войти</button>
+            <button onclick="handleAuth()" class="btn-main">ВОЙТИ</button>
         </div>
     </div>
 
@@ -58,20 +59,23 @@
         </main>
 
         <main id="tab_sell" class="tab-content px-5 pt-6">
-            <h2 class="text-xl font-black mb-6 italic uppercase text-blue-500">Продать</h2>
-            <div class="space-y-3">
+            <h2 class="text-xl font-black mb-6 italic uppercase text-blue-500">Создать лот</h2>
+            <div class="space-y-3 pb-20">
                 <input type="file" id="i_img" class="hidden" onchange="compImg(this, 'l_img')">
-                <label for="i_img" id="l_img" class="w-full h-32 bg-zinc-900 border-2 border-dashed border-white/5 rounded-3xl flex items-center justify-center font-black text-[10px] opacity-40 uppercase">Добавить фото</label>
+                <label for="i_img" id="l_img" class="w-full h-32 bg-zinc-900 border-2 border-dashed border-white/5 rounded-3xl flex items-center justify-center font-black text-[10px] opacity-40 uppercase">ФОТО ТОВАРА</label>
                 <select id="i_cat"></select>
-                <input id="i_title" placeholder="Заголовок">
+                <input id="i_title" placeholder="Название">
                 <textarea id="i_desc" placeholder="Данные товара"></textarea>
-                <input id="i_price" type="number" oninput="updFee()" placeholder="Цена">
-                <button onclick="postItem()" class="btn-main">Выставить</button>
+                <div class="relative">
+                    <input id="i_price" type="number" placeholder="Цена для покупателя (₽)" oninput="calcNet()">
+                    <p id="fee_info" class="text-[9px] font-black text-zinc-500 mt-2 ml-2 uppercase">К получению: 0 ₽</p>
+                </div>
+                <button onclick="postItem()" class="btn-main">Выставить на продажу</button>
             </div>
         </main>
 
         <main id="tab_chats" class="tab-content px-5 pt-6">
-            <button onclick="openChatRoom('support_' + me.id)" class="w-full tile p-5 mb-4 border-blue-500/20 text-blue-500 font-black text-[10px] uppercase italic">Техподдержка</button>
+            <button onclick="openChatRoom('support_' + me.id)" class="w-full tile p-5 mb-4 border-blue-500/20 text-blue-500 font-black text-[10px] uppercase italic">Поддержка</button>
             <div id="chats_list" class="space-y-2"></div>
         </main>
 
@@ -79,34 +83,34 @@
             <div class="tile p-6 mb-4 flex items-center gap-4">
                 <div class="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center font-black text-xl" id="p_ava">?</div>
                 <div>
-                    <b id="p_name" class="text-lg uppercase italic">...</b>
-                    <p id="p_id" class="text-[9px] opacity-30 font-bold uppercase">UID: 000000</p>
+                    <div class="flex items-center gap-2">
+                        <b id="p_name" class="text-lg uppercase italic">...</b>
+                        <i id="p_v_icon" class="fa-solid fa-circle-check text-blue-500 hidden"></i>
+                    </div>
+                    <div id="p_rating" class="text-amber-400 text-[10px] font-black mt-1">⭐ 0.0 (0 отзывов)</div>
                 </div>
             </div>
-            <div class="tile p-5 mb-4">
-                <input id="u_email" placeholder="Привязать почту" class="mb-2">
-                <button onclick="saveEmail()" class="w-full bg-blue-600 py-3 rounded-xl font-black text-[10px] uppercase">Сохранить</button>
-            </div>
-            <div class="grid grid-cols-2 gap-2 mb-4">
+            <button id="adm_btn" onclick="switchTab('admin')" class="hidden tile w-full p-5 font-black text-xs text-red-500 uppercase italic mb-4">АДМИН-ЦЕНТР V40</button>
+            <div class="grid grid-cols-2 gap-2 mb-2">
                 <button onclick="moneyReq('ПОПОЛНЕНИЕ')" class="tile p-5 font-black text-[10px] uppercase italic">Пополнить</button>
-                <button onclick="moneyReq('ВЫВОД')" class="tile p-5 font-black text-[10px] uppercase italic text-zinc-400">Вывести</button>
+                <button onclick="moneyReq('ВЫВОД')" class="tile p-5 font-black text-[10px] uppercase italic">Вывести</button>
             </div>
-            <button id="v_btn" onclick="reqV()" class="tile w-full p-5 font-black text-xs text-blue-500 uppercase italic mb-2">Верификация</button>
-            <button id="adm_btn" onclick="switchTab('admin')" class="hidden tile w-full p-5 font-black text-xs text-red-500 uppercase italic mb-2">АДМИН-ПАНЕЛЬ</button>
-            <button onclick="logout()" class="tile w-full p-5 opacity-30 font-black text-xs uppercase italic">Выход</button>
+            <button onclick="logout()" class="tile w-full p-5 opacity-30 font-black text-xs uppercase italic">Выйти</button>
         </main>
 
         <main id="tab_admin" class="tab-content px-5 pt-6">
-            <div class="space-y-4">
-                <div class="bg-zinc-900 p-4 rounded-3xl">
-                    <input id="cat_name" placeholder="Название игры" class="mb-2">
-                    <input type="file" id="cat_img" class="hidden" onchange="compImg(this, 'l_cat')">
-                    <label for="cat_img" id="l_cat" class="w-full h-10 bg-zinc-800 rounded-xl flex items-center justify-center text-[9px] font-black mb-2">ФОТО ИГРЫ</label>
-                    <button onclick="saveCat()" class="w-full bg-blue-600 py-3 rounded-xl font-black text-[10px] uppercase">Добавить категорию</button>
+            <h1 class="text-2xl font-black text-red-500 italic mb-6 uppercase">Control Center</h1>
+            <div class="space-y-6 pb-32">
+                <div class="tile p-4 border-blue-500/20">
+                    <p class="text-[9px] font-black text-blue-500 mb-2 uppercase italic">Экономика</p>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-black opacity-50 uppercase">Комиссия %:</span>
+                        <input id="set_fee" type="number" class="!py-2 !px-4 !w-24" placeholder="10">
+                        <button onclick="saveFee()" class="bg-blue-600 px-4 py-2 rounded-xl text-[9px] font-black uppercase italic">SAVE</button>
+                    </div>
                 </div>
-                <div id="adm_mod" class="space-y-2"></div>
-                <div id="adm_support" class="space-y-2"></div>
-                <div id="adm_users" class="space-y-2 pb-20"></div>
+                <div><p class="text-[9px] font-black opacity-30 uppercase mb-2">На модерации:</p><div id="adm_mod" class="space-y-2"></div></div>
+                <div><p class="text-[9px] font-black opacity-30 uppercase mb-2">Все чаты:</p><div id="adm_chats" class="space-y-2"></div></div>
             </div>
         </main>
 
@@ -119,39 +123,51 @@
     </div>
 
     <div id="chat_modal" class="fixed inset-0 bg-black z-[2000] hidden flex flex-col">
-        <header class="p-6 flex justify-between items-center border-b border-white/5 bg-zinc-950">
-            <b id="chat_title" class="text-xs text-blue-500 italic uppercase">Чат</b>
+        <header class="p-6 flex justify-between items-center bg-zinc-950 border-b border-white/5">
+            <b id="chat_title" class="text-xs uppercase italic text-blue-500">Чат сделки</b>
             <button onclick="closeChat()"><i class="fa-solid fa-xmark text-xl"></i></button>
         </header>
+        
+        <div id="adm_chat_tools" class="hidden bg-zinc-900 p-3 border-b border-white/5 flex gap-2">
+            <button onclick="adminResolve('complete')" class="bg-green-600 flex-1 py-2 rounded-lg text-[8px] font-black uppercase italic">Завершить</button>
+            <button onclick="adminResolve('cancel')" class="bg-red-600 flex-1 py-2 rounded-lg text-[8px] font-black uppercase italic">Возврат</button>
+        </div>
+
         <div id="chat_body" class="flex-1 overflow-y-auto p-5 flex flex-col gap-2"></div>
-        <div class="p-4 bg-zinc-950 flex gap-2 pb-10 border-t border-white/5">
+
+        <div id="review_box" class="hidden p-5 bg-zinc-900 border-t border-white/10 text-center">
+            <p class="text-[10px] font-black uppercase mb-3 italic">Оцените работу продавца:</p>
+            <div class="flex justify-center gap-4 mb-4 text-2xl">
+                <i onclick="setStar(1)" class="fa-solid fa-star star-btn" data-s="1"></i>
+                <i onclick="setStar(2)" class="fa-solid fa-star star-btn" data-s="2"></i>
+                <i onclick="setStar(3)" class="fa-solid fa-star star-btn" data-s="3"></i>
+                <i onclick="setStar(4)" class="fa-solid fa-star star-btn" data-s="4"></i>
+                <i onclick="setStar(5)" class="fa-solid fa-star star-btn" data-s="5"></i>
+            </div>
+            <button onclick="sendReview()" class="w-full bg-amber-500 py-3 rounded-2xl font-black text-[10px] uppercase italic text-black">Оставить отзыв</button>
+        </div>
+        
+        <div id="msg_input_box" class="p-4 bg-zinc-950 flex gap-2 pb-10 border-t border-white/5">
             <input id="chat_input" placeholder="Сообщение...">
-            <button onclick="sendTextMsg()" class="bg-blue-600 px-6 rounded-2xl font-black text-[9px] uppercase">ОТПР.</button>
+            <button onclick="sendTextMsg()" class="bg-blue-600 px-6 rounded-2xl font-black text-[9px] uppercase italic">ОТПР.</button>
         </div>
     </div>
 
     <script>
         const CFG = { apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI", databaseURL: "https://dogx-base-default-rtdb.firebaseio.com" };
         firebase.initializeApp(CFG);
-        const db = firebase.database().ref('lyne_v37_signal');
+        const db = firebase.database().ref('lyne_v40_biz');
 
-        // ТВОИ ДАННЫЕ
         const TG_TOKEN = "8641257792:AAEsxnQWEIeozMt_gnSwJdVgSFQlOc-hnuc";
         const TG_ADMIN_ID = "7040863301";
 
-        let me = null, data = {}, curChat = null, b64 = "", b64Cat = "";
-
-        // УВЕДОМЛЕНИЯ В ТГ
-        async function sendTg(text) {
-            const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_ADMIN_ID}&text=${encodeURIComponent(text)}&parse_mode=HTML`;
-            try { await fetch(url); } catch(e) { console.error(e); }
-        }
+        let me = null, data = {}, curChat = null, b64 = "", star = 5;
 
         async function init() {
             db.on('value', snap => {
-                data = snap.val() || { u:{}, i:{}, d:{}, c:{}, cat:{}, support:{} };
+                data = snap.val() || { u:{}, i:{}, d:{}, c:{}, cat:{}, fee: 10 };
                 const sid = localStorage.getItem('lyne_sid');
-                if(!sid) { document.getElementById('auth_screen').classList.remove('hidden'); }
+                if(!sid) document.getElementById('auth_screen').classList.remove('hidden');
                 else {
                     me = data.u[sid];
                     if(!me) return logout();
@@ -171,155 +187,108 @@
             let uid = Object.keys(data.u || {}).find(k => data.u[k].n.toLowerCase() === n.toLowerCase());
             if(!uid) {
                 uid = 'u' + Date.now().toString().slice(-6);
-                await db.child(`u/${uid}`).set({ id: uid, n, p, bal: 0 });
-                await sendTg(`🆕 <b>Новая регистрация!</b>\nНик: ${n}\nID: ${uid}`);
+                await db.child(`u/${uid}`).set({ id: uid, n, p, bal: 0, rating: 0, r_count: 0 });
             } else if(data.u[uid].p !== p) return Swal.fire('!', 'Пароль!', 'error');
             localStorage.setItem('lyne_sid', uid);
-            await sendTg(`🔑 <b>Вход в систему</b>\nЮзер: ${n}`);
             location.reload();
         }
 
         function render() {
-            document.getElementById('h_bal').innerText = (me.bal || 0) + ' ₽';
+            document.getElementById('h_bal').innerText = (me.bal || 0).toLocaleString() + ' ₽';
             document.getElementById('p_name').innerText = me.n;
             document.getElementById('p_id').innerText = 'UID: ' + me.id;
             document.getElementById('p_ava').innerText = me.n[0].toUpperCase();
-            if(me.n === 'owner') document.getElementById('adm_btn').classList.remove('hidden');
+            document.getElementById('p_rating').innerText = `⭐ ${(me.rating || 0).toFixed(1)} (${me.r_count || 0} отзывов)`;
+            
+            if(me.n === 'owner') {
+                document.getElementById('adm_btn').classList.remove('hidden');
+                document.getElementById('set_fee').value = data.fee || 10;
+            }
 
             const cats = Object.values(data.cat || {});
             document.getElementById('cat_view').innerHTML = cats.map(c => `
-                <div onclick="openCat('${c.name}')" class="tile p-4 text-center">
-                    <img src="${c.img}" class="w-10 h-10 mx-auto mb-2 rounded-lg">
-                    <p class="text-[8px] font-black uppercase">${c.name}</p>
+                <div onclick="openCat('${c.name}')" class="tile p-6 text-center">
+                    <img src="${c.img}" class="w-12 h-12 mx-auto mb-2 rounded-xl object-cover border border-white/5">
+                    <p class="text-[9px] font-black uppercase opacity-60 italic">${c.name}</p>
                 </div>`).join('');
             document.getElementById('i_cat').innerHTML = '<option disabled selected>ИГРА</option>' + cats.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
 
             const myD = Object.values(data.d || {}).filter(d => d.bid === me.id || d.sid === me.id).reverse();
             document.getElementById('chats_list').innerHTML = myD.map(d => `
-                <div onclick="openChatRoom('${d.id}')" class="tile p-4 flex justify-between items-center">
-                    <b class="text-[9px] uppercase italic">${d.title}</b>
-                    <span class="text-[7px] opacity-40">${d.status}</span>
+                <div onclick="openChatRoom('${d.id}')" class="tile p-5 flex justify-between items-center">
+                    <div><b class="text-[10px] uppercase italic">${d.title}</b><p class="text-[7px] opacity-30 mt-1 uppercase">${d.status}</p></div>
+                    <i class="fa-solid fa-chevron-right text-[10px] opacity-10"></i>
                 </div>`).join('');
 
             if(me.n === 'owner') renderAdmin();
         }
 
-        async function postItem() {
-            const t = document.getElementById('i_title').value;
+        // --- ЛОГИКА ЭКОНОМИКИ ---
+        function calcNet() {
             const p = Number(document.getElementById('i_price').value);
-            const c = document.getElementById('i_cat').value;
-            if(!t || !p || !b64) return Swal.fire('!', 'Поля!', 'warning');
-            const id = 'i' + Date.now();
-            await db.child(`i/${id}`).set({ id, sid: me.id, title: t, price: p, cat: c, status: 'pending', img: b64 });
-            await sendTg(`📦 <b>Новый лот на модерацию!</b>\nОт: ${me.n}\nТовар: ${t}\nЦена: ${p}₽`);
-            Swal.fire('OK', 'Ждите модерации', 'success');
-            switchTab('market');
+            const fee = data.fee || 10;
+            const net = Math.floor(p * (1 - fee / 100));
+            document.getElementById('fee_info').innerText = `К ПОЛУЧЕНИЮ: ${net} ₽ (Комиссия ${fee}%)`;
         }
 
-        async function buyItem(id) {
-            const it = data.i[id];
-            if(me.bal < it.price) return Swal.fire('!', 'Баланс!', 'error');
-            const did = 'd' + Date.now();
-            await db.child(`u/${me.id}/bal`).set(me.bal - it.price);
-            await db.child(`d/${did}`).set({ id: did, bid: me.id, sid: it.sid, title: it.title, price: it.price, status: 'Оплачено' });
-            await db.child(`i/${id}/status`).set('sold');
-            await sendTg(`💰 <b>ПРОДАЖА!</b>\nТовар: ${it.title}\nЦена: ${it.price}₽\nПокупатель: ${me.n}`);
-            switchTab('chats');
+        async function saveFee() {
+            const val = Number(document.getElementById('set_fee').value);
+            await db.child('fee').set(val);
+            Swal.fire('OK', 'Комиссия обновлена', 'success');
         }
 
-        async function sendTextMsg() {
-            const txt = document.getElementById('chat_input').value;
-            if(!txt) return;
-            const isSupport = curChat.startsWith('support_');
-            const path = isSupport ? `support/${curChat}` : `c/${curChat}`;
-            await db.child(`${path}/m${Date.now()}`).set({ sender: me.id, text: txt });
-            if(me.n !== 'owner') {
-                await sendTg(`💬 <b>Сообщение в ${isSupport ? 'Поддержку' : 'Сделку'}</b>\nОт: ${me.n}\nТекст: ${txt}`);
+        // --- ОТЗЫВЫ ---
+        function setStar(s) {
+            star = s;
+            document.querySelectorAll('.star-btn').forEach(btn => {
+                btn.classList.toggle('star-active', Number(btn.dataset.s) <= s);
+            });
+        }
+
+        async function sendReview() {
+            const d = data.d[curChat];
+            const sellerId = d.sid;
+            const sUser = data.u[sellerId];
+            
+            const newCount = (sUser.r_count || 0) + 1;
+            const newRating = ((sUser.rating * sUser.r_count) + star) / newCount;
+            
+            await db.child(`u/${sellerId}/rating`).set(newRating);
+            await db.child(`u/${sellerId}/r_count`).set(newCount);
+            await db.child(`d/${curChat}/reviewed`).set(true);
+            await db.child(`c/${curChat}/m_rev`).set({ sender: 'SYSTEM', text: `Покупатель оставил отзыв: ${star} звезд.` });
+            
+            Swal.fire('Спасибо!', 'Отзыв опубликован', 'success');
+        }
+
+        async function adminResolve(action) {
+            const d = data.d[curChat];
+            if(action === 'complete') {
+                const fee = data.fee || 10;
+                const net = Math.floor(d.price * (1 - fee / 100));
+                const seller = data.u[d.sid];
+                await db.child(`u/${d.sid}/bal`).set((seller.bal || 0) + net);
+                await db.child(`d/${curChat}/status`).set('Выполнено');
+            } else {
+                const buyer = data.u[d.bid];
+                await db.child(`u/${d.bid}/bal`).set((buyer.bal || 0) + d.price);
+                await db.child(`d/${curChat}/status`).set('Возврат');
             }
-            document.getElementById('chat_input').value = '';
         }
 
-        async function moneyReq(type) {
-            const { value: amt } = await Swal.fire({ title: type, input: 'number' });
-            if(amt) {
-                await sendTg(`💸 <b>ЗАЯВКА НА ${type}</b>\nЮзер: ${me.n}\nСумма: ${amt}₽`);
-                Swal.fire('ОК', 'Админ уведомлен', 'success');
-            }
+        // --- ЧАТЫ ---
+        function openChatRoom(id) {
+            curChat = id;
+            document.getElementById('chat_modal').classList.remove('hidden');
+            if(me.n === 'owner') document.getElementById('adm_chat_tools').classList.remove('hidden');
+            renderChat();
         }
 
-        async function saveEmail() {
-            const em = document.getElementById('u_email').value;
-            if(em) {
-                await db.child(`u/${me.id}/email`).set(em);
-                await sendTg(`📧 <b>Почта привязана</b>\nЮзер: ${me.n}\nEmail: ${em}`);
-            }
-        }
-
-        async function reqV() {
-            await sendTg(`✔️ <b>Запрос верификации!</b>\nЮзер: ${me.n}\nID: ${me.id}`);
-            Swal.fire('OK', 'Запрос отправлен', 'info');
-        }
-
-        // --- ВСПОМОГАТЕЛЬНОЕ ---
         function renderChat() {
-            const path = curChat.startsWith('support_') ? data.support?.[curChat] : data.c?.[curChat];
+            const isS = curChat.startsWith('support_');
+            const d = data.d[curChat];
+            const path = isS ? data.support?.[curChat] : data.c?.[curChat];
             const msgs = Object.values(path || {});
-            const body = document.getElementById('chat_body');
-            body.innerHTML = msgs.map(m => `<div class="chat-msg ${m.sender === me.id ? 'msg-out' : 'msg-in'}">${m.text}</div>`).join('');
-            body.scrollTop = body.scrollHeight;
-        }
-        function openChatRoom(id) { curChat = id; document.getElementById('chat_modal').classList.remove('hidden'); renderChat(); }
-        function closeChat() { curChat = null; document.getElementById('chat_modal').classList.add('hidden'); }
-        function switchTab(t) {
-            document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
-            document.getElementById('tab_'+t).classList.add('active');
-            document.getElementById('n_'+t).classList.add('active');
-        }
-        function openCat(n) {
-            document.getElementById('cat_view').classList.add('hidden');
-            document.getElementById('items_view').classList.remove('hidden');
-            const its = Object.values(data.i || {}).filter(i => i.cat === n && i.status === 'active').reverse();
-            document.getElementById('market_grid').innerHTML = its.map(i => `
-                <div class="tile p-4 flex justify-between items-center">
-                    <div class="flex items-center gap-3">
-                        <img src="${i.img}" class="w-10 h-10 rounded-lg object-cover">
-                        <b class="text-[10px] uppercase italic">${i.title}</b>
-                    </div>
-                    <button onclick="buyItem('${i.id}')" class="bg-blue-600 px-4 py-2 rounded-xl text-[10px] font-black italic">${i.price} ₽</button>
-                </div>`).join('');
-        }
-        function backToCats() { document.getElementById('cat_view').classList.remove('hidden'); document.getElementById('items_view').classList.add('hidden'); }
-        function logout() { localStorage.clear(); location.reload(); }
-        function compImg(i, l) {
-            const r = new FileReader();
-            r.onload = e => {
-                const img = new Image();
-                img.onload = () => {
-                    const c = document.createElement('canvas');
-                    const ctx = c.getContext('2d');
-                    c.width = 400; c.height = img.height * (400/img.width);
-                    ctx.drawImage(img, 0,0,400, c.height);
-                    const res = c.toDataURL('image/jpeg', 0.6);
-                    if(l === 'l_img') b64 = res; else b64Cat = res;
-                    document.getElementById(l).innerHTML = `<img src="${res}" class="w-full h-full object-cover rounded-3xl">`;
-                };
-                img.src = e.target.result;
-            };
-            r.readAsDataURL(i.files[0]);
-        }
-        function renderAdmin() {
-            const pnd = Object.values(data.i || {}).filter(i => i.status === 'pending');
-            document.getElementById('adm_mod').innerHTML = pnd.map(i => `
-                <div class="tile p-4 flex justify-between items-center">
-                    <p class="text-[9px] font-black uppercase">${i.title}</p>
-                    <button onclick="db.child('i/${i.id}/status').set('active')" class="bg-green-600 px-3 py-1 rounded text-[8px] font-black">OK</button>
-                </div>`).join('');
-            const tickets = [...Object.keys(data.support || {}), ...Object.keys(data.c || {})];
-            document.getElementById('adm_support').innerHTML = tickets.map(t => `
-                <div onclick="openChatRoom('${t}')" class="tile p-4 flex justify-between items-center text-[8px] uppercase font-black">${t} <i class="fa-solid fa-message"></i></div>`).join('');
-        }
-        init();
-    </script>
-</body>
-</html>
+            
+            document.getElementById('chat_body').innerHTML = msgs.map(m => `
+                <div class="chat-msg ${m.sender === me.id ? 'msg-out
