@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>anon:zadan v26.0 OMNI</title>
+    <title>sswckk:system v28.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -12,135 +12,165 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        body { background: #000; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .glass { background: rgba(15,15,18,0.9); backdrop-filter: blur(35px); border: 1px solid rgba(255,255,255,0.08); border-radius: 35px; }
-        .tab { display: none; padding-bottom: 130px; } .tab.active { display: block; animation: fIn 0.4s cubic-bezier(0.2, 0, 0.2, 1); }
+        body { background: #000; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+        .glass { background: rgba(15,15,18,0.9); backdrop-filter: blur(35px); border: 1px solid rgba(255,255,255,0.07); border-radius: 35px; }
+        .tab { display: none; padding-bottom: 120px; } .tab.active { display: block; animation: fIn 0.3s ease; }
         @keyframes fIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .input-box { background: #0a0a0c; border: 1px solid #1a1a1c; color: #fff; border-radius: 20px; padding: 16px; width: 100%; outline: none; }
+        .input-box { background: #0a0a0c; border: 1px solid #1a1a1c; color: #fff; border-radius: 20px; padding: 18px; width: 100%; outline: none; }
         .nav-item { opacity: 0.2; transition: 0.3s; } .nav-item.active { opacity: 1; color: #3b82f6; }
-        #ban-scr { display:none; position:fixed; inset:0; background:#000; z-index:10000; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding: 25px; }
-        .btn-act { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 12px; margin-top: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; width: 100%; text-align: center; }
+        .btn-act { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 12px; margin-top: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; width: 100%; text-align: center; display: block; }
         ::-webkit-scrollbar { width: 0; }
     </style>
 </head>
 <body>
-    <div id="ban-scr">
-        <h1 class="text-red-600 font-black text-6xl italic mb-6">BANNED</h1>
-        <div class="glass p-2 mb-8 w-full max-w-sm"><video id="bv" class="w-full rounded-[25px]" loop muted playsinline><source src="https://v1.pinimg.com/videos/mc/720p/8c/21/5c/8c215c0e181419796030c25a7209772a.mp4" type="video/mp4"></video></div>
-        <div class="glass p-8 w-full max-w-sm"><p id="br" class="text-[10px] opacity-30 uppercase font-black mb-2"></p><p id="bt" class="text-2xl font-black text-red-600 mb-8 italic tracking-tighter"></p><button onclick="setTab('support'); document.getElementById('ban-scr').style.display='none'" class="w-full py-5 bg-white text-black rounded-[22px] font-black uppercase text-xs">Support</button></div>
-    </div>
-
-    <header class="p-6 flex justify-between items-center sticky top-0 z-[500] glass border-none rounded-none rounded-b-[40px] shadow-2xl">
-        <div><h1 class="text-2xl font-black italic tracking-tighter">anon:<span class="text-zinc-700">zadan</span></h1><p class="text-[8px] text-blue-500 font-black uppercase mt-1 tracking-widest">● <span id="f-on">0</span> active</p></div>
+    <header class="p-6 flex justify-between items-center sticky top-0 z-[500] glass border-none rounded-none rounded-b-[45px] shadow-2xl">
+        <div><h1 class="text-2xl font-black italic tracking-tighter">sswckk:<span class="text-zinc-600">zadan</span></h1><p class="text-[8px] text-blue-500 font-black uppercase mt-1">● system online</p></div>
         <div id="ub" onclick="setTab('me')" class="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl text-[11px] font-black italic cursor-pointer">0 ₽</div>
     </header>
 
     <section id="home" class="tab active px-5 pt-8 space-y-6"><div id="tl" class="space-y-6"></div></section>
     
-    <section id="create" class="tab px-5 pt-8"><div class="glass p-8 space-y-5"><input id="zt" class="input-box" placeholder="Название"><input id="za" class="input-box" placeholder="Ссылка/Локация"><input id="zp" type="number" class="input-box" placeholder="Цена ₽"><input type="file" id="zf" class="hidden" onchange="document.getElementById('fl').innerText='МЕДИА ГОТОВО'"><label for="zf" id="fl" class="input-box block text-center py-10 border-dashed border-zinc-800 opacity-40 italic uppercase text-[10px] font-black cursor-pointer">Прикрепить фото</label><button onclick="cTask()" id="cb" class="w-full py-6 bg-blue-600 rounded-[28px] font-black uppercase italic shadow-xl shadow-blue-600/20">Опубликовать</button></div></section>
+    <section id="create" class="tab px-5 pt-8"><div class="glass p-8 space-y-5"><h2 class="text-[10px] font-black opacity-30 uppercase text-center">New Task</h2><input id="zt" class="input-box" placeholder="Название"><input id="za" class="input-box" placeholder="Ссылка/Локация"><input id="zp" type="number" class="input-box" placeholder="Цена ₽"><input type="file" id="zf" class="hidden" onchange="document.getElementById('fl').innerText='МЕДИА: OK'"><label for="zf" id="fl" class="input-box block text-center py-12 border-dashed border-zinc-800 opacity-40 italic uppercase text-[10px] font-black cursor-pointer">Прикрепить фото</label><button onclick="cTask()" id="cb" class="w-full py-6 bg-blue-600 rounded-[28px] font-black uppercase italic shadow-xl">Опубликовать</button></div></section>
 
-    <section id="support" class="tab px-5 pt-8"><div id="cl" class="space-y-4"></div><div id="cr" class="hidden"><button onclick="activeC=null; render()" class="text-[10px] font-black uppercase mb-5 opacity-40"><i class="fa-solid fa-chevron-left"></i> Назад</button><div class="glass p-5 h-[62vh] flex flex-col"><div id="ms" class="flex-1 overflow-y-auto space-y-4 pr-1"></div><div id="ir" class="flex gap-3 mt-4"><input id="mi" class="input-box" placeholder="Сообщение..."><button onclick="sMsg()" class="w-16 bg-white text-black rounded-[22px] flex items-center justify-center shadow-lg"><i class="fa-solid fa-paper-plane"></i></button></div></div></div></section>
-
-    <section id="me" class="tab px-5 pt-8"><div class="glass p-12 text-center space-y-12"><h3 id="un" class="text-4xl font-black italic uppercase tracking-tighter">...</h3><div id="ubm" class="text-8xl font-black italic tracking-tighter">0 ₽</div><div class="grid grid-cols-2 gap-4"><button onclick="localStorage.clear();location.reload()" class="py-5 bg-zinc-900 border border-white/5 rounded-2xl text-[10px] font-black uppercase italic shadow-xl">Выход</button><button onclick="setTab('al')" class="py-5 bg-zinc-900/40 rounded-2xl text-[10px] font-black uppercase opacity-5">Admin</button></div></div></section>
-
-    <section id="al" class="tab px-5 pt-24"><div class="glass p-12 text-center"><input type="password" oninput="if(this.value==='kalubxq') setTab('adm')" class="input-box text-center font-black" placeholder="OVERLORD CODE"></div></section>
-    
-    <section id="adm" class="tab px-5 pt-8 space-y-8 overflow-y-auto">
-        <h2 class="text-3xl font-black italic text-red-600 tracking-tighter">OVERLORD COMMAND</h2>
-        
-        <div class="glass p-8 space-y-4">
-            <h3 class="text-[10px] font-black uppercase text-blue-500 italic tracking-widest">Broadcast Engine</h3>
-            <textarea id="an-t" class="input-box text-xs h-24" placeholder="Текст сообщения..."></textarea>
-            <input type="file" id="an-i" class="hidden" onchange="document.getElementById('ai-l').innerText='МЕДИА ВЫБРАНО'"><label for="an-i" id="ai-l" class="text-[8px] font-black uppercase block border border-dashed border-zinc-800 p-4 text-center opacity-40">Добавить фото</label>
-            <div id="bb" class="space-y-3"></div>
-            <button onclick="aBtn()" class="text-[9px] font-black uppercase text-zinc-600">+ Кнопка действия</button>
-            <div class="grid grid-cols-2 gap-3 pt-4"><button onclick="sB('news')" class="py-4 bg-blue-600 rounded-2xl text-[10px] font-black uppercase">В Канал</button><button onclick="sB('all')" class="py-4 bg-white text-black rounded-2xl text-[10px] font-black uppercase">Всем в ЛС</button></div>
+    <section id="support" class="tab px-5 pt-8">
+        <div id="chat-list" class="space-y-4"></div>
+        <div id="chat-room" class="hidden">
+            <button onclick="backToChats()" class="text-[10px] font-black uppercase mb-5 opacity-40"><i class="fa-solid fa-chevron-left"></i> Назад</button>
+            <div class="glass p-5 h-[62vh] flex flex-col">
+                <div id="messages" class="flex-1 overflow-y-auto space-y-4 pr-1"></div>
+                <div class="flex gap-3 mt-4">
+                    <input id="msg-input" class="input-box" placeholder="Сообщение...">
+                    <button onclick="sendMsg()" class="w-16 bg-white text-black rounded-[22px] flex items-center justify-center shadow-lg"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
         </div>
-
-        <div class="space-y-5"><h3 class="text-[10px] font-black opacity-20 uppercase italic ml-2 tracking-widest">Задания (Pending)</h3><div id="atl" class="space-y-4"></div></div>
-        <div class="space-y-5"><h3 class="text-[10px] font-black opacity-20 uppercase italic ml-2 tracking-widest">База Воркеров</h3><div id="aul" class="space-y-3"></div></div>
     </section>
 
-    <nav id="bn" class="fixed bottom-0 left-0 right-0 h-28 bg-black/95 backdrop-blur-3xl border-t border-white/5 flex justify-around items-center z-[1000] rounded-t-[50px] shadow-2xl">
+    <section id="me" class="tab px-5 pt-8"><div class="glass p-12 text-center space-y-12"><h3 id="un" class="text-4xl font-black italic uppercase tracking-tighter">...</h3><div id="ubm" class="text-8xl font-black italic tracking-tighter">0 ₽</div><div class="grid grid-cols-2 gap-4"><button onclick="localStorage.clear();location.reload()" class="py-5 bg-zinc-900 border border-white/5 rounded-2xl text-[10px] font-black uppercase italic">Выход</button><button onclick="setTab('al')" class="py-5 bg-zinc-900/40 rounded-2xl text-[10px] font-black uppercase opacity-10">Admin</button></div></div></section>
+
+    <section id="al" class="tab px-5 pt-24"><div class="glass p-12 text-center"><input type="password" oninput="if(this.value==='kalubxq') setTab('adm')" class="input-box text-center font-black" placeholder="CODE"></div></section>
+    
+    <section id="adm" class="tab px-5 pt-8 space-y-8 overflow-y-auto">
+        <h2 class="text-3xl font-black italic text-red-600 tracking-tighter">OVERLORD PANEL</h2>
+        
+        <div class="glass p-8 space-y-4">
+            <h3 class="text-[10px] font-black uppercase text-blue-500 italic">Broadcast Builder</h3>
+            <textarea id="bc-text" class="input-box text-xs h-24" placeholder="Текст рассылки..."></textarea>
+            <input type="file" id="bc-img" class="hidden" onchange="document.getElementById('bc-img-label').innerText='ФОТО ПРИКРЕПЛЕНО'"><label for="bc-img" id="bc-img-label" class="text-[8px] font-black uppercase block border border-dashed border-zinc-800 p-4 text-center opacity-40 cursor-pointer">Добавить фото к рассылке</label>
+            
+            <div id="button-builder" class="space-y-3"></div>
+            <button onclick="addButtonField()" class="text-[9px] font-black uppercase text-zinc-500">+ Добавить кнопку действия</button>
+            
+            <div class="grid grid-cols-2 gap-3 mt-4">
+                <button onclick="sendBroadcast('news')" class="py-4 bg-blue-600 rounded-2xl text-[10px] font-black uppercase italic">В КАНАЛ</button>
+                <button onclick="sendBroadcast('all')" class="py-4 bg-white text-black rounded-2xl text-[10px] font-black uppercase italic">ВСЕМ В ЛС</button>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <h3 class="text-[10px] font-black opacity-20 uppercase italic ml-2">На проверке</h3>
+            <div id="adm-tasks" class="space-y-4"></div>
+        </div>
+
+        <div class="space-y-4">
+            <h3 class="text-[10px] font-black opacity-20 uppercase italic ml-2">Управление воркерами</h3>
+            <div id="adm-users" class="space-y-3"></div>
+        </div>
+    </section>
+
+    <nav id="bn" class="fixed bottom-0 left-0 right-0 h-28 bg-black/95 border-t border-white/5 flex justify-around items-center z-[1000] rounded-t-[50px] shadow-2xl">
         <button onclick="setTab('home')" class="nav-item active" id="btn-home"><i class="fa-solid fa-house-user text-xl"></i></button>
         <button onclick="setTab('create')" class="nav-item" id="btn-create"><i class="fa-solid fa-circle-plus text-2xl"></i></button>
         <button onclick="setTab('support')" class="nav-item" id="btn-support"><i class="fa-solid fa-comment-dots text-xl"></i></button>
-        <button onclick="setTab('me')" class="nav-item" id="btn-me"><i class="fa-solid fa-id-card text-xl"></i></button>
+        <button onclick="setTab('me')" class="nav-item" id="btn-me"><i class="fa-solid fa-fingerprint text-xl"></i></button>
     </nav>
 
     <script>
+        // ТВОИ НАСТРОЙКИ FIREBASE
         const cfg = { apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI", databaseURL: "https://dogx-base-default-rtdb.firebaseio.com", storageBucket: "dogx-base.appspot.com" };
-        const K = 'anon_v26_omni'; firebase.initializeApp(cfg); const db_r = firebase.database(); const st_r = firebase.storage();
-        let me = null, activeC = null, db = {u:{}, t:{}, c:{}}, bC = 0;
+        const K = 'sswckk_final'; firebase.initializeApp(cfg); const db_r = firebase.database(); const st_r = firebase.storage();
+        let me = null, activeC = null, db = {u:{}, t:{}, c:{}}, btnCount = 0;
 
         function init() {
             db_r.ref(K).on('value', s => {
-                db = s.val() || {u:{}, t:{}, c:{}}; const uid = localStorage.getItem('a_id');
-                if(uid && db.u[uid]) { me = db.u[uid]; if(me.b) showB(); render(); } else auth();
-                document.getElementById('f-on').innerText = Math.floor(Math.random() * 40 + 80);
+                db = s.val() || {u:{}, t:{}, c:{}}; const uid = localStorage.getItem('u_id');
+                if(uid && db.u[uid]) { me = db.u[uid]; render(); } else auth();
             });
         }
 
         async function auth() {
-            const { value: f } = await Swal.fire({ title: 'IDENTIFICATION', background:'#000', color:'#fff', html:`<input id="sn" class="swal2-input" placeholder="НИК"><input id="sp" type="password" class="swal2-input" placeholder="ПАРОЛЬ"><input id="st" class="swal2-input" placeholder="@ТЕЛЕГРАМ">`, allowOutsideClick:false, preConfirm:()=>[document.getElementById('sn').value, document.getElementById('sp').value, document.getElementById('st').value] });
+            const { value: f } = await Swal.fire({ title: 'IDENTIFICATION', background:'#000', color:'#fff', html:`<input id="sn" class="swal2-input" placeholder="НИК"><input id="sp" type="password" class="swal2-input" placeholder="ПАРОЛЬ"><input id="st" class="swal2-input" placeholder="@ЛОГИН_ТГ">`, allowOutsideClick:false, preConfirm:()=>[document.getElementById('sn').value, document.getElementById('sp').value, document.getElementById('st').value] });
             if(f && f[2]) {
                 const ex = Object.values(db.u).find(u=>u.t===f[2]);
-                if(ex && ex.p===f[1]) { localStorage.setItem('a_id', ex.id); location.reload(); }
-                else if(ex) { auth(); }
-                else { const id = "u"+Date.now(); await db_r.ref(`${K}/u/${id}`).set({id, n:f[0], p:f[1], t:f[2], bal:0, b:false, s:'WORKER'}); localStorage.setItem('a_id', id); location.reload(); }
+                if(ex && ex.p===f[1]) { localStorage.setItem('u_id', ex.id); location.reload(); }
+                else { const id = "u"+Date.now(); await db_r.ref(`${K}/u/${id}`).set({id, n:f[0], p:f[1], t:f[2], bal:0, s:'WORKER'}); localStorage.setItem('u_id', id); location.reload(); }
             } else auth();
         }
 
-        function showB() { document.getElementById('ban-scr').style.display='flex'; document.getElementById('br').innerText=me.br; document.getElementById('bt').innerText=me.bt; document.getElementById('bv').play(); document.getElementById('bn').style.display='none'; }
-
         async function cTask() {
             const t = document.getElementById('zt').value, p = document.getElementById('zp').value, f = document.getElementById('zf').files[0]; if(!t || !p || !f) return;
-            document.getElementById('cb').innerText = "ЗАГРУЗКА..."; const r = st_r.ref(`v26/${Date.now()}`); await r.put(f); const url = await r.getDownloadURL();
+            document.getElementById('cb').innerText = "ОБРАБОТКА..."; const ref = st_r.ref(`v28/${Date.now()}`); await ref.put(f); const url = await ref.getDownloadURL();
             await db_r.ref(`${K}/t/t${Date.now()}`).set({id:"t"+Date.now(), t, p:Number(p), img:url, st:'pending', o:me.n}); setTab('home');
         }
 
         function render() {
             document.getElementById('ub').innerText = me.bal + ' ₽'; document.getElementById('ubm').innerText = me.bal + ' ₽'; document.getElementById('un').innerText = me.n;
-            const ts = Object.values(db.t || {}).filter(x => x.st === 'active');
-            document.getElementById('tl').innerHTML = ts.map(t => `<div class="glass overflow-hidden shadow-2xl"><img src="${t.img}" class="w-full h-56 object-cover"><div class="p-6 flex justify-between items-center"><div><b class="text-sm uppercase italic font-black">${t.t}</b></div><b class="text-xl font-black italic tracking-tighter">${t.p} ₽</b></div></div>`).join('');
             
-            // ADMIN UI
-            const pT = Object.values(db.t || {}).filter(x => x.st === 'pending');
-            document.getElementById('atl').innerHTML = pT.map(t => `<div class="glass p-5 flex justify-between items-center text-[10px] font-black uppercase">${t.o}: ${t.t}<div class="flex gap-4"><button onclick="db_r.ref('${K}/t/${t.id}').update({st:'active'})" class="text-green-500">ОК</button><button onclick="db_r.ref('${K}/t/${t.id}').remove()" class="text-red-600">X</button></div></div>`).join('') || '<p class="text-center opacity-10 text-[8px] uppercase">Пусто</p>';
-            document.getElementById('aul').innerHTML = Object.values(db.u || {}).map(u => `<div class="glass p-5 flex justify-between items-center ${u.b?'border-red-600/30 bg-red-900/10':''}"><div class="text-[10px] font-black italic">${u.n} <span class="text-blue-500">[${u.s}]</span><br><span class="opacity-30">${u.t}</span></div><div class="flex flex-col items-end gap-2"><b class="text-[10px] text-green-500">${u.bal}₽</b><button onclick="aE('${u.id}')" class="text-[9px] opacity-40 font-black">EDIT</button></div></div>`).join('');
+            // Лента заданий
+            const tasks = Object.values(db.t || {}).filter(x => x.st === 'active');
+            document.getElementById('tl').innerHTML = tasks.map(t => `<div class="glass overflow-hidden"><img src="${t.img}" class="w-full h-56 object-cover"><div class="p-6 flex justify-between"><b>${t.t}</b><b>${t.p} ₽</b></div></div>`).join('');
             
-            // CHATS UI
-            const ch = [{id:'news', n:'Канал Системы', i:'fa-bullhorn', b:'bg-blue-600'}, {id:'system', n:'Тех-Поддержка', i:'fa-headset', b:'bg-zinc-800'}];
-            if(!activeC) document.getElementById('cl').innerHTML = ch.map(c => `<div onclick="oChat('${c.id}')" class="glass p-7 flex items-center gap-6 cursor-pointer hover:scale-[1.02] transition shadow-lg shadow-black/40"><div class="w-14 h-14 ${c.b} rounded-[22px] flex items-center justify-center text-2xl"><i class="fa-solid ${c.i} text-white"></i></div><div><b class="text-sm uppercase font-black italic">${c.n}</b><p class="text-[8px] opacity-30 font-bold mt-1 uppercase tracking-widest">Connect</p></div></div>`).join('');
-            if(activeC) renderM();
+            // Модерация (Админ)
+            document.getElementById('adm-tasks').innerHTML = Object.values(db.t || {}).filter(x => x.st === 'pending').map(t => `<div class="glass p-5 flex justify-between items-center text-[10px] font-black uppercase">${t.o}: ${t.t} <div class="flex gap-3"><button onclick="db_r.ref('${K}/t/${t.id}').update({st:'active'})" class="text-green-500">ОК</button><button onclick="db_r.ref('${K}/t/${t.id}').remove()" class="text-red-600">X</button></div></div>`).join('');
+            
+            // База юзеров (Админ)
+            document.getElementById('adm-users').innerHTML = Object.values(db.u || {}).map(u => `<div class="glass p-5 flex justify-between items-center text-[10px] font-black uppercase"><div>${u.n} (${u.t})</div><button onclick="editUser('${u.id}')" class="opacity-40">EDIT</button></div>`).join('');
+            
+            // Список чатов (Поддержка)
+            const chats = [{id:'news', n:'Канал Системы', i:'fa-bullhorn', b:'bg-blue-600'}, {id:'system', n:'Поддержка', i:'fa-headset', b:'bg-zinc-800'}];
+            if(!activeC) document.getElementById('chat-list').innerHTML = chats.map(c => `<div onclick="openChat('${c.id}')" class="glass p-7 flex items-center gap-6 cursor-pointer"><div class="w-14 h-14 ${c.b} rounded-2xl flex items-center justify-center text-2xl shadow-xl"><i class="fa-solid ${c.i} text-white"></i></div><div><b class="text-sm uppercase font-black italic">${c.n}</b></div></div>`).join('');
+            if(activeC) renderMessages();
         }
 
-        async function aE(uid) {
-            const u = db.u[uid]; const { value: v } = await Swal.fire({ title:'OVERLORD', background:'#0a0a0a', color:'#fff', html:`<input id="eb" class="swal2-input" placeholder="Баланс" value="${u.bal}"><input id="es" class="swal2-input" placeholder="Статус" value="${u.s}"><div class="grid grid-cols-2 gap-3 mt-5"><button onclick="window.act='b'" class="swal2-confirm swal2-styled !bg-red-600">${u.b?'UNBAN':'BAN'}</button><button onclick="window.act='d'" class="swal2-confirm swal2-styled !bg-zinc-900">DELETE</button></div>`, preConfirm:()=>({bal:document.getElementById('eb').value, s:document.getElementById('es').value}) });
-            if(v) { if(window.act==='b') db_r.ref(`${K}/u/${uid}`).update({b:!u.b, br:'Violation', bt:'Forever'}); else if(window.act==='d') db_r.ref(`${K}/u/${uid}`).remove(); else db_r.ref(`${K}/u/${uid}`).update({bal:Number(v.bal), s:v.s}); window.act=null; }
+        async function editUser(uid) {
+            const u = db.u[uid]; const { value: v } = await Swal.fire({ title:'ADMIN CONTROL', background:'#0a0a0a', color:'#fff', html:`<input id="eb" class="swal2-input" placeholder="Баланс" value="${u.bal}"><div class="mt-4"><button onclick="window.act='del'" class="bg-red-600 p-4 rounded-xl text-xs font-black uppercase w-full">Удалить аккаунт</button></div>`, preConfirm:()=>({bal:document.getElementById('eb').value}) });
+            if(v) { if(window.act==='del') db_r.ref(`${K}/u/${uid}`).remove(); else db_r.ref(`${K}/u/${uid}`).update({bal:Number(v.bal)}); window.act=null; }
         }
 
-        function aBtn() { const d=document.createElement('div'); d.className="flex gap-2"; d.innerHTML=`<input class="input-box text-[10px] p-3" placeholder="Текст кнопки"><input class="input-box text-[10px] p-3" placeholder="Действие/Ссылка"><button onclick="this.parentElement.remove()" class="text-red-500 font-bold px-2">✕</button>`; document.getElementById('bb').appendChild(d); }
-
-        async function sB(target) {
-            const txt=document.getElementById('an-t').value, img=document.getElementById('an-i').files[0];
-            let url=null; if(img) { const r=st_r.ref(`an/${Date.now()}`); await r.put(img); url=await r.getDownloadURL(); }
-            const btns=[]; document.querySelectorAll('#bb div').forEach(d=>{ const i=d.querySelectorAll('input'); if(i[0].value) btns.push({t:i[0].value, a:i[1].value}); });
-            const m = { text:txt, img:url, btns:btns, from:'system', time:Date.now() };
-            if(target==='news') await db_r.ref(`${K}/c/news/${Date.now()}`).set(m);
-            else Object.keys(db.u).forEach(uid => db_r.ref(`${K}/c/${uid}/${Date.now()}`).set(m));
-            Swal.fire('OK', 'Broadcast sent', 'success');
+        function addButtonField() {
+            const id = "btn-" + btnCount++; const div = document.createElement('div'); div.className = "flex gap-2";
+            div.innerHTML = `<input class="input-box text-[10px] p-3" placeholder="Текст кнопки"><input class="input-box text-[10px] p-3" placeholder="Ссылка/Действие"><button onclick="this.parentElement.remove()" class="text-red-500 font-bold px-2">✕</button>`;
+            document.getElementById('button-builder').appendChild(div);
         }
 
-        function setTab(t) { if(me && me.b && t !== 'support') return; document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); document.getElementById(t).classList.add('active'); document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active')); if(document.getElementById('btn-'+t)) document.getElementById('btn-'+t).classList.add('active'); }
-        function oChat(id) { activeC = id; document.getElementById('cl').classList.add('hidden'); document.getElementById('cr').classList.remove('hidden'); document.getElementById('ir').style.display = (id==='news') ? 'none' : 'flex'; renderM(); }
-        async function sMsg() { const v = document.getElementById('mi').value; if(!v) return; const p = (activeC === 'system' || db.u[activeC]) ? (activeC === 'system' ? me.id : activeC) : activeC; await db_r.ref(`${K}/c/${p}/${Date.now()}`).set({text:v, from:(me.id===activeC||activeC==='system'?'user':'system'), time:Date.now()}); document.getElementById('mi').value=""; }
-        function renderM() {
-            const p = (activeC === 'system' || db.u[activeC]) ? (activeC === 'system' ? me.id : activeC) : activeC; const ms = Object.values(db.c[p] || {}).sort((a,b)=>a.time-b.time);
-            document.getElementById('ms').innerHTML = ms.map(m => `<div class="p-5 max-w-[92%] rounded-[28px] text-[12px] font-black shadow-xl italic ${m.from==='system'?'bg-blue-600 self-start text-white':'bg-zinc-800 self-end text-white'}">${m.img ? `<img src="${m.img}" class="w-full rounded-2xl mb-3">` : ''}${m.text}${m.btns ? m.btns.map(b => `<button onclick="hA('${b.a}')" class="btn-act">${b.t}</button>`).join('') : ''}</div>`).join('');
-            const b = document.getElementById('ms'); b.scrollTop = b.scrollHeight;
+        async function sendBroadcast(target) {
+            const txt = document.getElementById('bc-text').value, img = document.getElementById('bc-img').files[0];
+            let url = null; if(img) { const r = st_r.ref(`bc/${Date.now()}`); await r.put(img); url = await r.getDownloadURL(); }
+            const btns = []; document.querySelectorAll('#button-builder div').forEach(d => { const i = d.querySelectorAll('input'); if(i[0].value) btns.push({t:i[0].value, a:i[1].value}); });
+            const msg = { text:txt, img:url, btns:btns, from:'system', time:Date.now() };
+            if(target === 'news') await db_r.ref(`${K}/c/news/${Date.now()}`).set(msg);
+            else Object.keys(db.u).forEach(uid => db_r.ref(`${K}/c/${uid}/${Date.now()}`).set(msg));
+            Swal.fire('OK', 'Рассылка ушла', 'success');
         }
-        window.hA = (a) => { if(a.startsWith('http')) window.open(a, '_blank'); else Swal.fire({ title: 'System', text: a, background: '#0a0a0a', color: '#fff' }); };
+
+        function setTab(t) { document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); document.getElementById(t).classList.add('active'); document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active')); if(document.getElementById('btn-'+t)) document.getElementById('btn-'+t).classList.add('active'); }
+        function openChat(id) { activeC = id; document.getElementById('chat-list').classList.add('hidden'); document.getElementById('chat-room').classList.remove('hidden'); renderMessages(); }
+        function backToChats() { activeC = null; document.getElementById('chat-list').classList.remove('hidden'); document.getElementById('chat-room').classList.add('hidden'); render(); }
+        
+        async function sendMsg() { 
+            const v = document.getElementById('msg-input').value; if(!v) return; 
+            const path = (activeC === 'system' ? me.id : activeC); 
+            await db_r.ref(`${K}/c/${path}/${Date.now()}`).set({text:v, from:'user', time:Date.now()}); 
+            document.getElementById('msg-input').value = ""; 
+        }
+
+        function renderMessages() {
+            const path = (activeC === 'system' ? me.id : activeC); const msgs = Object.values(db.c[path] || {}).sort((a,b)=>a.time-b.time);
+            document.getElementById('messages').innerHTML = msgs.map(m => `<div class="p-5 max-w-[92%] rounded-[25px] text-[12px] font-black italic shadow-xl ${m.from==='system'?'bg-blue-600 self-start text-white':'bg-zinc-800 self-end text-white'}">${m.img ? `<img src="${m.img}" class="w-full rounded-2xl mb-3 shadow-lg">` : ''}${m.text}${m.btns ? m.btns.map(b => `<button onclick="handleAction('${b.a}')" class="btn-act">${b.t}</button>`).join('') : ''}</div>`).join('');
+            const b = document.getElementById('messages'); b.scrollTop = b.scrollHeight;
+        }
+
+        window.handleAction = (a) => { if(a.startsWith('http')) window.open(a, '_blank'); else Swal.fire({ title:'Info', text:a, background:'#0a0a0a', color:'#fff' }); };
         init();
     </script>
 </body>
