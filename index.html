@@ -3,194 +3,310 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>lyneok | Access</title>
+    <title>lyneok | Professional Marketplace</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
-        * { -webkit-tap-highlight-color: transparent; outline: none; box-sizing: border-box; }
-        body { background: #07070a; color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; margin: 0; }
-        ::-webkit-scrollbar { display: none; }
-        
-        /* Дизайн регистрации как на фото */
-        #auth_screen { background: radial-gradient(circle at top, #1e3a8a 0%, #07070a 70%); }
-        .auth-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 40px; padding: 40px 30px; width: 90%; max-width: 380px; }
-        .auth-input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 18px; width: 100%; color: #fff; margin-bottom: 12px; font-size: 15px; }
-        .auth-btn { background: #3b82f6; border-radius: 25px; padding: 20px; font-weight: 800; width: 100%; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 10px 30px rgba(59,130,246,0.3); }
 
-        .glass { background: #121218; border: 1px solid rgba(255,255,255,0.03); border-radius: 20px; }
-        .tab { display: none; height: 100vh; overflow-y: auto; padding-bottom: 100px; }
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        :root {
+            --bg-main: #07070a;
+            --bg-card: #111118;
+            --accent: #3b82f6;
+            --text-gray: #71717a;
+        }
+
+        * { 
+            -webkit-tap-highlight-color: transparent; 
+            outline: none; 
+            box-sizing: border-box; 
+            user-select: none;
+        }
+
+        body { 
+            background: var(--bg-main); 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            overflow: hidden; 
+            margin: 0; 
+        }
+
+        ::-webkit-scrollbar { display: none; }
+
+        /* Экраны Auth & Ban */
+        .full-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #auth_screen { 
+            background: radial-gradient(circle at top right, #1e3a8a 0%, #07070a 60%); 
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 40px;
+            padding: 40px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-lyne {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 16px 20px;
+            width: 100%;
+            color: #fff;
+            font-size: 14px;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .input-lyne:focus {
+            border-color: var(--accent);
+            background: rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn-blue {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-radius: 20px;
+            padding: 18px;
+            font-weight: 800;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+            transition: 0.2s;
+        }
+
+        .btn-blue:active { transform: scale(0.97); opacity: 0.9; }
+
+        /* Контейнеры приложения */
+        .tab { 
+            display: none; 
+            height: 100vh; 
+            overflow-y: auto; 
+            padding-bottom: 110px; 
+            animation: slideUp 0.4s ease-out;
+        }
+
         .tab.active { display: block; }
-        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: rgba(7,7,10,0.98); border-top: 1px solid #1f1f2e; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
-        .nav-btn { color: #52525b; font-size: 20px; transition: 0.3s; }
-        .nav-btn.active { color: #3b82f6; }
-        
-        .game-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
-        .game-item { display: flex; flex-direction: column; align-items: center; text-align: center; }
-        .game-icon { width: 100%; aspect-ratio: 1; border-radius: 15px; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-        
-        #ban_screen { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 85px;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-btn {
+            color: #52525b;
+            font-size: 22px;
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            position: relative;
+        }
+
+        .nav-btn.active { color: var(--accent); }
+        .nav-btn span { font-size: 9px; font-weight: 700; text-transform: uppercase; }
+
+        /* Карточки и Элементы */
+        .glass-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 24px;
+            padding: 20px;
+            transition: 0.3s;
+        }
+
+        .lot-card {
+            border-left: 4px solid var(--accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        /* Чаты */
+        .chat-bubble {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .bubble-me { background: var(--accent); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .bubble-them { background: #1f1f2e; color: #fff; align-self: flex-start; border-bottom-left-radius: 4px; }
+
+        /* Админка Модалка */
+        #admin_modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 9000;
+            padding: 20px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
 
-    <div id="auth_screen" class="fixed inset-0 z-[5000] flex flex-col items-center justify-center hidden">
-        <div class="auth-card text-center">
-            <div class="w-16 h-16 bg-blue-600 rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-xl">
+    <div id="auth_screen" class="full-screen hidden">
+        <div class="auth-card">
+            <div class="w-16 h-16 bg-blue-600 rounded-3xl mx-auto flex items-center justify-center mb-6 shadow-2xl rotate-3">
                 <i class="fa-solid fa-shield-halved text-white text-3xl"></i>
             </div>
-            <h1 class="text-3xl font-black italic mb-1">lyneok<span class="text-blue-400">:access</span></h1>
-            <p class="text-[10px] text-zinc-500 uppercase font-bold tracking-[3px] mb-8">вход в систему управления</p>
+            <h1 class="text-3xl font-black italic text-center mb-1">lyneok<span class="text-blue-400">:access</span></h1>
+            <p class="text-[9px] text-zinc-500 uppercase font-black tracking-[4px] mb-10 text-center">secure marketplace access</p>
             
-            <input id="reg_n" class="auth-input" placeholder="Никнейм">
-            <input id="reg_tg" class="auth-input" placeholder="@username_tg">
-            <input id="reg_p" type="password" class="auth-input" placeholder="Пароль">
-            
-            <button onclick="register()" class="auth-btn mt-4 text-sm">Начать работу</button>
+            <div class="space-y-4">
+                <input id="reg_n" class="input-lyne" placeholder="Желаемый никнейм">
+                <input id="reg_tg" class="input-lyne" placeholder="Ваш Telegram (@username)">
+                <input id="reg_p" type="password" class="input-lyne" placeholder="Придумайте пароль">
+                <button onclick="authAction()" class="btn-blue mt-4">Начать торговлю</button>
+            </div>
         </div>
-        <p class="text-[9px] text-zinc-600 font-bold uppercase tracking-widest mt-10 italic">v3.1 encrypted connection</p>
+        <p class="text-[10px] text-zinc-700 font-bold uppercase mt-8 tracking-widest italic opacity-50">v4.0 encrypted node</p>
     </div>
 
-    <div id="ban_screen" class="hidden">
-        <i class="fa-solid fa-lock text-red-500 text-6xl mb-6"></i>
-        <h2 class="text-2xl font-black uppercase">Доступ ограничен</h2>
-        <div id="ban_timer" class="text-4xl font-black text-red-500 mt-4">00:00</div>
+    <div id="ban_screen" class="full-screen bg-black hidden">
+        <div class="w-24 h-24 bg-red-600/10 rounded-full flex items-center justify-center mb-8 border border-red-600/20">
+            <i class="fa-solid fa-user-lock text-red-500 text-5xl"></i>
+        </div>
+        <h2 class="text-3xl font-black uppercase tracking-tighter">Доступ заблокирован</h2>
+        <p class="text-zinc-500 mt-2 text-sm px-10 text-center">Вы нарушили правила сообщества lyneok.</p>
+        <div id="ban_timer" class="text-5xl font-black text-red-600 mt-10 tabular-nums">00:00</div>
     </div>
 
-    <div id="main_app" class="hidden">
-        <header class="px-5 py-4 flex justify-between items-center sticky top-0 bg-[#07070a] z-50">
-            <h1 class="text-xl font-black italic">lyne<span class="text-blue-500">ok</span></h1>
-            <div onclick="setTab('profile')" class="bg-[#1a1a24] px-4 py-2 rounded-xl text-xs font-bold border border-white/5">
-                <i class="fa-solid fa-wallet text-blue-500 mr-2"></i><span id="top_bal">0</span> ₽
+    <div id="app" class="hidden">
+        
+        <header class="px-6 py-5 flex justify-between items-center sticky top-0 bg-[#07070a]/90 backdrop-blur-lg z-[500]">
+            <div>
+                <h1 class="text-2xl font-black italic tracking-tighter">lyne<span class="text-blue-500">ok</span></h1>
+                <p class="text-[8px] text-zinc-600 font-bold uppercase tracking-widest">Marketplace</p>
+            </div>
+            <div onclick="setTab('profile')" class="bg-blue-600/10 border border-blue-600/20 px-4 py-2 rounded-2xl flex items-center gap-3">
+                <i class="fa-solid fa-wallet text-blue-500 text-xs"></i>
+                <span class="text-xs font-black tabular-nums" id="user_bal_top">0</span>
+                <span class="text-[10px] font-bold text-blue-500">₽</span>
             </div>
         </header>
 
-        <main id="home" class="tab active px-5 pt-4">
-            <div class="relative mb-6">
-                <input class="input-p bg-[#121218] border border-white/5 w-full p-4 rounded-2xl pl-12 text-sm" placeholder="Поиск игр и приложений">
-                <i class="fa-solid fa-search absolute left-5 top-4.5 text-zinc-500"></i>
+        <main id="home" class="tab active px-6 pt-2">
+            <div class="relative mb-8">
+                <input class="w-full bg-[#111118] border border-white/5 p-4.5 rounded-2xl pl-12 text-sm text-zinc-300 focus:border-blue-600/50" placeholder="Поиск игр, скинов, валюты...">
+                <i class="fa-solid fa-magnifying-glass absolute left-5 top-5 text-zinc-600"></i>
             </div>
-            
-            <div class="flex justify-between items-center mb-4"><h2 class="font-bold">Игры и приложения</h2><span class="text-xs text-zinc-500">Все 850+</span></div>
-            <div class="game-grid mb-8">
-                <div class="game-item"><div class="game-icon bg-blue-600"><i class="fa-brands fa-steam text-2xl"></i></div><p class="text-[10px] mt-2 font-bold">Steam</p></div>
-                <div class="game-item"><div class="game-icon bg-sky-500"><i class="fa-brands fa-telegram text-2xl"></i></div><p class="text-[10px] mt-2 font-bold">Telegram</p></div>
-                <div class="game-item"><div class="game-icon bg-orange-500"><i class="fa-solid fa-ghost text-2xl"></i></div><p class="text-[10px] mt-2 font-bold">Brawl Stars</p></div>
-                <div class="game-item"><div class="game-icon bg-zinc-700"><i class="fa-solid fa-cube text-2xl"></i></div><p class="text-[10px] mt-2 font-bold">Roblox</p></div>
+
+            <div class="flex justify-between items-end mb-5">
+                <h2 class="font-black text-lg tracking-tight">Популярные игры</h2>
+                <span class="text-[10px] text-zinc-500 font-black uppercase">Все категории</span>
             </div>
-            <div id="feed_items" class="space-y-3"></div>
+            <div class="grid grid-cols-4 gap-4 mb-10" id="game_grid">
+                </div>
+
+            <div class="flex items-center gap-2 mb-4">
+                <div class="w-1 h-5 bg-blue-600 rounded-full"></div>
+                <h2 class="font-black text-lg">Свежие предложения</h2>
+            </div>
+            <div id="items_container" class="space-y-4 pb-10">
+                </div>
         </main>
 
-        <main id="sell" class="tab px-5 pt-4">
-            <div class="glass p-6 space-y-4 text-center">
-                <h2 class="font-black text-lg uppercase">Выставить товар</h2>
-                <input id="s_g" class="auth-input !bg-[#07070a]" placeholder="Игра">
-                <input id="s_n" class="auth-input !bg-[#07070a]" placeholder="Название лота">
-                <input id="s_p" type="number" class="auth-input !bg-[#07070a]" placeholder="Цена ₽">
-                <button onclick="addLot()" class="auth-btn !py-4 text-xs">Опубликовать</button>
-            </div>
-        </main>
-
-        <main id="profile" class="tab px-5 pt-4">
-            <div class="glass p-8 text-center space-y-4">
-                <div class="w-20 h-20 bg-blue-600 rounded-full mx-auto flex items-center justify-center text-3xl font-black" id="p_ava">?</div>
-                <h3 class="text-xl font-bold" id="p_name">User</h3>
-                <div class="flex justify-center gap-1 text-amber-400" id="stars"></div>
-                <div class="grid grid-cols-2 gap-2 mt-4">
-                    <div class="bg-[#07070a] p-4 rounded-2xl"><b id="p_sls">0</b><p class="text-[10px] opacity-40 uppercase">Продаж</p></div>
-                    <div class="bg-[#07070a] p-4 rounded-2xl"><b id="p_bal">0</b><p class="text-[10px] opacity-40 uppercase">Баланс ₽</p></div>
+        <main id="sell" class="tab px-6 pt-6">
+            <div class="glass-card mb-6">
+                <h2 class="text-xl font-black mb-6 text-center uppercase tracking-widest">Выставить товар</h2>
+                <div class="space-y-4">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-zinc-500 uppercase ml-2">Выберите игру</label>
+                        <select id="lot_game" class="input-lyne appearance-none">
+                            <option>Brawl Stars</option><option>Roblox</option><option>Standoff 2</option><option>Steam</option><option>Telegram</option><option>Genshin Impact</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-zinc-500 uppercase ml-2">Название лота</label>
+                        <input id="lot_title" class="input-lyne" placeholder="Напр: Аккаунт 50 скинов + почта">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-zinc-500 uppercase ml-2">Описание (инструкция)</label>
+                        <textarea id="lot_desc" class="input-lyne h-24" placeholder="Опишите товар подробно..."></textarea>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-zinc-500 uppercase ml-2">Цена продажи (₽)</label>
+                        <input id="lot_price" type="number" class="input-lyne" placeholder="0" oninput="updateFee(this.value)">
+                        <p id="fee_calc" class="text-[9px] text-zinc-500 text-center mt-2 font-medium">Комиссия lyneok: 3.5% | К зачислению: 0 ₽</p>
+                    </div>
+                    <button onclick="createLot()" class="btn-blue !py-4 mt-4">Опубликовать</button>
                 </div>
             </div>
         </main>
 
-        <nav class="nav-bar">
-            <div onclick="setTab('home')" id="n_home" class="nav-btn active"><i class="fa-solid fa-shop"></i></div>
-            <div onclick="setTab('sell')" id="n_sell" class="nav-btn"><i class="fa-solid fa-plus-circle text-3xl"></i></div>
-            <div onclick="setTab('profile')" id="n_profile" class="nav-btn"><i class="fa-solid fa-user"></i></div>
-        </nav>
-    </div>
+        <main id="chats" class="tab px-6 pt-6">
+            <div id="chat_list_view" class="space-y-3">
+                <div onclick="openSupport()" class="glass-card flex items-center gap-4 border-l-4 border-blue-600 cursor-pointer active:scale-95 transition">
+                    <div class="w-12 h-12 bg-blue-600/20 rounded-full flex items-center justify-center text-blue-500"><i class="fa-solid fa-headset text-xl"></i></div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center"><b class="text-sm">Поддержка lyneok</b><span class="text-[10px] text-zinc-500 uppercase">24/7</span></div>
+                        <p class="text-[11px] text-zinc-500 mt-1 truncate">Помощь по сделками и балансу</p>
+                    </div>
+                </div>
+                <div class="text-center py-10 opacity-20">
+                    <i class="fa-solid fa-comments text-5xl mb-4"></i>
+                    <p class="text-xs font-bold uppercase tracking-widest">Активных сделок нет</p>
+                </div>
+            </div>
 
-    <script>
-        const BOT = "8641257792:AAEsxnQWEIeozMt_gnSwJdVgSFQlOc-hnuc", AID = "7040863301";
-        const CFG = { apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI", databaseURL: "https://dogx-base-default-rtdb.firebaseio.com" };
-        firebase.initializeApp(CFG); const dbR = firebase.database().ref('lyneok_v3_1');
+            <div id="active_chat_view" class="hidden fixed inset-0 bg-[#07070a] z-[2000] flex flex-col">
+                <div class="px-6 py-5 flex items-center gap-4 border-bottom border-white/5">
+                    <button onclick="closeChat()" class="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center"><i class="fa-solid fa-chevron-left"></i></button>
+                    <div><b class="text-sm" id="chat_target_name">Чат</b><p class="text-[10px] text-green-500 font-bold uppercase">Онлайн</p></div>
+                </div>
+                <div id="chat_messages" class="flex-1 overflow-y-auto p-6 flex flex-col"></div>
+                <div class="p-6 bg-[#07070a] border-t border-white/5">
+                    <div class="flex gap-2">
+                        <input id="chat_input" class="input-lyne !rounded-full" placeholder="Ваше сообщение...">
+                        <button onclick="sendMessage()" class="w-14 h-14 bg-blue-600 rounded-full flex-shrink-0 flex items-center justify-center"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </main>
 
-        let me = null, db = {};
-
-        function init() {
-            dbR.on('value', snap => {
-                db = snap.val() || {u:{}, i:{}};
-                const id = localStorage.getItem('lyne_id');
-                if(!id) {
-                    document.getElementById('auth_screen').classList.remove('hidden');
-                } else {
-                    me = db.u[id];
-                    if(me) {
-                        document.getElementById('auth_screen').classList.add('hidden');
-                        document.getElementById('main_app').classList.remove('hidden');
-                        checkBan(); render();
-                    } else { localStorage.removeItem('lyne_id'); location.reload(); }
-                }
-            });
-        }
-
-        async function register() {
-            const n = document.getElementById('reg_n').value, t = document.getElementById('reg_tg').value, p = document.getElementById('reg_p').value;
-            if(!n || !t || !p) return Swal.fire('Ой', 'Заполни все поля', 'error');
-            const id = 'u' + Date.now();
-            await dbR.child(`u/${id}`).set({id, n, tg:t, pass:p, bal:0, ban:0, sls:0, rev:0});
-            localStorage.setItem('lyne_id', id);
-            tg(`🆕 НОВЫЙ ВОРКЕР: ${n} (${t})`);
-        }
-
-        function checkBan() {
-            if(!me) return;
-            const screen = document.getElementById('ban_screen');
-            if(me.ban && me.ban > Date.now()) {
-                screen.classList.remove('hidden');
-                let left = Math.ceil((me.ban - Date.now())/1000);
-                document.getElementById('ban_timer').innerText = `${Math.floor(left/60)}:${(left%60).toString().padStart(2,'0')}`;
-            } else { screen.classList.add('hidden'); }
-        }
-
-        function render() {
-            document.getElementById('top_bal').innerText = me.bal;
-            document.getElementById('p_bal').innerText = me.bal;
-            document.getElementById('p_name').innerText = me.n;
-            document.getElementById('p_ava').innerText = me.n[0].toUpperCase();
-            document.getElementById('p_sls').innerText = me.sls;
-            document.getElementById('stars').innerHTML = '<i class="fa-solid fa-star text-[10px]"></i>'.repeat(5);
-
-            const items = Object.values(db.i || {}).reverse();
-            document.getElementById('feed_items').innerHTML = items.map(i => `
-                <div class="glass p-4 flex justify-between items-center">
-                    <div><p class="text-[9px] text-blue-500 font-bold uppercase">${i.g}</p><h3 class="font-bold text-sm">${i.n}</h3></div>
-                    <div class="text-right"><b class="text-blue-500">${i.p} ₽</b><br><button onclick="buy('${i.id}')" class="text-[9px] bg-blue-600/20 text-blue-500 px-3 py-1 rounded-lg mt-1">КУПИТЬ</button></div>
-                </div>`).join('');
-        }
-
-        async function addLot() {
-            const g=document.getElementById('s_g').value, n=document.getElementById('s_n').value, p=Number(document.getElementById('s_p').value);
-            if(p<1) return;
-            await dbR.child(`i/lot${Date.now()}`).set({id:'lot'+Date.now(), g, n, p, s:me.id});
-            setTab('home');
-        }
-
-        function buy(id) { Swal.fire('Покупка', 'Заявка отправлена админу', 'info'); tg(`💳 ПОКУПКА: ${db.i[id].n} от ${me.n}`); }
-
-        function setTab(t) {
-            document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-            document.getElementById(t).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
-            document.getElementById('n_'+t).classList.add('active');
-        }
-
-        async function tg(txt) { fetch(`https://api.telegram.org/bot${BOT}/sendMessage`, {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:AID, text:txt})}); }
-
-        setInterval(checkBan, 1000); init();
-    </script>
-</body>
-</html>
+        <main id="profile" class="tab px-6 pt-6">
+            <div class="glass-card text-center relative overflow-hidden mb-6">
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
+                <div class="w-24 h-24 bg-zinc-900 rounded-[32px] mx-auto flex items-center justify-center text-4xl font-black shadow-2xl mb-4 border border-white/5" id="user_avatar">?</div>
+                <h3 class="text-2xl font-black tracking-tight" id="user_name">User</h3>
+                <p class
