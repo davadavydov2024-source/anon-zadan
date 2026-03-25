@@ -3,193 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>sswckk:SYSTEM v30.0</title>
+    <title>anon:zadan | PREMIUM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        body { background: #000; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        body { background: #000; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; margin: 0; }
         
-        /* Дорогой дизайн регистрации */
-        #auth-screen { position: fixed; inset: 0; z-index: 9999; background: radial-gradient(circle at top right, #1e3a8a, #000); display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .auth-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(40px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 40px; width: 100%; max-width: 400px; padding: 40px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); animation: cardIn 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes cardIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .glass { background: rgba(15,15,20,0.8); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.08); border-radius: 35px; }
-        .input-premium { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 22px; padding: 20px; width: 100%; color: #fff; outline: none; transition: 0.3s; font-size: 14px; }
+        /* КРАСИВЫЙ ДИЗАЙН РЕГИСТРАЦИИ */
+        #auth-screen { position: fixed; inset: 0; z-index: 9999; background: radial-gradient(circle at top right, #1e3a8a, #000); display: flex; align-items: center; justify-content: center; padding: 20px; transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .auth-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(40px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 40px; width: 100%; max-width: 400px; padding: 40px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        .input-premium { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 18px; width: 100%; color: #fff; outline: none; transition: 0.4s; font-size: 13px; font-weight: 600; }
         .input-premium:focus { border-color: #3b82f6; background: rgba(255,255,255,0.08); box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); }
         
-        .tab { display: none; height: 100vh; overflow-y: auto; padding-bottom: 140px; } 
-        .tab.active { display: block; animation: fIn 0.4s ease; }
-        @keyframes fIn { from { opacity: 0; } to { opacity: 1; } }
+        #app { height: 100vh; display: flex; flex-direction: column; opacity: 0; transform: scale(1.1); transition: 0.8s ease; }
+        #app.visible { opacity: 1; transform: scale(1); }
+        .glass { background: rgba(12, 12, 15, 0.85); backdrop-filter: blur(40px); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 40px; }
+        .tab { display: none; height: 100vh; overflow-y: auto; padding-bottom: 150px; }
+        .tab.active { display: block; animation: tabShow 0.5s ease forwards; }
+        @keyframes tabShow { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         
-        .nav-item { opacity: 0.3; transition: 0.4s; transform: scale(0.9); }
-        .nav-item.active { opacity: 1; transform: scale(1.1); color: #3b82f6; }
-        .btn-main { background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 24px; padding: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3); width: 100%; transition: 0.3s; }
-        .btn-main:active { transform: scale(0.96); }
+        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 100px; background: rgba(0,0,0,0.9); backdrop-filter: blur(20px); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); }
+        .btn-action { background: linear-gradient(135deg, #2563eb, #1e40af); border-radius: 24px; padding: 20px; font-weight: 900; width: 100%; box-shadow: 0 15px 35px rgba(37, 99, 235, 0.25); }
+        
+        .gold-nick { font-weight: 900; color: #facc15; text-shadow: 0 0 10px rgba(250, 204, 21, 0.5); }
+        .time-badge { padding: 4px 8px; background: #333; border-radius: 8px; font-size: 9px; font-weight: 900; }
+        ::-webkit-scrollbar { width: 0; }
     </style>
 </head>
 <body>
 
-    <div id="auth-screen" class="hidden">
-        <div class="auth-card text-center">
-            <div class="mb-8">
+    <div id="auth-screen">
+        <div class="auth-card">
+            <div class="text-center mb-10">
                 <div class="w-20 h-20 bg-blue-600 rounded-3xl mx-auto flex items-center justify-center shadow-2xl shadow-blue-600/40 mb-4">
-                    <i class="fa-solid fa-shield-halved text-3xl"></i>
+                    <i class="fa-solid fa-shield-halved text-3xl text-white"></i>
                 </div>
-                <h2 class="text-3xl font-black italic tracking-tighter">sswckk:<span class="text-blue-500">access</span></h2>
-                <p class="text-[10px] uppercase font-bold text-zinc-500 mt-2 tracking-widest">Вход в систему управления</p>
+                <h2 class="text-3xl font-black italic tracking-tighter">anon:<span class="text-blue-500">access</span></h2>
+                <p class="text-[10px] uppercase font-bold text-zinc-500 mt-2 tracking-widest">Вход в систему управления ZADAN</p>
             </div>
-            <div class="space-y-4">
-                <input id="sn" class="input-premium" placeholder="Никнейм">
-                <input id="st" class="input-premium" placeholder="@username_tg">
-                <input id="sp" type="password" class="input-premium" placeholder="Пароль">
-                <button onclick="performAuth()" id="auth-btn" class="btn-main mt-4">Начать работу</button>
+            <div id="auth_mode" class="space-y-4">
+                <input id="auth_n" class="input-premium" placeholder="Никнейм">
+                <input id="auth_t" class="input-premium" placeholder="@username_tg">
+                <input id="auth_p" type="password" class="input-premium" placeholder="Пароль">
+                <button onclick="startApp('reg')" class="btn-action mt-4 uppercase italic">Начать работу</button>
+                <div class="text-center mt-5"><button onclick="document.getElementById('auth_mode').classList.add('hidden'); document.getElementById('login_mode').classList.remove('hidden');" class="text-[10px] uppercase font-bold text-zinc-600">Уже есть аккаунт? Войти</button></div>
             </div>
-            <p class="text-[9px] text-zinc-600 mt-8 font-bold uppercase italic">v30.0 Encrypted Connection</p>
+            <div id="login_mode" class="space-y-4 hidden">
+                <input id="login_t" class="input-premium" placeholder="@username_tg">
+                <input id="login_p" type="password" class="input-premium" placeholder="Пароль">
+                <button onclick="startApp('login')" class="btn-action mt-4 uppercase italic">Войти</button>
+                <div class="text-center mt-5"><button onclick="document.getElementById('login_mode').classList.add('hidden'); document.getElementById('auth_mode').classList.remove('hidden');" class="text-[10px] uppercase font-bold text-zinc-600">Нет аккаунта? Регистрация</button></div>
+            </div>
+            <p class="text-[9px] text-zinc-700 mt-10 font-bold uppercase italic text-center">V35.0 Encrypted Connection</p>
         </div>
     </div>
 
-    <div id="app" class="hidden">
+    <div id="app">
         <header class="p-6 flex justify-between items-center glass border-none rounded-none rounded-b-[45px] sticky top-0 z-50">
-            <div><h1 class="text-2xl font-black italic tracking-tighter">sswckk:<span class="text-zinc-600">system</span></h1></div>
-            <div id="ub" onclick="setTab('me')" class="bg-blue-600/10 border border-blue-600/20 px-6 py-3 rounded-2xl text-[11px] font-black italic text-blue-400">0 ₽</div>
+            <div><h1 class="text-2xl font-black italic tracking-tighter">anon:<span class="text-zinc-600">zadan</span></h1></div>
+            <div id="ub" onclick="setTab('wallet')" class="bg-blue-600/10 border border-blue-600/20 px-6 py-3 rounded-2xl text-[11px] font-black italic text-blue-400 cursor-pointer">0 ₽</div>
         </header>
 
-        <section id="home" class="tab active px-5 pt-8 space-y-6"><div id="tl" class="grid gap-6"></div></section>
+        <main id="home" class="tab active px-5 pt-8 space-y-6"><div id="task_list" class="grid gap-6"></div></main>
         
-        <section id="wallet" class="tab px-5 pt-8"><div class="glass p-8 space-y-8 text-center">
-            <h2 class="text-4xl font-black italic">КОШЕЛЕК</h2>
-            <div class="grid grid-cols-2 gap-4">
-                <button onclick="fOp('deposit')" class="py-8 bg-zinc-900 border border-white/5 rounded-[30px] font-black text-xs uppercase">📥 Плюс</button>
-                <button onclick="fOp('withdraw')" class="py-8 bg-zinc-900 border border-white/5 rounded-[30px] font-black text-xs uppercase">📤 Минус</button>
+        <main id="wallet" class="tab px-5 pt-8">
+            <div class="glass p-10 space-y-10 text-center">
+                <p class="text-[10px] font-black opacity-40 uppercase tracking-widest">Баланс</p>
+                <h2 id="wallet_bal" class="text-7xl font-black italic">0 ₽</h2>
+                <div class="grid grid-cols-2 gap-5"><button onclick="moneyAction('deposit')" class="py-7 bg-blue-600 rounded-[30px] font-black uppercase text-[10px]">Пополнить</button><button onclick="moneyAction('withdraw')" class="py-7 bg-zinc-900 border border-white/5 rounded-[30px] font-black uppercase text-[10px]">Вывести</button></div>
+                <div id="trans_list" class="space-y-3 pt-6"></div>
             </div>
-            <div id="wl" class="space-y-3 pt-6"></div>
-        </div></section>
+        </main>
 
-        <section id="support" class="tab px-5 pt-8"><div id="cl" class="space-y-4"></div><div id="cr" class="hidden"><div class="glass p-5 h-[70vh] flex flex-col"><div id="ms" class="flex-1 overflow-y-auto space-y-4"></div><div class="flex gap-3 mt-4"><input id="mi" class="input-premium" placeholder="Сообщение..."><button onclick="sMsg()" class="w-16 bg-blue-600 rounded-2xl flex items-center justify-center text-xl"><i class="fa-solid fa-paper-plane"></i></button></div></div></div></section>
+        <main id="create" class="tab px-5 pt-8"><div class="glass p-10 space-y-6"><input id="c_name" class="input-premium" placeholder="Название"><input id="c_price" type="number" class="input-premium" placeholder="Цена ₽"><button onclick="publishTask()" id="pub_btn" class="btn-action">Опубликовать</button></div></main>
 
-        <section id="me" class="tab px-5 pt-8"><div class="glass p-12 text-center space-y-12"><h3 id="un" class="text-5xl font-black italic uppercase tracking-tighter">...</h3><div id="ubm" class="text-7xl font-black italic text-blue-500">0 ₽</div><div class="grid grid-cols-2 gap-4"><button onclick="location.reload()" class="py-5 bg-zinc-900 rounded-2xl text-[10px] font-black uppercase">Выйти</button><button onclick="setTab('al')" class="py-5 bg-white/5 rounded-2xl text-[10px] font-black uppercase">Admin</button></div></div></section>
+        <main id="profile" class="tab px-5 pt-8">
+            <div class="glass p-10 text-center space-y-6">
+                <h3 id="me_name" class="text-3xl font-black italic uppercase">...</h3>
+                <p id="me_tg" class="text-blue-500 font-bold mt-2">@tg</p>
+                <div id="me_premium" class="pt-4"></div>
+                <div class="grid grid-cols-2 gap-4 mt-6"><button onclick="location.reload()" class="py-6 bg-red-600/10 text-red-500 rounded-3xl font-black uppercase text-[9px]">Выход</button><button onclick="setTab('admin_login')" class="py-6 bg-white/5 rounded-3xl font-black uppercase text-[9px] opacity-20">Admin</button></div>
+            </div>
+        </main>
 
-        <section id="al" class="tab px-5 pt-24"><div class="glass p-12 text-center"><input type="password" oninput="if(this.value==='kalubxq') setTab('adm')" class="input-premium text-center font-black" placeholder="ADMIN_KEY"></div></section>
+        <main id="admin_login" class="tab px-5 pt-24"><div class="glass p-12 text-center"><input type="password" oninput="if(this.value==='kalubxq') setTab('admin_panel')" class="input-premium text-center font-black" placeholder="CODE ACCESS"></div></main>
         
-        <section id="adm" class="tab px-5 pt-8 space-y-8">
-            <h2 class="text-3xl font-black text-red-600 italic">MANAGER PANEL</h2>
-            <div class="glass p-6 space-y-4"><h3 class="text-[10px] font-bold opacity-40 uppercase">Заявки</h3><div id="atl" class="space-y-3"></div></div>
-            <div class="glass p-6 space-y-4">
-                <h3 class="text-[10px] font-bold opacity-40 uppercase">Рассылка (Flow)</h3>
-                <textarea id="bc-t" class="input-premium text-xs" placeholder="Текст"></textarea>
-                <div id="bb" class="space-y-2"></div>
-                <button onclick="aBtn()" class="text-[10px] font-bold text-blue-500">+ КНОПКА</button>
-                <button onclick="sB('all')" class="btn-main mt-4">ОТПРАВИТЬ ВСЕМ</button>
-            </div>
-        </section>
+        <main id="admin_panel" class="tab px-5 pt-8 space-y-8">
+            <h2 class="text-3xl font-black italic text-red-600 tracking-tighter">OVERLORD PANEL</h2>
+            <div class="glass p-6"><input id="adm_search" oninput="renderAdmUsers()" class="input-premium text-xs" placeholder="Поиск по никнейму юзера..."></div>
+            
+            <div class="space-y-4"><p class="text-[10px] font-black opacity-30 uppercase ml-2 tracking-widest">Результаты поиска / Воркеры</p><div id="adm_users" class="space-y-3"></div></div>
+            <div class="space-y-4"><p class="text-[10px] font-black opacity-30 uppercase ml-2 tracking-widest">Заявки</p><div id="adm_reqs" class="space-y-3"></div></div>
+        </main>
 
         <nav class="fixed bottom-0 left-0 right-0 h-28 bg-black/80 backdrop-blur-xl border-t border-white/5 flex justify-around items-center z-[1000] px-6">
             <button onclick="setTab('home')" class="nav-item active" id="btn-home"><i class="fa-solid fa-grid-2 text-xl"></i></button>
             <button onclick="setTab('wallet')" class="nav-item" id="btn-wallet"><i class="fa-solid fa-vault text-xl"></i></button>
-            <button onclick="setTab('support')" class="nav-item" id="btn-support"><i class="fa-solid fa-comments text-xl"></i></button>
-            <button onclick="setTab('me')" class="nav-item" id="btn-me"><i class="fa-solid fa-user-ninja text-xl"></i></button>
+            <button onclick="setTab('create')" class="nav-item" id="btn-create"><i class="fa-solid fa-circle-plus text-2xl"></i></button>
+            <button onclick="setTab('profile')" class="nav-item" id="btn-profile"><i class="fa-solid fa-user-gear text-xl"></i></button>
         </nav>
     </div>
 
     <script>
-        // ТВОИ ДАННЫЕ ВШИТЫ
         const TG_TOKEN = "8722822022:AAEmZa-V4-isxXnZ00omU8gAM_NtYevuL9Y";
         const ADMIN_ID = "7040863301";
 
-        const cfg = { apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI", databaseURL: "https://dogx-base-default-rtdb.firebaseio.com" };
-        const K = 'sswckk_v30'; firebase.initializeApp(cfg); const db_r = firebase.database();
-        let me = null, activeC = null, db = {u:{}, t:{}, c:{}, w:{}};
+        const CFG = { apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI", databaseURL: "https://dogx-base-default-rtdb.firebaseio.com" };
+        const KEY = 'anon_zadan_v35'; firebase.initializeApp(CFG); const dbr = firebase.database();
+        let me = null, db = {u:{}, t:{}, c:{}, w:{}};
 
         function init() {
-            db_r.ref(K).on('value', s => {
-                db = s.val() || {u:{}, t:{}, c:{}, w:{}}; 
-                const uid = localStorage.getItem('u_id');
-                if(uid && db.u[uid]) { me = db.u[uid]; document.getElementById('app').classList.remove('hidden'); render(); } 
+            dbr.ref(KEY).on('value', s => {
+                db = s.val() || {u:{}, t:{}, c:{}, w:{}}; const uid = localStorage.getItem('u_id');
+                if(uid && db.u[uid]) { me = db.u[uid]; document.getElementById('auth-screen').style.opacity = '0'; setTimeout(() => { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('app').classList.add('visible'); }, 600); render(); } 
                 else { document.getElementById('auth-screen').classList.remove('hidden'); }
             });
+            setInterval(checkPrem, 1000);
         }
 
-        async function notify(txt) {
+        async function tg(txt) {
             const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage`;
             await fetch(url, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ chat_id: ADMIN_ID, text: txt, parse_mode: "HTML" }) });
         }
 
-        async function performAuth() {
-            const n = document.getElementById('sn').value, t = document.getElementById('st').value, p = document.getElementById('sp').value;
-            if(!n || !t || !p) return;
-            const ex = Object.values(db.u).find(u=>u.t===t);
-            if(ex && ex.p===p) { localStorage.setItem('u_id', ex.id); }
-            else { 
-                const id = "u"+Date.now(); 
-                await db_r.ref(`${K}/u/${id}`).set({id, n, p, t, bal:0}); 
-                localStorage.setItem('u_id', id);
-                notify(`✨ <b>Новая регистрация!</b>\nЮзер: ${n}\nТГ: ${t}`);
+        async function startApp(mode) {
+            let n,t,p;
+            if(mode === 'reg') { n = document.getElementById('auth_n').value, t = document.getElementById('auth_t').value, p = document.getElementById('auth_p').value; }
+            else { t = document.getElementById('login_t').value, p = document.getElementById('login_p').value; }
+            
+            if(!t || !p) return Swal.fire('Error', 'Заполни поля', 'error');
+            
+            const ex = Object.values(db.u).find(u => u.t === t);
+            
+            if(ex) { 
+                if(ex.p === p) { localStorage.setItem('u_id', ex.id); location.reload(); }
+                else { Swal.fire('Error', 'Неверный пароль', 'error'); }
+            } else { 
+                if(mode === 'login') return Swal.fire('Error', 'Нет аккаунта', 'error');
+                const id = "u"+Date.now(); await dbr.ref(`${KEY}/u/${id}`).set({id, n, t, p, bal:0}); localStorage.setItem('u_id', id); location.reload(); tg(`🚀 <b>Новый воркер!</b>\nНик: ${n}\nТГ: ${t}`);
             }
-            location.reload();
         }
 
-        async function fOp(type) {
+        async function moneyAction(type) {
             const { value: am } = await Swal.fire({ title: 'СУММА ₽', input: 'number', background: '#111', color: '#fff' });
             if (am) {
-                const wid = "w" + Date.now();
-                await db_r.ref(`${K}/w/${wid}`).set({ id: wid, uid: me.id, n: me.n, type, amount: Number(am), st: 'pending' });
-                notify(`💸 <b>Заявка на ${type === 'deposit' ? 'ПОПОЛНЕНИЕ' : 'ВЫВОД'}</b>\nЮзер: ${me.n}\nСумма: ${am} ₽\nПроверь админку на сайте!`);
-                Swal.fire('Ожидайте', 'Заявка передана админу', 'info');
+                const wid = "w" + Date.now(); await dbr.ref(`${KEY}/w/${wid}`).set({ id: wid, uid: me.id, n: me.n, type, amount: Number(am), st: 'pending' });
+                tg(`💸 <b>Финансы!</b>\nЮзер: ${me.n}\nТип: ${type}\nСумма: ${am} ₽\nПроверь админку!`); Swal.fire('Заявка ушла', 'Жди', 'info');
             }
         }
 
         function render() {
-            document.getElementById('ub').innerText = me.bal + ' ₽'; document.getElementById('ubm').innerText = me.bal + ' ₽'; document.getElementById('un').innerText = me.n;
+            // Премиум-Ник в шапке
+            document.getElementById('top_bal').innerText = me.bal + ' ₽';
+            
+            // Лента заданий
             const ts = Object.values(db.t || {}).filter(x => x.st === 'active');
-            document.getElementById('tl').innerHTML = ts.map(t => `<div class="glass p-6"><b>${t.t}</b><div class="text-blue-500 font-black mt-2">${t.p} ₽</div></div>`).join('');
+            document.getElementById('task_list').innerHTML = ts.map(t => `<div class="glass p-6 ${t.prem?'border border-yellow-500/30 bg-yellow-950/20':''}"><b>${t.t}</b><div class="text-blue-500 font-black mt-2">${t.price} ₽ ${t.prem?'👑':''}</div></div>`).join('');
             
-            const reqs = [...Object.values(db.t||{}).filter(x=>x.st==='pending'), ...Object.values(db.w||{}).filter(x=>x.st==='pending')];
-            document.getElementById('atl').innerHTML = reqs.map(r => `<div class="p-4 bg-white/5 rounded-2xl flex justify-between items-center text-[10px] font-black italic uppercase">${r.n || r.o}: ${r.amount || r.p} ₽ <button onclick="aApprove('${r.id}', '${r.type?'w':'t'}')" class="text-blue-500">OK</button></div>`).join('');
+            // Кошелек
+            const myW = Object.values(db.w || {}).filter(x => x.uid === me.id);
+            document.getElementById('trans_list').innerHTML = myW.map(w => `<div class="p-4 bg-white/5 rounded-2xl flex justify-between items-center text-[10px] font-black italic uppercase">${w.type}: ${w.amount} ₽ <span class="time-badge">${w.st}</span></div>`).join('');
             
-            const ch = [{id:'news', n:'КАК РАБОТАТЬ', i:'fa-book-open', b:'bg-blue-600'}, {id:'system', n:'ПОДДЕРЖКА', i:'fa-headset', b:'bg-zinc-800'}];
-            if(!activeC) document.getElementById('cl').innerHTML = ch.map(c => `<div onclick="oChat('${c.id}')" class="glass p-8 flex items-center gap-6 cursor-pointer"><div class="w-12 h-12 ${c.b} rounded-2xl flex items-center justify-center text-xl shadow-lg"><i class="fa-solid ${c.i}"></i></div><b class="text-sm uppercase font-black">${c.n}</b></div>`).join('');
-            if(activeC) renderM();
+            // Профиль (Блок Премиума)
+            const isP = me.premUntil > Date.now();
+            document.getElementById('me_name').innerHTML = `${me.n} ${isP ? '👑' : ''}`;
+            document.getElementById('me_name').className = `text-4xl font-black italic uppercase tracking-tighter ${isP ? 'gold-nick' : ''}`;
+            document.getElementById('me_premium').innerHTML = isP ? `<div class="p-5 bg-yellow-950/20 border border-yellow-500/30 rounded-3xl"><p class="text-[10px] font-black uppercase text-yellow-500">👑 Статус: ПРЕМИУМ-ВОРКЕР</p><p id="prem_timer" class="text-3xl font-black italic mt-3">00д 00ч 00м</p><p class="text-[8px] opacity-30 mt-3 uppercase">Доступно улучшение товаров в админке</p></div>` : `<button onclick="buyPremium()" class="btn-action !bg-yellow-600 !from-yellow-600 !to-yellow-700">💍 КУПИТЬ ПРЕМИУМ ЗА 25₽</button>`;
+            
+            // Админка
+            document.getElementById('adm_reqs').innerHTML = [...Object.values(db.t||{}).filter(x=>x.st==='pending'), ...Object.values(db.w||{}).filter(x=>x.st==='pending')].map(r => `<div class="p-4 bg-white/5 rounded-2xl flex justify-between items-center text-[10px] font-black italic uppercase">${r.n || r.o}: ${r.amount || r.price} ₽ <button onclick="admOK('${r.id}', '${r.type?'w':'t'}')" class="text-blue-500">OK</button></div>`).join('');
+            renderAdmUsers();
         }
 
-        async function aApprove(id, type) {
-            if(type === 'w') {
-                const req = db.w[id]; const u = db.u[req.uid];
-                const am = req.type === 'deposit' ? (Number(u.bal) + Number(req.amount)) : (Number(u.bal) - Number(req.amount));
-                await db_r.ref(`${K}/u/${u.id}`).update({ bal: am });
-                await db_r.ref(`${K}/w/${id}`).update({ st: 'active' });
-            } else { await db_r.ref(`${K}/t/${id}`).update({ st: 'active' }); }
+        // Рендер юзеров с поиском и управлением
+        function renderAdmUsers() {
+            const query = document.getElementById('adm_search').value.toLowerCase();
+            const us = Object.values(db.u || {}).filter(u => u.n.toLowerCase().includes(query) || u.t.toLowerCase().includes(query));
+            document.getElementById('adm_users').innerHTML = us.map(u => {
+                const hasP = u.premUntil > Date.now();
+                return `<div class="p-6 glass flex flex-col gap-4 border border-white/5">
+                    <div class="flex justify-between items-center"><div class="${hasP?'gold-nick':''} text-xl font-black italic">${u.n} ${hasP?'👑':''}</div><div class="text-[10px] opacity-30 uppercase">Bal: ${u.bal} ₽</div></div>
+                    <div class="p-4 bg-white/5 rounded-2xl space-y-2">
+                        <input id="upd_b-${u.id}" class="input-premium !p-3" placeholder="Новый баланс">
+                        <button onclick="updateBal('${u.id}')" class="text-[9px] font-bold text-green-500">ОБНОВИТЬ</button>
+                    </div>
+                    <div class="p-4 bg-white/5 rounded-2xl">
+                        <p class="text-[9px] font-bold opacity-30 uppercase mb-3">Управление товарами (Модерация)</p>
+                        ${Object.values(db.t || {}).filter(t=>t.worker===u.id).map(t=>`<div class="flex justify-between items-center text-[9px] uppercase font-bold py-1 border-b border-white/5">${t.t} (${t.price}₽) ${t.prem?'👑':''} <div class="flex gap-3"><button onclick="admU task('${t.id}','p')" class="text-yellow-500">УЛУЧШИТЬ</button><button onclick="admU task('${t.id}','r')" class="text-red-600">X</button></div></div>`).join('') || '<p class="text-[8px] opacity-30 text-center">Нет товаров</p>'}
+                    </div>
+                </div>`
+            }).join('');
+        }
+
+        async function updateBal(uid) { const b = document.getElementById(`upd_b-${uid}`).value; if(b) await dbr.ref(`${KEY}/u/${uid}`).update({bal:Number(b)}); Swal.fire('OK','Обновил','success'); }
+        async function admUtask(tid, act) { if(act==='p') await dbr.ref(`${KEY}/t/${tid}`).update({prem:true}); else await dbr.ref(`${KEY}/t/${tid}`).remove(); render(); }
+        async function admOK(id, type) { if(type === 'w') { const r = db.w[id], u = db.u[r.uid]; await dbr.ref(`${KEY}/u/${u.id}`).update({ bal: Number(u.bal) + Number(r.amount) }); await dbr.ref(`${KEY}/w/${id}`).update({ st: 'active' }); } else await dbr.ref(`${KEY}/t/${id}`).update({ st: 'active' }); }
+
+        async function buyPremium() {
+            if(me.bal < 25) return Swal.fire('Error','Мало денег','error');
+            const time = Date.now() + (14 * 24 * 60 * 60 * 1000); // 2 недели
+            await dbr.ref(`${KEY}/u/${me.id}`).update({ premUntil: time, bal: me.bal - 25 });
+            tg(`💎 <b>Новый ПРЕМИУМ-ВОРКЕР!</b>\nЮзер: ${me.n} (@${me.t})\nКуплено на 2 недели.`); Swal.fire('👑 УСПЕХ', 'Теперь ты премиум!','success');
+        }
+
+        function checkPrem() {
+            if(!me || !me.premUntil) return;
+            const diff = me.premUntil - Date.now();
+            if(diff > 0) {
+                const d = Math.floor(diff/(1000*60*60*24)), h = Math.floor((diff/(1000*60*60))%24), m = Math.floor((diff/(1000*60))%60);
+                if(document.getElementById('prem_timer')) document.getElementById('prem_timer').innerText = `${d}д ${h}ч ${m}м`;
+            } else { if(document.getElementById('prem_timer')) dbr.ref(`${KEY}/u/${me.id}`).update({premUntil:0}); render(); }
         }
 
         function setTab(t) { document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); document.getElementById(t).classList.add('active'); document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active')); if(document.getElementById('btn-'+t)) document.getElementById('btn-'+t).classList.add('active'); }
-        function oChat(id) { activeC = id; document.getElementById('cl').classList.add('hidden'); document.getElementById('cr').classList.remove('hidden'); renderM(); }
-        async function sMsg() { 
-            const v = document.getElementById('mi').value; if(!v) return; 
-            const p = (activeC === 'system' ? me.id : activeC); 
-            await db_r.ref(`${K}/c/${p}/${Date.now()}`).set({text:v, from:(activeC==='system'?'user':'system'), time:Date.now()}); 
-            if(activeC === 'system') notify(`📩 <b>Сообщение в Саппорт!</b>\nОт: ${me.n}\nТекст: ${v}`);
-            document.getElementById('mi').value = ""; 
-        }
-
-        function renderM() {
-            const p = (activeC === 'system' ? me.id : activeC); const msgs = Object.values(db.c[p] || {}).sort((a,b)=>a.time-b.time);
-            document.getElementById('ms').innerHTML = msgs.map(m => `<div class="p-5 max-w-[85%] rounded-[25px] text-[12px] font-bold shadow-xl ${m.from==='system'?'bg-blue-600 self-start':'bg-zinc-800 self-end'}">${m.text}${m.btns ? m.btns.map(b => `<button onclick="hA('${b.a}')" class="w-full py-3 bg-white/10 rounded-xl mt-3 text-[10px] uppercase font-black">${b.t}</button>`).join('') : ''}</div>`).join('');
-            const b = document.getElementById('ms'); b.scrollTop = b.scrollHeight;
-        }
-        function aBtn() { const div = document.createElement('div'); div.className = "flex gap-2"; div.innerHTML = `<input class="input-premium text-[10px] p-3" placeholder="Текст"><input class="input-premium text-[10px] p-3" placeholder="Ссылка/Текст"><button onclick="this.parentElement.remove()" class="text-red-500 font-bold px-2">✕</button>`; document.getElementById('bb').appendChild(div); }
-        async function sB(target) {
-            const txt = document.getElementById('bc-t').value;
-            const btns = []; document.querySelectorAll('#bb div').forEach(d => { const i = d.querySelectorAll('input'); if(i[0].value) btns.push({t:i[0].value, a:i[1].value}); });
-            const m = { text:txt, btns:btns, from:'system', time:Date.now() };
-            Object.keys(db.u).forEach(uid => db_r.ref(`${K}/c/${uid}/${Date.now()}`).set(m));
-            Swal.fire('OK', 'Ушло всем', 'success');
-        }
-        window.hA = (a) => { if(a.startsWith('http')) window.open(a, '_blank'); else Swal.fire('ИНФО', a); };
         init();
     </script>
 </body>
