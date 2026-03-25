@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>anon:zadan | V36.2 ULTIMATE</title>
+    <title>anon:zadan | V38 OVERLORD EDITION</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -15,9 +15,8 @@
         body { background: #050505; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; margin: 0; }
         .glass { background: rgba(20, 20, 25, 0.6); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 32px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         .input-mod { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 20px; width: 100%; color: #fff; outline: none; transition: 0.3s; font-size: 14px; font-weight: 600; }
-        .btn-super { background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899); background-size: 200% 200%; border-radius: 28px; padding: 20px; font-weight: 900; width: 100%; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 15px 30px rgba(168, 85, 247, 0.3); transition: 0.4s; animation: grad 5s ease infinite; border: none; color: white; cursor: pointer; }
+        .btn-super { background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899); background-size: 200% 200%; border-radius: 28px; padding: 20px; font-weight: 900; width: 100%; text-transform: uppercase; letter-spacing: 1px; animation: grad 5s ease infinite; border: none; color: white; cursor: pointer; }
         @keyframes grad { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        #auth-screen { position: fixed; inset: 0; z-index: 9999; background: radial-gradient(circle at top right, #312e81, #000); display: flex; align-items: center; justify-content: center; padding: 20px; }
         #app { height: 100vh; display: flex; flex-direction: column; opacity: 0; transition: 0.6s ease; }
         #app.visible { opacity: 1; }
         .tab { display: none; height: 100vh; overflow-y: auto; padding-bottom: 150px; }
@@ -25,29 +24,35 @@
         .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 95px; background: rgba(5,5,5,0.85); backdrop-filter: blur(30px); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); z-index: 1000; }
         .nav-btn { color: #52525b; transition: 0.3s; font-size: 24px; padding: 15px; }
         .nav-btn.active { color: #a855f7; text-shadow: 0 0 20px rgba(168,85,247,0.5); }
-        ::-webkit-scrollbar { display: none; }
+        .reaction-btn { background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 12px; font-size: 12px; transition: 0.2s; border: 1px solid rgba(255,255,255,0.03); }
     </style>
 </head>
 <body>
 
-    <div id="auth-screen">
-        <div class="glass p-10 w-full max-w-sm">
-            <div class="text-center mb-10">
-                <div class="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-[28px] mx-auto flex items-center justify-center shadow-2xl mb-5"><i class="fa-solid fa-fingerprint text-4xl text-white"></i></div>
-                <h2 class="text-4xl font-black italic tracking-tighter">anon:<span class="text-indigo-400">access</span></h2>
-            </div>
+    <div id="ban-screen" class="fixed inset-0 z-[10000] bg-black hidden items-center justify-center flex-col text-center">
+        <div class="glass p-10 mx-5 w-full max-w-sm border-red-500/30">
+            <h1 class="text-5xl font-black text-red-500 italic mb-2 tracking-tighter">ОПА!</h1>
+            <p class="text-xs font-bold mb-8 opacity-60 uppercase">Доступ ограничен администратором</p>
+            <div id="ban-timer" class="text-4xl font-black font-mono text-white mb-8 tracking-widest bg-zinc-900/80 py-4 rounded-3xl border border-white/5">00:00:00</div>
+            <button onclick="setTab('chats'); document.getElementById('ban-screen').style.display='none';" class="w-full py-4 bg-white/10 rounded-2xl text-[10px] font-black uppercase text-white">Написать в поддержку</button>
+        </div>
+    </div>
+
+    <div id="auth-screen" class="fixed inset-0 z-[9999] bg-[#050505] flex items-center justify-center p-5">
+        <div class="glass p-10 w-full max-w-sm border-white/10">
+            <h2 class="text-3xl font-black italic mb-8 text-center uppercase tracking-tighter">anon:<span class="text-indigo-400">gate</span></h2>
             <div id="auth_mode" class="space-y-4">
-                <input id="auth_n" class="input-mod" placeholder="Никнейм">
-                <input id="auth_t" class="input-mod" placeholder="@tg_username">
+                <input id="auth_n" class="input-mod" placeholder="Твой ник">
+                <input id="auth_t" class="input-mod" placeholder="@логин_тг">
                 <input id="auth_p" type="password" class="input-mod" placeholder="Пароль">
-                <button onclick="auth('reg')" class="btn-super mt-2">Регистрация</button>
-                <div class="text-center pt-4"><button onclick="toggleAuth()" class="text-[11px] font-bold text-zinc-500 uppercase">Уже есть аккаунт? Вход</button></div>
+                <button onclick="auth('reg')" class="btn-super w-full">Создать аккаунт</button>
+                <button onclick="toggleAuth()" class="w-full text-[10px] opacity-40 uppercase font-black">Уже есть аккаунт</button>
             </div>
             <div id="login_mode" class="space-y-4 hidden">
-                <input id="login_t" class="input-mod" placeholder="@tg_username">
+                <input id="login_t" class="input-mod" placeholder="@логин_тг">
                 <input id="login_p" type="password" class="input-mod" placeholder="Пароль">
-                <button onclick="auth('login')" class="btn-super mt-2">Войти</button>
-                <div class="text-center pt-4"><button onclick="toggleAuth()" class="text-[11px] font-bold text-zinc-500 uppercase">Нет аккаунта? Создать</button></div>
+                <button onclick="auth('login')" class="btn-super w-full">Войти в систему</button>
+                <button onclick="toggleAuth()" class="w-full text-[10px] opacity-40 uppercase font-black">Создать новый</button>
             </div>
         </div>
     </div>
@@ -59,25 +64,32 @@
         </header>
 
         <main id="home" class="tab active px-5 pt-8 space-y-6"><div id="task_list" class="grid gap-6"></div></main>
-        
+
         <main id="wallet" class="tab px-5 pt-8">
             <div class="glass p-10 text-center space-y-8">
-                <p class="text-[10px] font-black opacity-40 uppercase tracking-widest">Твой баланс</p>
-                <h2 id="wallet_bal" class="text-6xl font-black italic">0 ₽</h2>
-                <div class="grid grid-cols-2 gap-4"><button onclick="money('deposit')" class="py-6 bg-indigo-600 rounded-3xl font-black uppercase text-[10px]">Пополнить</button><button onclick="money('withdraw')" class="py-6 bg-zinc-800 rounded-3xl font-black uppercase text-[10px]">Вывести</button></div>
+                <h2 id="wallet_bal" class="text-6xl font-black italic tracking-tighter">0 ₽</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="money('deposit')" class="py-6 bg-indigo-600 rounded-3xl font-black uppercase text-[10px]">Пополнить</button>
+                    <button onclick="money('withdraw')" class="py-6 bg-zinc-800 rounded-3xl font-black uppercase text-[10px]">Вывести</button>
+                </div>
                 <div id="trans_list" class="space-y-3 pt-4"></div>
             </div>
+        </main>
+
+        <main id="news" class="tab px-5 pt-8 space-y-6">
+            <div class="text-center"><b class="text-xs uppercase opacity-30 tracking-[5px]">Digital Channel</b></div>
+            <div id="news_list" class="space-y-6 pb-20"></div>
         </main>
 
         <main id="chats" class="tab px-5 pt-8">
             <div id="chat_list" class="space-y-4">
                 <div onclick="openChat('support')" class="glass p-6 flex items-center gap-5 cursor-pointer">
-                    <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex justify-center items-center text-xl"><i class="fa-solid fa-headset"></i></div>
-                    <div><b class="text-sm uppercase font-black">Уведомления системы</b><p class="text-[10px] opacity-50 mt-1">Чеки и статусы здесь</p></div>
+                    <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex justify-center items-center text-xl shadow-lg shadow-indigo-500/20"><i class="fa-solid fa-bell"></i></div>
+                    <div><b class="text-sm uppercase font-black">Системный чат</b><p class="text-[10px] opacity-40 mt-1">Твои чеки и новости здесь</p></div>
                 </div>
             </div>
             <div id="chat_room" class="hidden h-full flex flex-col -mt-8 bg-[#050505] relative z-[1001]">
-                <div class="glass rounded-t-none p-5 flex items-center gap-4"><button onclick="closeChat()" class="text-xl px-2"><i class="fa-solid fa-chevron-left"></i></button><b class="font-black uppercase">Уведомления</b></div>
+                <div class="glass rounded-t-none p-5 flex items-center gap-4"><button onclick="closeChat()" class="text-xl px-2"><i class="fa-solid fa-chevron-left"></i></button><b class="font-black uppercase text-xs">Уведомления</b></div>
                 <div id="chat_msgs" class="flex-1 overflow-y-auto p-5 space-y-4 pb-32"></div>
             </div>
         </main>
@@ -85,21 +97,45 @@
         <main id="profile" class="tab px-5 pt-8">
             <div class="glass p-10 text-center space-y-6">
                 <h3 id="me_name" class="text-4xl font-black italic uppercase">...</h3>
-                <p id="me_tg" class="text-zinc-500 font-bold">@tg</p>
-                <button onclick="setTab('admin_login')" class="py-6 w-full bg-white/5 rounded-3xl font-black uppercase text-[10px] opacity-30 mt-10">Admin Login</button>
+                <p id="me_tg" class="text-zinc-500 font-bold mb-10">@tg</p>
+                <button onclick="deleteAccount()" class="py-5 w-full bg-red-900/10 text-red-500 border border-red-500/20 rounded-3xl font-black uppercase text-[10px]">Удалить всё</button>
+                <button onclick="setTab('admin_login')" class="py-6 w-full opacity-5 text-[10px] font-black">ADMIN</button>
             </div>
         </main>
 
-        <main id="admin_login" class="tab px-5 pt-24"><div class="glass p-10"><input type="password" oninput="if(this.value==='kalubxq') setTab('admin_panel')" class="input-mod text-center" placeholder="SECURE CODE"></div></main>
+        <main id="admin_login" class="tab px-5 pt-24"><div class="glass p-10"><input type="password" oninput="if(this.value==='kalubxq') setTab('admin_panel')" class="input-mod text-center" placeholder="PASSWORD"></div></main>
         
-        <main id="admin_panel" class="tab px-4 pt-6 space-y-6">
-            <h2 class="text-3xl font-black italic text-red-500 text-center uppercase tracking-tighter">Overlord v36.2</h2>
-            <div class="glass p-6 space-y-4"><p class="text-[10px] font-black uppercase text-yellow-500">Заявки</p><div id="adm_reqs" class="space-y-4"></div></div>
+        <main id="admin_panel" class="tab px-4 pt-6 space-y-6 pb-40">
+            <h2 class="text-3xl font-black italic text-red-500 text-center uppercase tracking-tighter">Overlord Core</h2>
+            
+            <div class="glass p-6 space-y-4 border-red-500/30">
+                <p class="text-[10px] font-black text-red-500 uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-radio"></i> Бесконечная рассылка</p>
+                <textarea id="adm_broadcast_text" class="input-mod h-24 text-xs" placeholder="Сообщение ВСЕМ воркерам..."></textarea>
+                <button onclick="runMassBroadcast()" class="btn-super w-full !py-4 text-[10px]">Запустить пробив</button>
+            </div>
+
+            <div class="glass p-6 space-y-4 border-indigo-500/30">
+                <p class="text-[10px] font-black text-indigo-400 uppercase">Новый пост в канал</p>
+                <textarea id="adm_news_text" class="input-mod h-20 text-xs" placeholder="Текст поста..."></textarea>
+                <button onclick="sendNews()" class="btn-super w-full !py-3 text-[10px]">Опубликовать</button>
+            </div>
+
+            <div class="glass p-6 space-y-4 border-yellow-500/30">
+                <p class="text-[10px] font-black text-yellow-500 uppercase">Входящие заявки</p>
+                <div id="adm_reqs" class="space-y-4"></div>
+            </div>
+
+            <div class="glass p-6 space-y-4 border-green-500/30">
+                <p class="text-[10px] font-black text-green-500 uppercase flex justify-between">Воркеры <span>КТО В СЕТИ</span></p>
+                <input id="adm_search" oninput="renderAdm()" class="input-mod !p-3 text-xs" placeholder="Поиск по базе...">
+                <div id="adm_users" class="space-y-4 mt-4"></div>
+            </div>
         </main>
 
         <nav class="nav-bar">
             <button onclick="setTab('home')" id="n_home" class="nav-btn active"><i class="fa-solid fa-bolt"></i></button>
             <button onclick="setTab('wallet')" id="n_wallet" class="nav-btn"><i class="fa-solid fa-wallet"></i></button>
+            <button onclick="setTab('news')" id="n_news" class="nav-btn"><i class="fa-solid fa-bullhorn"></i></button>
             <button onclick="setTab('chats')" id="n_chats" class="nav-btn"><i class="fa-solid fa-comment-dots"></i></button>
             <button onclick="setTab('profile')" id="n_profile" class="nav-btn"><i class="fa-solid fa-user-ninja"></i></button>
         </nav>
@@ -113,42 +149,53 @@
         
         firebase.initializeApp(CFG); 
         const dbRef = firebase.database().ref('anon_zadan_v36');
-        let me = null, db = {u:{}, t:{}, c:{}, w:{}}, actC = null;
+        let me = null, db = {u:{}, t:{}, c:{}, w:{}, n:{}}, isBanned = false;
 
         function init() {
             const params = new URLSearchParams(window.location.search);
-            const isBotGo = params.get('admin') === 'kalubxq';
+            if(params.get('admin') === 'kalubxq') { setTimeout(() => setTab('admin_panel'), 1000); window.history.replaceState({}, document.title, MY_SITE); }
 
             dbRef.on('value', s => {
-                db = s.val() || {u:{}, t:{}, c:{}, w:{}}; 
+                db = s.val() || {u:{}, t:{}, c:{}, w:{}, n:{}}; 
                 const id = localStorage.getItem('u_id');
                 if(id && db.u[id]) { 
                     me = db.u[id]; 
                     document.getElementById('auth-screen').style.display='none'; 
                     document.getElementById('app').classList.add('visible'); 
-                    render(); 
-                    if(isBotGo) { setTab('admin_panel'); window.history.replaceState({}, document.title, MY_SITE); }
-                } else document.getElementById('auth-screen').classList.remove('hidden');
+                    render();
+                } else {
+                    document.getElementById('auth-screen').style.display='flex';
+                }
             });
+
+            setInterval(() => {
+                if(me) dbRef.child(`u/${me.id}/lastSeen`).set(Date.now());
+                checkBan();
+            }, 5000);
         }
 
-        async function tg(txt, reqBtns = false) {
-            let body = { chat_id: ADM, text: txt, parse_mode: "HTML" };
-            if(reqBtns) {
-                const fastLink = `${MY_SITE}?admin=kalubxq`;
-                body.reply_markup = { inline_keyboard: [[ { text: "ДА 👑", url: fastLink }, { text: "НЕТ 🙁", url: fastLink } ]] };
+        function checkBan() {
+            if(!me) return;
+            const diff = (me.banUntil || 0) - Date.now();
+            if(diff > 0) {
+                isBanned = true;
+                document.getElementById('ban-screen').style.display = 'flex';
+                const h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
+                document.getElementById('ban-timer').innerText = `${h}:${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+            } else if(isBanned) {
+                isBanned = false;
+                document.getElementById('ban-screen').style.display = 'none';
             }
-            await fetch(`https://api.telegram.org/bot${TG}/sendMessage`, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body) });
         }
 
-        async function money(type) {
-            const {value: am} = await Swal.fire({title: 'СУММА ₽', input: 'number', background: '#111', color: '#fff'});
-            if(am) { 
-                const id="w"+Date.now(); 
-                await dbRef.child(`w/${id}`).set({id, uid:me.id, n:me.n, t:me.t, type, amount:Number(am), st:'pending'});
-                tg(`💳 <b>ЗАЯВКА</b>\nЮзер: @${me.t}\nТип: ${type==='deposit'?'ВВОД':'ВЫВОД'}\nСумма: ${am} ₽`, true); 
-                Swal.fire('ОК','Заявка отправлена','success'); 
-            }
+        async function runMassBroadcast() {
+            const txt = document.getElementById('adm_broadcast_text').value;
+            if(!txt) return;
+            const users = Object.values(db.u || {});
+            const now = Date.now();
+            users.forEach(u => dbRef.child(`c/${u.id}/${now}`).set({txt: `📢 ВНИМАНИЕ:\n${txt}`, from:'sys'}));
+            document.getElementById('adm_broadcast_text').value = '';
+            Swal.fire('ОК', 'Рассылка ушла', 'success');
         }
 
         function render() {
@@ -156,45 +203,106 @@
             document.getElementById('wallet_bal').innerText = me.bal + ' ₽';
             document.getElementById('me_name').innerText = me.n;
             document.getElementById('me_tg').innerText = '@'+me.t;
-            renderAdm(); if(actC) renderM();
-            document.getElementById('trans_list').innerHTML = Object.values(db.w).filter(x=>x.uid===me.id).map(w=>`<div class="p-4 bg-white/5 rounded-2xl flex justify-between text-[10px] font-bold uppercase"><span>${w.type}</span><span class="${w.st==='success'?'text-green-500':w.st==='rejected'?'text-red-500':'text-yellow-500'}">${w.amount}₽ (${w.st})</span></div>`).reverse().join('');
+            
+            document.getElementById('trans_list').innerHTML = Object.values(db.w || {}).filter(x=>x.uid===me.id).reverse().map(w=>`
+                <div class="p-4 bg-white/5 rounded-2xl flex justify-between text-[10px] font-black uppercase border border-white/5">
+                    <span>${w.type}</span><span class="${w.st==='success'?'text-green-500':w.st==='rejected'?'text-red-500':'text-yellow-500'}">${w.amount}₽</span>
+                </div>`).join('');
+
+            document.getElementById('news_list').innerHTML = Object.values(db.n || {}).reverse().map(n => `
+                <div class="glass p-6 space-y-4 border-indigo-500/20">
+                    <p class="text-xs font-bold leading-relaxed">${n.txt}</p>
+                    <div class="flex gap-2">
+                        <button onclick="react('${n.id}','heart')" class="reaction-btn">❤️‍🩹 ${n.heart||0}</button>
+                        <button onclick="react('${n.id}','evil')" class="reaction-btn">😈 ${n.evil||0}</button>
+                    </div>
+                </div>`).join('');
+
+            if(actC) renderM();
+            renderAdm();
         }
 
         function renderAdm() {
-            document.getElementById('adm_reqs').innerHTML = Object.values(db.w).filter(x=>x.st==='pending').map(r => `
-                <div class="glass p-5 mb-2">
-                    <p class="text-xs font-black uppercase mb-3">@${r.t}: ${r.type} ${r.amount}₽</p>
-                    <div class="flex gap-3"><button onclick="admOk('${r.id}',true)" class="flex-1 py-3 bg-indigo-600 rounded-xl font-black text-xs">ДА 👑</button><button onclick="admOk('${r.id}',false)" class="flex-1 py-3 bg-red-600/20 text-red-500 rounded-xl font-black text-xs">НЕТ 🙁</button></div>
-                </div>`).join('') || '<p class="text-center opacity-20 text-xs">Нет заявок</p>';
+            const q = document.getElementById('adm_search').value.toLowerCase();
+            document.getElementById('adm_users').innerHTML = Object.values(db.u || {}).filter(u=>u.n.toLowerCase().includes(q)).map(u => {
+                const isOnline = (Date.now() - (u.lastSeen || 0)) < 30000;
+                return `
+                <div class="glass p-5 space-y-4 border-white/5">
+                    <div class="flex justify-between items-center">
+                        <b class="text-sm">@${u.t} ${isOnline ? '<span class="text-green-500 text-[8px] animate-pulse">● LIVE</span>' : ''}</b>
+                        <span class="text-indigo-400 font-black">${u.bal}₽</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input id="bal-${u.id}" type="number" class="input-mod !p-2 text-[10px]" placeholder="+/- Баланс">
+                        <button onclick="admEditBal('${u.id}')" class="bg-indigo-600 rounded-xl text-[9px] font-black uppercase">Изм.</button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input id="ban-${u.id}" type="number" class="input-mod !p-2 text-[10px]" placeholder="Мин. бана">
+                        <button onclick="admBan('${u.id}')" class="bg-red-600 rounded-xl text-[9px] font-black uppercase">Бан</button>
+                    </div>
+                    <button onclick="dbRef.child('u/${u.id}').update({banUntil:0})" class="w-full py-2 bg-white/5 text-[8px] font-black uppercase rounded-lg">Разбанить</button>
+                </div>`;
+            }).join('');
+
+            document.getElementById('adm_reqs').innerHTML = Object.values(db.w || {}).filter(x=>x.st==='pending').map(r => `
+                <div class="glass p-5 flex flex-col gap-3">
+                    <div class="text-[10px] font-black uppercase">@${r.t} — <span class="text-indigo-400">${r.type} ${r.amount}₽</span></div>
+                    <div class="flex gap-2">
+                        <button onclick="admOk('${r.id}',true)" class="flex-1 py-3 bg-green-600 rounded-xl font-black text-[9px]">ДА</button>
+                        <button onclick="admOk('${r.id}',false)" class="flex-1 py-3 bg-red-600 rounded-xl font-black text-[9px]">НЕТ</button>
+                    </div>
+                </div>`).join('') || '<p class="text-center opacity-20 text-xs">Заявок нет</p>';
+        }
+
+        async function admEditBal(id) {
+            const v = Number(document.getElementById(`bal-${id}`).value);
+            if(v) await dbRef.child(`u/${id}`).update({bal: (Number(db.u[id].bal) + v)});
+            Swal.fire('ОК','Готово','success');
+        }
+
+        async function admBan(id) {
+            const m = Number(document.getElementById(`ban-${id}`).value);
+            if(m) await dbRef.child(`u/${id}`).update({banUntil: Date.now() + (m * 60000)});
+            Swal.fire('ОК','Забанен','success');
         }
 
         async function admOk(id, ok) {
-            const r = db.w[id]; if(!r) return;
-            const u = db.u[r.uid];
+            const r = db.w[id];
             if(ok) {
-                let nb = r.type==='deposit' ? Number(u.bal) + Number(r.amount) : Number(u.bal) - Number(r.amount);
+                const u = db.u[r.uid];
+                let nb = r.type==='ВВОД' ? Number(u.bal) + Number(r.amount) : Number(u.bal) - Number(r.amount);
                 await dbRef.child(`u/${u.id}`).update({bal: nb});
                 await dbRef.child(`w/${id}`).update({st:'success'});
-                // Уведомление юзеру
-                await dbRef.child(`c/${u.id}/${Date.now()}`).set({txt: `✅ Заявка на ${r.amount}₽ ОДОБРЕНА. Баланс обновлен!`, from:'sys'});
-                tg(`✅ ОДОБРЕНО: @${u.t} +${r.amount}₽`);
-            } else {
-                await dbRef.child(`w/${id}`).update({st:'rejected'});
-                // Уведомление юзеру об отмене
-                await dbRef.child(`c/${u.id}/${Date.now()}`).set({txt: `❌ Заявка на ${r.amount}₽ ОТКЛОНЕНА администрацией.`, from:'sys'});
-            }
-            Swal.fire('ОК', 'Готово', 'success');
+                await dbRef.child(`c/${u.id}/${Date.now()}`).set({txt: `✅ Заявка на ${r.amount}₽ одобрена.`, from:'sys'});
+            } else { await dbRef.child(`w/${id}`).update({st:'rejected'}); }
         }
 
-        // Логика чата
+        async function sendNews() {
+            const t = document.getElementById('adm_news_text').value;
+            if(t) { await dbRef.child(`n/n${Date.now()}`).set({id:`n${Date.now()}`, txt:t, heart:0, evil:0}); document.getElementById('adm_news_text').value=''; }
+        }
+
+        async function react(id, type) { await dbRef.child(`n/${id}/${type}`).set((db.n[id][type] || 0) + 1); }
+
+        async function money(type) {
+            const {value: am} = await Swal.fire({title: 'СУММА ₽', input: 'number', background: '#111', color: '#fff'});
+            if(am) { 
+                const id="w"+Date.now(); 
+                await dbRef.child(`w/${id}`).set({id, uid:me.id, n:me.n, t:me.t, type: type==='deposit'?'ВВОД':'ВЫВОД', amount:Number(am), st:'pending'});
+                tg(`💳 <b>ЗАЯВКА</b>\n@${me.t}: ${type} ${am}₽`);
+                Swal.fire('ОК','Заявка отправлена','success'); 
+            }
+        }
+
         function openChat(id) { actC=id; document.getElementById('chat_list').classList.add('hidden'); document.getElementById('chat_room').classList.remove('hidden'); renderM(); }
         function closeChat() { actC=null; document.getElementById('chat_list').classList.remove('hidden'); document.getElementById('chat_room').classList.add('hidden'); }
         function renderM() {
-            const msgs = Object.values(db.c[me.id] || {});
-            document.getElementById('chat_msgs').innerHTML = msgs.map(m => `<div class="p-4 max-w-[85%] rounded-[24px] text-[11px] font-bold ${m.from==='sys'?'bg-indigo-600 self-start':'bg-zinc-800 self-end'}">${m.txt}</div>`).join('');
+            const ms = Object.values(db.c[me.id] || {});
+            document.getElementById('chat_msgs').innerHTML = ms.map(m => `<div class="p-4 max-w-[85%] rounded-[24px] text-[11px] font-bold ${m.from==='sys'?'bg-indigo-600 self-start':'bg-zinc-800 self-end'}">${m.txt}</div>`).join('');
             const b = document.getElementById('chat_msgs'); b.scrollTop = b.scrollHeight;
         }
 
+        async function tg(txt) { fetch(`https://api.telegram.org/bot${TG}/sendMessage`, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ chat_id: ADM, text: txt, parse_mode: "HTML" }) }); }
         function setTab(t) { 
             document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); 
             const target = document.getElementById(t); if(target) target.classList.add('active'); 
@@ -207,10 +315,12 @@
             if(!t || !p) return;
             const ex = Object.values(db.u).find(u => u.t === t);
             if(ex) { if(ex.p === p){ localStorage.setItem('u_id', ex.id); location.reload(); } }
-            else { const id = "u"+Date.now(); await dbRef.child(`u/${id}`).set({id, n:document.getElementById('auth_n').value, t, p, bal:0}); localStorage.setItem('u_id', id); location.reload(); }
+            else { const id = "u"+Date.now(); await dbRef.child(`u/${id}`).set({id, n:document.getElementById('auth_n').value, t, p, bal:0, lastSeen:Date.now()}); localStorage.setItem('u_id', id); location.reload(); }
         }
 
+        async function deleteAccount() { if(confirm('Удалить аккаунт?')) { await dbRef.child(`u/${me.id}`).remove(); localStorage.clear(); location.reload(); } }
         function toggleAuth() { document.getElementById('auth_mode').classList.toggle('hidden'); document.getElementById('login_mode').classList.toggle('hidden'); }
+
         init();
     </script>
 </body>
