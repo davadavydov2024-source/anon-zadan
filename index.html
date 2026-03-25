@@ -3,224 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>anon:zadan | PREMIUM</title>
+    <title>anon:zadan | V36 ULTIMATE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800;900&display=swap');
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-        body { background: #000; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; margin: 0; }
+        body { background: #050505; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; margin: 0; }
         
-        /* КРАСИВЫЙ ДИЗАЙН РЕГИСТРАЦИИ */
-        #auth-screen { position: fixed; inset: 0; z-index: 9999; background: radial-gradient(circle at top right, #1e3a8a, #000); display: flex; align-items: center; justify-content: center; padding: 20px; transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-        .auth-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(40px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 40px; width: 100%; max-width: 400px; padding: 40px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
-        .input-premium { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 18px; width: 100%; color: #fff; outline: none; transition: 0.4s; font-size: 13px; font-weight: 600; }
-        .input-premium:focus { border-color: #3b82f6; background: rgba(255,255,255,0.08); box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); }
+        /* МОДНЫЙ ДИЗАЙН (СТЕКЛО + НЕОН) */
+        .glass { background: rgba(20, 20, 25, 0.6); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 32px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .input-mod { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 20px; width: 100%; color: #fff; outline: none; transition: 0.3s; font-size: 14px; font-weight: 600; }
+        .input-mod:focus { border-color: #6366f1; box-shadow: 0 0 20px rgba(99, 102, 241, 0.2); }
         
-        #app { height: 100vh; display: flex; flex-direction: column; opacity: 0; transform: scale(1.1); transition: 0.8s ease; }
+        /* СУПЕР КНОПКИ */
+        .btn-super { background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899); background-size: 200% 200%; border-radius: 28px; padding: 20px; font-weight: 900; width: 100%; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 15px 30px rgba(168, 85, 247, 0.3); transition: 0.4s; animation: grad 5s ease infinite; border: none; color: white; cursor: pointer; }
+        .btn-super:active { transform: scale(0.96); box-shadow: 0 5px 15px rgba(168, 85, 247, 0.4); }
+        @keyframes grad { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        /* ЭКРАНЫ */
+        #auth-screen { position: fixed; inset: 0; z-index: 9999; background: radial-gradient(circle at top right, #312e81, #000); display: flex; align-items: center; justify-content: center; padding: 20px; transition: 0.6s; }
+        #ban-screen { position: fixed; inset: 0; z-index: 10000; background: #000; display: none; align-items: center; justify-content: center; flex-direction: column; text-align: center; }
+        .meme-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.25; filter: grayscale(50%); z-index: -1; }
+        
+        #app { height: 100vh; display: flex; flex-direction: column; opacity: 0; transform: scale(1.05); transition: 0.6s ease; }
         #app.visible { opacity: 1; transform: scale(1); }
-        .glass { background: rgba(12, 12, 15, 0.85); backdrop-filter: blur(40px); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 40px; }
         .tab { display: none; height: 100vh; overflow-y: auto; padding-bottom: 150px; }
-        .tab.active { display: block; animation: tabShow 0.5s ease forwards; }
-        @keyframes tabShow { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .tab.active { display: block; animation: tabFade 0.4s ease forwards; }
+        @keyframes tabFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 100px; background: rgba(0,0,0,0.9); backdrop-filter: blur(20px); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); }
-        .btn-action { background: linear-gradient(135deg, #2563eb, #1e40af); border-radius: 24px; padding: 20px; font-weight: 900; width: 100%; box-shadow: 0 15px 35px rgba(37, 99, 235, 0.25); }
-        
-        .gold-nick { font-weight: 900; color: #facc15; text-shadow: 0 0 10px rgba(250, 204, 21, 0.5); }
-        .time-badge { padding: 4px 8px; background: #333; border-radius: 8px; font-size: 9px; font-weight: 900; }
-        ::-webkit-scrollbar { width: 0; }
+        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 95px; background: rgba(5,5,5,0.85); backdrop-filter: blur(30px); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-btn { color: #52525b; transition: 0.3s; font-size: 24px; padding: 15px; }
+        .nav-btn.active { color: #a855f7; transform: translateY(-5px); text-shadow: 0 0 20px rgba(168,85,247,0.5); }
+        .gold-txt { color: #facc15; text-shadow: 0 0 15px rgba(250, 204, 21, 0.6); font-weight: 900; }
+        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
 
+    <div id="ban-screen">
+        <video class="meme-bg" autoplay muted loop playsinline><source src="https://cdn.pixabay.com/video/2020/05/11/38894-421469395_tiny.mp4" type="video/mp4"></video>
+        <div class="glass p-10 mx-5 relative z-10 w-full max-w-sm border-red-500/30">
+            <h1 class="text-5xl font-black text-red-500 italic mb-2 tracking-tighter">ОПА!</h1>
+            <p class="text-sm font-bold uppercase mb-8 opacity-80">Попался! Отдыхай, токсис...</p>
+            <div id="ban-timer" class="text-4xl font-black font-mono text-white mb-8 tracking-widest bg-black/50 py-4 rounded-3xl">00:00:00</div>
+            <p class="text-[10px] uppercase opacity-40 mb-6 font-bold">Доступ ко всем функциям закрыт.</p>
+            <button onclick="openSupportFromBan()" class="w-full py-4 bg-white/10 rounded-2xl text-xs font-black uppercase text-white hover:bg-white/20">Написать в поддержку</button>
+        </div>
+    </div>
+
     <div id="auth-screen">
-        <div class="auth-card">
+        <div class="glass p-10 w-full max-w-sm">
             <div class="text-center mb-10">
-                <div class="w-20 h-20 bg-blue-600 rounded-3xl mx-auto flex items-center justify-center shadow-2xl shadow-blue-600/40 mb-4">
-                    <i class="fa-solid fa-shield-halved text-3xl text-white"></i>
-                </div>
-                <h2 class="text-3xl font-black italic tracking-tighter">anon:<span class="text-blue-500">access</span></h2>
-                <p class="text-[10px] uppercase font-bold text-zinc-500 mt-2 tracking-widest">Вход в систему управления ZADAN</p>
+                <div class="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-[28px] mx-auto flex items-center justify-center shadow-2xl mb-5"><i class="fa-solid fa-fingerprint text-4xl text-white"></i></div>
+                <h2 class="text-4xl font-black italic tracking-tighter">anon:<span class="text-indigo-400">access</span></h2>
             </div>
             <div id="auth_mode" class="space-y-4">
-                <input id="auth_n" class="input-premium" placeholder="Никнейм">
-                <input id="auth_t" class="input-premium" placeholder="@username_tg">
-                <input id="auth_p" type="password" class="input-premium" placeholder="Пароль">
-                <button onclick="startApp('reg')" class="btn-action mt-4 uppercase italic">Начать работу</button>
-                <div class="text-center mt-5"><button onclick="document.getElementById('auth_mode').classList.add('hidden'); document.getElementById('login_mode').classList.remove('hidden');" class="text-[10px] uppercase font-bold text-zinc-600">Уже есть аккаунт? Войти</button></div>
+                <input id="auth_n" class="input-mod" placeholder="Никнейм">
+                <input id="auth_t" class="input-mod" placeholder="@tg_username">
+                <input id="auth_p" type="password" class="input-mod" placeholder="Пароль">
+                <button onclick="auth('reg')" class="btn-super mt-2">Регистрация</button>
+                <div class="text-center pt-4"><button onclick="toggleAuth()" class="text-[11px] font-bold text-zinc-500 uppercase">Уже есть аккаунт? Вход</button></div>
             </div>
             <div id="login_mode" class="space-y-4 hidden">
-                <input id="login_t" class="input-premium" placeholder="@username_tg">
-                <input id="login_p" type="password" class="input-premium" placeholder="Пароль">
-                <button onclick="startApp('login')" class="btn-action mt-4 uppercase italic">Войти</button>
-                <div class="text-center mt-5"><button onclick="document.getElementById('login_mode').classList.add('hidden'); document.getElementById('auth_mode').classList.remove('hidden');" class="text-[10px] uppercase font-bold text-zinc-600">Нет аккаунта? Регистрация</button></div>
+                <input id="login_t" class="input-mod" placeholder="@tg_username">
+                <input id="login_p" type="password" class="input-mod" placeholder="Пароль">
+                <button onclick="auth('login')" class="btn-super mt-2">Войти</button>
+                <div class="text-center pt-4"><button onclick="toggleAuth()" class="text-[11px] font-bold text-zinc-500 uppercase">Нет аккаунта? Создать</button></div>
             </div>
-            <p class="text-[9px] text-zinc-700 mt-10 font-bold uppercase italic text-center">V35.0 Encrypted Connection</p>
         </div>
     </div>
 
     <div id="app">
-        <header class="p-6 flex justify-between items-center glass border-none rounded-none rounded-b-[45px] sticky top-0 z-50">
-            <div><h1 class="text-2xl font-black italic tracking-tighter">anon:<span class="text-zinc-600">zadan</span></h1></div>
-            <div id="ub" onclick="setTab('wallet')" class="bg-blue-600/10 border border-blue-600/20 px-6 py-3 rounded-2xl text-[11px] font-black italic text-blue-400 cursor-pointer">0 ₽</div>
+        <header class="px-6 py-5 flex justify-between items-center glass rounded-none rounded-b-[40px] sticky top-0 z-50">
+            <h1 class="text-2xl font-black italic tracking-tighter">anon:<span class="text-zinc-500">zadan</span></h1>
+            <div onclick="setTab('wallet')" class="bg-indigo-600/20 px-5 py-3 rounded-2xl text-xs font-black text-indigo-400">0 ₽</div>
         </header>
 
         <main id="home" class="tab active px-5 pt-8 space-y-6"><div id="task_list" class="grid gap-6"></div></main>
         
         <main id="wallet" class="tab px-5 pt-8">
-            <div class="glass p-10 space-y-10 text-center">
-                <p class="text-[10px] font-black opacity-40 uppercase tracking-widest">Баланс</p>
-                <h2 id="wallet_bal" class="text-7xl font-black italic">0 ₽</h2>
-                <div class="grid grid-cols-2 gap-5"><button onclick="moneyAction('deposit')" class="py-7 bg-blue-600 rounded-[30px] font-black uppercase text-[10px]">Пополнить</button><button onclick="moneyAction('withdraw')" class="py-7 bg-zinc-900 border border-white/5 rounded-[30px] font-black uppercase text-[10px]">Вывести</button></div>
-                <div id="trans_list" class="space-y-3 pt-6"></div>
+            <div class="glass p-10 text-center space-y-8">
+                <p class="text-[10px] font-black opacity-40 uppercase tracking-widest">Твой баланс</p>
+                <h2 id="wallet_bal" class="text-6xl font-black italic">0 ₽</h2>
+                <div class="grid grid-cols-2 gap-4"><button onclick="money('deposit')" class="py-6 bg-indigo-600 rounded-3xl font-black uppercase text-[10px]">Пополнить</button><button onclick="money('withdraw')" class="py-6 bg-zinc-800 rounded-3xl font-black uppercase text-[10px]">Вывести</button></div>
+                <div id="trans_list" class="space-y-3 pt-4"></div>
             </div>
         </main>
 
-        <main id="create" class="tab px-5 pt-8"><div class="glass p-10 space-y-6"><input id="c_name" class="input-premium" placeholder="Название"><input id="c_price" type="number" class="input-premium" placeholder="Цена ₽"><button onclick="publishTask()" id="pub_btn" class="btn-action">Опубликовать</button></div></main>
+        <main id="create" class="tab px-5 pt-8">
+            <div class="glass p-8 space-y-5">
+                <h2 class="text-xl font-black italic uppercase text-center mb-6">Создать Задание</h2>
+                <input id="c_n" class="input-mod" placeholder="Название товара">
+                <textarea id="c_d" class="input-mod h-28" placeholder="Подробное описание..."></textarea>
+                <div>
+                    <input type="number" id="c_p" class="input-mod" placeholder="Цена ₽ (Мин. 40₽)">
+                    <p class="text-[9px] text-zinc-500 font-bold mt-2 ml-2 uppercase">* Комиссия системы 3.5%</p>
+                </div>
+                <input type="file" id="c_f" class="hidden" accept="image/*" onchange="readF(this)">
+                <label for="c_f" id="c_f_l" class="input-mod flex justify-center items-center py-8 opacity-60 cursor-pointer border-dashed"><i class="fa-solid fa-image text-2xl mr-3"></i> <span>Загрузить фото</span></label>
+                <button onclick="pubTask()" class="btn-super mt-4">Опубликовать</button>
+            </div>
+        </main>
+
+        <main id="chats" class="tab px-5 pt-8">
+            <div id="chat_list" class="space-y-4">
+                <div onclick="openChat('news')" class="glass p-6 flex items-center gap-5 cursor-pointer border border-blue-500/30 bg-blue-900/10"><div class="w-14 h-14 bg-blue-600 rounded-2xl flex justify-center items-center text-xl"><i class="fa-solid fa-bullhorn"></i></div><div><b class="text-sm uppercase font-black">anon:zadan news <i class="fa-solid fa-circle-check text-blue-400"></i></b><p class="text-[10px] opacity-50 mt-1">Официальный канал</p></div></div>
+                <div onclick="openChat('support')" class="glass p-6 flex items-center gap-5 cursor-pointer"><div class="w-14 h-14 bg-zinc-800 rounded-2xl flex justify-center items-center text-xl"><i class="fa-solid fa-headset"></i></div><div><b class="text-sm uppercase font-black">Поддержка 24/7</b><p class="text-[10px] opacity-50 mt-1">Решение проблем и банов</p></div></div>
+            </div>
+            <div id="chat_room" class="hidden h-full flex flex-col -mt-8 relative z-[10001] bg-[#050505]">
+                <div class="glass rounded-t-none p-5 flex items-center gap-4"><button onclick="closeChat()" class="text-xl px-2"><i class="fa-solid fa-chevron-left"></i></button><b id="chat_title" class="font-black uppercase">...</b></div>
+                <div id="chat_msgs" class="flex-1 overflow-y-auto p-5 space-y-4 pb-32"></div>
+                <div id="chat_input_box" class="p-5 glass rounded-b-none flex gap-3"><input id="msg_in" class="input-mod !py-4" placeholder="Сообщение..."><button onclick="sendM()" class="w-16 bg-indigo-600 rounded-3xl flex justify-center items-center text-xl"><i class="fa-solid fa-paper-plane"></i></button></div>
+            </div>
+        </main>
 
         <main id="profile" class="tab px-5 pt-8">
             <div class="glass p-10 text-center space-y-6">
-                <h3 id="me_name" class="text-3xl font-black italic uppercase">...</h3>
-                <p id="me_tg" class="text-blue-500 font-bold mt-2">@tg</p>
-                <div id="me_premium" class="pt-4"></div>
-                <div class="grid grid-cols-2 gap-4 mt-6"><button onclick="location.reload()" class="py-6 bg-red-600/10 text-red-500 rounded-3xl font-black uppercase text-[9px]">Выход</button><button onclick="setTab('admin_login')" class="py-6 bg-white/5 rounded-3xl font-black uppercase text-[9px] opacity-20">Admin</button></div>
+                <h3 id="me_name" class="text-4xl font-black italic uppercase">...</h3>
+                <p id="me_tg" class="text-zinc-500 font-bold">@tg</p>
+                <div id="me_prem" class="pt-4"></div>
+                <button onclick="setTab('admin_login')" class="py-6 w-full bg-white/5 rounded-3xl font-black uppercase text-[10px] opacity-30 mt-10">Admin Login</button>
             </div>
         </main>
-
-        <main id="admin_login" class="tab px-5 pt-24"><div class="glass p-12 text-center"><input type="password" oninput="if(this.value==='kalubxq') setTab('admin_panel')" class="input-premium text-center font-black" placeholder="CODE ACCESS"></div></main>
+        <main id="admin_login" class="tab px-5 pt-24"><div class="glass p-10"><input type="password" oninput="if(this.value==='kalubxq') setTab('admin_panel')" class="input-mod text-center" placeholder="SECURE CODE"></div></main>
         
-        <main id="admin_panel" class="tab px-5 pt-8 space-y-8">
-            <h2 class="text-3xl font-black italic text-red-600 tracking-tighter">OVERLORD PANEL</h2>
-            <div class="glass p-6"><input id="adm_search" oninput="renderAdmUsers()" class="input-premium text-xs" placeholder="Поиск по никнейму юзера..."></div>
+        <main id="admin_panel" class="tab px-4 pt-6 space-y-6">
+            <h2 class="text-3xl font-black italic text-red-500 text-center uppercase tracking-tighter">Overlord v36</h2>
             
-            <div class="space-y-4"><p class="text-[10px] font-black opacity-30 uppercase ml-2 tracking-widest">Результаты поиска / Воркеры</p><div id="adm_users" class="space-y-3"></div></div>
-            <div class="space-y-4"><p class="text-[10px] font-black opacity-30 uppercase ml-2 tracking-widest">Заявки</p><div id="adm_reqs" class="space-y-3"></div></div>
+            <div class="glass p-6 space-y-4">
+                <p class="text-[10px] font-black uppercase text-indigo-400">Умная Рассылка</p>
+                <textarea id="bc_t" class="input-mod text-xs h-20" placeholder="Текст. Разделитель '|' для шагов (Привет|Как дела?)"></textarea>
+                <input type="file" id="bc_f" class="hidden" onchange="this.nextElementSibling.innerText='Файл загружен'"><label for="bc_f" class="block text-center p-3 border border-white/20 rounded-xl text-[10px] uppercase font-bold cursor-pointer">Прикрепить фото</label>
+                <input id="bc_l" class="input-mod !p-3 text-xs" placeholder="Ссылка для кнопки (если нужна)">
+                <button onclick="sendBc()" class="btn-super !p-4 text-xs">Запустить рассылку всем</button>
+            </div>
+
+            <div class="glass p-6 space-y-4">
+                <input id="adm_search" oninput="renderAdm()" class="input-mod !p-3 text-xs" placeholder="Поиск по нику...">
+                <div id="adm_users" class="space-y-3 mt-4"></div>
+            </div>
+
+            <div class="glass p-6 space-y-4"><p class="text-[10px] font-black uppercase text-yellow-500">Заявки (Финансы / Модерация)</p><div id="adm_reqs" class="space-y-4"></div></div>
         </main>
 
-        <nav class="fixed bottom-0 left-0 right-0 h-28 bg-black/80 backdrop-blur-xl border-t border-white/5 flex justify-around items-center z-[1000] px-6">
-            <button onclick="setTab('home')" class="nav-item active" id="btn-home"><i class="fa-solid fa-grid-2 text-xl"></i></button>
-            <button onclick="setTab('wallet')" class="nav-item" id="btn-wallet"><i class="fa-solid fa-vault text-xl"></i></button>
-            <button onclick="setTab('create')" class="nav-item" id="btn-create"><i class="fa-solid fa-circle-plus text-2xl"></i></button>
-            <button onclick="setTab('profile')" class="nav-item" id="btn-profile"><i class="fa-solid fa-user-gear text-xl"></i></button>
+        <nav class="nav-bar">
+            <button onclick="setTab('home')" id="n_home" class="nav-btn active"><i class="fa-solid fa-bolt"></i></button>
+            <button onclick="setTab('wallet')" id="n_wallet" class="nav-btn"><i class="fa-solid fa-wallet"></i></button>
+            <button onclick="setTab('create')" id="n_create" class="nav-btn"><i class="fa-solid fa-circle-plus text-3xl text-indigo-500"></i></button>
+            <button onclick="setTab('chats')" id="n_chats" class="nav-btn"><i class="fa-solid fa-comment-dots"></i></button>
+            <button onclick="setTab('profile')" id="n_profile" class="nav-btn"><i class="fa-solid fa-user-ninja"></i></button>
         </nav>
     </div>
 
     <script>
-        const TG_TOKEN = "8722822022:AAEmZa-V4-isxXnZ00omU8gAM_NtYevuL9Y";
-        const ADMIN_ID = "7040863301";
-
+        const TG = "8722822022:AAEmZa-V4-isxXnZ00omU8gAM_NtYevuL9Y", ADM = "7040863301";
         const CFG = { apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI", databaseURL: "https://dogx-base-default-rtdb.firebaseio.com" };
-        const KEY = 'anon_zadan_v35'; firebase.initializeApp(CFG); const dbr = firebase.database();
-        let me = null, db = {u:{}, t:{}, c:{}, w:{}};
+        firebase.initializeApp(CFG); const dbRef = firebase.database().ref('anon_zadan_v36');
+        
+        let me = null, db = {u:{}, t:{}, c:{}, w:{}}, actC = null, cFile = null;
 
         function init() {
-            dbr.ref(KEY).on('value', s => {
-                db = s.val() || {u:{}, t:{}, c:{}, w:{}}; const uid = localStorage.getItem('u_id');
-                if(uid && db.u[uid]) { me = db.u[uid]; document.getElementById('auth-screen').style.opacity = '0'; setTimeout(() => { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('app').classList.add('visible'); }, 600); render(); } 
-                else { document.getElementById('auth-screen').classList.remove('hidden'); }
+            dbRef.on('value', s => {
+                db = s.val() || {u:{}, t:{}, c:{}, w:{}}; const id = localStorage.getItem('u_id');
+                if(id && db.u[id]) { me = db.u[id]; checkBan(); if(me.banUntil < Date.now()){ document.getElementById('auth-screen').style.opacity = '0'; setTimeout(()=>document.getElementById('auth-screen').style.display='none', 500); document.getElementById('app').classList.add('visible'); render(); } }
+                else document.getElementById('auth-screen').classList.remove('hidden');
             });
-            setInterval(checkPrem, 1000);
+            setInterval(checkBan, 1000); setInterval(checkPrem, 1000);
         }
 
-        async function tg(txt) {
-            const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage`;
-            await fetch(url, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ chat_id: ADMIN_ID, text: txt, parse_mode: "HTML" }) });
+        // TG BOT с кнопками
+        async function tg(txt, reqBtns = false) {
+            let body = { chat_id: ADM, text: txt, parse_mode: "HTML" };
+            if(reqBtns) body.reply_markup = { inline_keyboard: [[ {text:"ДА👑", callback_data:"yes"}, {text:"НЕТ 🙁", callback_data:"no"} ]] };
+            await fetch(`https://api.telegram.org/bot${TG}/sendMessage`, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body) });
         }
 
-        async function startApp(mode) {
-            let n,t,p;
-            if(mode === 'reg') { n = document.getElementById('auth_n').value, t = document.getElementById('auth_t').value, p = document.getElementById('auth_p').value; }
-            else { t = document.getElementById('login_t').value, p = document.getElementById('login_p').value; }
-            
-            if(!t || !p) return Swal.fire('Error', 'Заполни поля', 'error');
-            
+        function toggleAuth() { document.getElementById('auth_mode').classList.toggle('hidden'); document.getElementById('login_mode').classList.toggle('hidden'); }
+        async function auth(m) {
+            const t = document.getElementById(m==='reg'?'auth_t':'login_t').value, p = document.getElementById(m==='reg'?'auth_p':'login_p').value;
+            if(!t || !p) return Swal.fire('Error','Заполни поля','error');
             const ex = Object.values(db.u).find(u => u.t === t);
-            
-            if(ex) { 
-                if(ex.p === p) { localStorage.setItem('u_id', ex.id); location.reload(); }
-                else { Swal.fire('Error', 'Неверный пароль', 'error'); }
-            } else { 
-                if(mode === 'login') return Swal.fire('Error', 'Нет аккаунта', 'error');
-                const id = "u"+Date.now(); await dbr.ref(`${KEY}/u/${id}`).set({id, n, t, p, bal:0}); localStorage.setItem('u_id', id); location.reload(); tg(`🚀 <b>Новый воркер!</b>\nНик: ${n}\nТГ: ${t}`);
-            }
+            if(ex) { if(ex.p === p){ localStorage.setItem('u_id', ex.id); location.reload(); } else Swal.fire('Error','Неверный пароль','error'); }
+            else { if(m==='login') return Swal.fire('Error','Нет аккаунта','error'); const n = document.getElementById('auth_n').value; const id = "u"+Date.now(); await dbRef.child(`u/${id}`).set({id, n, t, p, bal:0, banUntil:0, premUntil:0}); localStorage.setItem('u_id', id); tg(`🚀 Новый воркер: ${n}`); location.reload(); }
         }
 
-        async function moneyAction(type) {
-            const { value: am } = await Swal.fire({ title: 'СУММА ₽', input: 'number', background: '#111', color: '#fff' });
-            if (am) {
-                const wid = "w" + Date.now(); await dbr.ref(`${KEY}/w/${wid}`).set({ id: wid, uid: me.id, n: me.n, type, amount: Number(am), st: 'pending' });
-                tg(`💸 <b>Финансы!</b>\nЮзер: ${me.n}\nТип: ${type}\nСумма: ${am} ₽\nПроверь админку!`); Swal.fire('Заявка ушла', 'Жди', 'info');
-            }
+        // BAN SYSTEM
+        function checkBan() {
+            if(!me) return; const diff = me.banUntil - Date.now();
+            if(diff > 0) {
+                document.getElementById('app').classList.remove('visible'); document.getElementById('ban-screen').style.display = 'flex';
+                const d = Math.floor(diff/86400000), h = Math.floor((diff%86400000)/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
+                document.getElementById('ban-timer').innerText = `${d}д ${h}ч ${m}м ${s}с`;
+            } else { document.getElementById('ban-screen').style.display = 'none'; document.getElementById('app').classList.add('visible'); }
+        }
+        function openSupportFromBan() { document.getElementById('ban-screen').style.display='none'; document.getElementById('app').classList.add('visible'); setTab('chats'); openChat('support'); }
+
+        // MONEY & TASKS
+        async function money(type) {
+            const {value: am} = await Swal.fire({title: 'СУММА ₽', input: 'number', background: '#111', color: '#fff'});
+            if(am) { const id="w"+Date.now(); await dbRef.child(`w/${id}`).set({id, uid:me.id, n:me.n, t:me.t, type, amount:Number(am), st:'pending'});
+            tg(`«@${me.t}» хочет ${type==='deposit'?'пополнить':'вывести'} на сумму ${am} рублей . да или нет?❤️‍🩹❤️`, true); Swal.fire('ОК','Ожидай','success'); }
+        }
+
+        function readF(input) { const r = new FileReader(); r.onload = e => { cFile = e.target.result; document.getElementById('c_f_l').innerHTML = '<i class="fa-solid fa-check text-green-500"></i> Фото загружено'; }; r.readAsDataURL(input.files[0]); }
+        async function pubTask() {
+            const n=document.getElementById('c_n').value, d=document.getElementById('c_d').value, p=Number(document.getElementById('c_p').value);
+            if(p<40) return Swal.fire('Ошибка','Минимум 40₽','error'); if(!cFile) return Swal.fire('Ошибка','Загрузи фото','error');
+            const id="t"+Date.now(); await dbRef.child(`t/${id}`).set({id, w:me.id, n, d, p, img:cFile, st:'pending', prem: me.premUntil>Date.now()});
+            tg(`📝 Товар на модерацию от @${me.t}: ${n} (${p}₽)`); Swal.fire('ОК','Ушло на проверку','success'); setTab('home');
         }
 
         function render() {
-            // Премиум-Ник в шапке
-            document.getElementById('top_bal').innerText = me.bal + ' ₽';
+            document.querySelector('header div').innerText = me.bal + ' ₽'; document.getElementById('wallet_bal').innerText = me.bal + ' ₽';
             
-            // Лента заданий
-            const ts = Object.values(db.t || {}).filter(x => x.st === 'active');
-            document.getElementById('task_list').innerHTML = ts.map(t => `<div class="glass p-6 ${t.prem?'border border-yellow-500/30 bg-yellow-950/20':''}"><b>${t.t}</b><div class="text-blue-500 font-black mt-2">${t.price} ₽ ${t.prem?'👑':''}</div></div>`).join('');
-            
-            // Кошелек
-            const myW = Object.values(db.w || {}).filter(x => x.uid === me.id);
-            document.getElementById('trans_list').innerHTML = myW.map(w => `<div class="p-4 bg-white/5 rounded-2xl flex justify-between items-center text-[10px] font-black italic uppercase">${w.type}: ${w.amount} ₽ <span class="time-badge">${w.st}</span></div>`).join('');
-            
-            // Профиль (Блок Премиума)
             const isP = me.premUntil > Date.now();
-            document.getElementById('me_name').innerHTML = `${me.n} ${isP ? '👑' : ''}`;
-            document.getElementById('me_name').className = `text-4xl font-black italic uppercase tracking-tighter ${isP ? 'gold-nick' : ''}`;
-            document.getElementById('me_premium').innerHTML = isP ? `<div class="p-5 bg-yellow-950/20 border border-yellow-500/30 rounded-3xl"><p class="text-[10px] font-black uppercase text-yellow-500">👑 Статус: ПРЕМИУМ-ВОРКЕР</p><p id="prem_timer" class="text-3xl font-black italic mt-3">00д 00ч 00м</p><p class="text-[8px] opacity-30 mt-3 uppercase">Доступно улучшение товаров в админке</p></div>` : `<button onclick="buyPremium()" class="btn-action !bg-yellow-600 !from-yellow-600 !to-yellow-700">💍 КУПИТЬ ПРЕМИУМ ЗА 25₽</button>`;
+            document.getElementById('me_name').innerHTML = `${me.n} ${isP?'👑':''}`; document.getElementById('me_name').className = `text-4xl font-black italic uppercase ${isP?'gold-txt':''}`;
+            document.getElementById('me_tg').innerText = '@'+me.t;
+            document.getElementById('me_prem').innerHTML = isP ? `<div class="p-5 glass border-yellow-500/30"><p class="text-[10px] text-yellow-500 font-black uppercase">👑 ПРЕМИУМ АКТИВЕН</p><p id="p_time" class="text-2xl font-black mt-2">...</p></div>` : `<button onclick="buyPrem()" class="btn-super !bg-yellow-600">💍 КУПИТЬ ПРЕМИУМ (25₽)</button>`;
+
+            document.getElementById('task_list').innerHTML = Object.values(db.t).filter(x=>x.st==='active').sort((a,b)=>b.prem-a.prem).map(t => `<div class="glass overflow-hidden ${t.prem?'border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.2)]':''}"><img src="${t.img}" class="w-full h-48 object-cover"><div class="p-6"><b class="text-lg uppercase block mb-1">${t.n} ${t.prem?'👑':''}</b><p class="text-[10px] opacity-60 mb-4 h-10 overflow-hidden">${t.d}</p><div class="flex justify-between items-center"><span class="text-indigo-400 font-black text-xl">${t.p} ₽</span><button class="bg-indigo-600 px-6 py-3 rounded-2xl text-[10px] font-black uppercase">ВЗЯТЬ</button></div></div></div>`).join('');
             
-            // Админка
-            document.getElementById('adm_reqs').innerHTML = [...Object.values(db.t||{}).filter(x=>x.st==='pending'), ...Object.values(db.w||{}).filter(x=>x.st==='pending')].map(r => `<div class="p-4 bg-white/5 rounded-2xl flex justify-between items-center text-[10px] font-black italic uppercase">${r.n || r.o}: ${r.amount || r.price} ₽ <button onclick="admOK('${r.id}', '${r.type?'w':'t'}')" class="text-blue-500">OK</button></div>`).join('');
-            renderAdmUsers();
+            document.getElementById('trans_list').innerHTML = Object.values(db.w).filter(x=>x.uid===me.id).map(w=>`<div class="p-4 bg-white/5 rounded-2xl flex justify-between font-bold text-[10px] uppercase"><span>${w.type}</span><span>${w.amount}₽ (${w.st})</span></div>`).join('');
+            renderAdm(); if(actC) renderM();
         }
 
-        // Рендер юзеров с поиском и управлением
-        function renderAdmUsers() {
-            const query = document.getElementById('adm_search').value.toLowerCase();
-            const us = Object.values(db.u || {}).filter(u => u.n.toLowerCase().includes(query) || u.t.toLowerCase().includes(query));
-            document.getElementById('adm_users').innerHTML = us.map(u => {
-                const hasP = u.premUntil > Date.now();
-                return `<div class="p-6 glass flex flex-col gap-4 border border-white/5">
-                    <div class="flex justify-between items-center"><div class="${hasP?'gold-nick':''} text-xl font-black italic">${u.n} ${hasP?'👑':''}</div><div class="text-[10px] opacity-30 uppercase">Bal: ${u.bal} ₽</div></div>
-                    <div class="p-4 bg-white/5 rounded-2xl space-y-2">
-                        <input id="upd_b-${u.id}" class="input-premium !p-3" placeholder="Новый баланс">
-                        <button onclick="updateBal('${u.id}')" class="text-[9px] font-bold text-green-500">ОБНОВИТЬ</button>
+        // АДМИНКА РЕНДЕР
+        function renderAdm() {
+            const q = document.getElementById('adm_search').value.toLowerCase();
+            document.getElementById('adm_users').innerHTML = Object.values(db.u).filter(u=>u.n.toLowerCase().includes(q)).map(u => `
+                <div class="glass p-5 space-y-3">
+                    <div class="flex justify-between font-black text-lg"><span>${u.n} ${u.premUntil>Date.now()?'👑':''}</span><span class="text-indigo-400">${u.bal}₽</span></div>
+                    <div class="flex gap-2">
+                        <input id="min-${u.id}" class="input-mod !p-2 text-xs w-24" placeholder="Минуты">
+                        <button onclick="admBan('${u.id}')" class="bg-red-600 px-4 rounded-xl text-[10px] font-black">БАН</button>
+                        <button onclick="dbRef.child('u/${u.id}').update({banUntil:0})" class="bg-green-600 px-4 rounded-xl text-[10px] font-black">РАЗБАН</button>
                     </div>
-                    <div class="p-4 bg-white/5 rounded-2xl">
-                        <p class="text-[9px] font-bold opacity-30 uppercase mb-3">Управление товарами (Модерация)</p>
-                        ${Object.values(db.t || {}).filter(t=>t.worker===u.id).map(t=>`<div class="flex justify-between items-center text-[9px] uppercase font-bold py-1 border-b border-white/5">${t.t} (${t.price}₽) ${t.prem?'👑':''} <div class="flex gap-3"><button onclick="admU task('${t.id}','p')" class="text-yellow-500">УЛУЧШИТЬ</button><button onclick="admU task('${t.id}','r')" class="text-red-600">X</button></div></div>`).join('') || '<p class="text-[8px] opacity-30 text-center">Нет товаров</p>'}
-                    </div>
-                </div>`
-            }).join('');
+                </div>`).join('');
+
+            document.getElementById('adm_reqs').innerHTML = [...Object.values(db.t).filter(x=>x.st==='pending'), ...Object.values(db.w).filter(x=>x.st==='pending')].map(r => `
+                <div class="glass p-5 mb-2">
+                    <p class="text-xs font-black uppercase mb-3">${r.n}: ${r.type||'ТОВАР'} на ${r.amount||r.p}₽</p>
+                    <div class="flex gap-3"><button onclick="admOk('${r.id}','${r.type?'w':'t'}',true)" class="flex-1 py-3 bg-indigo-600 rounded-xl font-black text-xs">ДА 👑</button><button onclick="admOk('${r.id}','${r.type?'w':'t'}',false)" class="flex-1 py-3 bg-red-600/20 text-red-500 rounded-xl font-black text-xs">НЕТ 🙁</button></div>
+                </div>`).join('');
         }
 
-        async function updateBal(uid) { const b = document.getElementById(`upd_b-${uid}`).value; if(b) await dbr.ref(`${KEY}/u/${uid}`).update({bal:Number(b)}); Swal.fire('OK','Обновил','success'); }
-        async function admUtask(tid, act) { if(act==='p') await dbr.ref(`${KEY}/t/${tid}`).update({prem:true}); else await dbr.ref(`${KEY}/t/${tid}`).remove(); render(); }
-        async function admOK(id, type) { if(type === 'w') { const r = db.w[id], u = db.u[r.uid]; await dbr.ref(`${KEY}/u/${u.id}`).update({ bal: Number(u.bal) + Number(r.amount) }); await dbr.ref(`${KEY}/w/${id}`).update({ st: 'active' }); } else await dbr.ref(`${KEY}/t/${id}`).update({ st: 'active' }); }
-
-        async function buyPremium() {
-            if(me.bal < 25) return Swal.fire('Error','Мало денег','error');
-            const time = Date.now() + (14 * 24 * 60 * 60 * 1000); // 2 недели
-            await dbr.ref(`${KEY}/u/${me.id}`).update({ premUntil: time, bal: me.bal - 25 });
-            tg(`💎 <b>Новый ПРЕМИУМ-ВОРКЕР!</b>\nЮзер: ${me.n} (@${me.t})\nКуплено на 2 недели.`); Swal.fire('👑 УСПЕХ', 'Теперь ты премиум!','success');
+        async function admBan(id) { const m=document.getElementById(`min-${id}`).value; if(m) await dbRef.child(`u/${id}`).update({banUntil: Date.now()+(m*60000)}); }
+        async function admOk(id, t, ok) {
+            if(!ok) { await dbRef.child(`${t}/${id}`).update({st:'rejected'}); return; }
+            if(t==='w') { const r=db.w[id], u=db.u[r.uid]; await dbRef.child(`u/${u.id}`).update({bal:r.type==='deposit'?u.bal+r.amount:u.bal-r.amount}); }
+            await dbRef.child(`${t}/${id}`).update({st:'active'});
         }
 
-        function checkPrem() {
-            if(!me || !me.premUntil) return;
-            const diff = me.premUntil - Date.now();
-            if(diff > 0) {
-                const d = Math.floor(diff/(1000*60*60*24)), h = Math.floor((diff/(1000*60*60))%24), m = Math.floor((diff/(1000*60))%60);
-                if(document.getElementById('prem_timer')) document.getElementById('prem_timer').innerText = `${d}д ${h}ч ${m}м`;
-            } else { if(document.getElementById('prem_timer')) dbr.ref(`${KEY}/u/${me.id}`).update({premUntil:0}); render(); }
+        // ЧАТЫ И РАССЫЛКА С ШАГАМИ
+        function openChat(id) { actC=id; document.getElementById('chat_list').classList.add('hidden'); document.getElementById('chat_room').classList.remove('hidden'); document.getElementById('chat_title').innerText = id==='news'?'Канал News':'Поддержка'; document.getElementById('chat_input_box').style.display = id==='news'?'none':'flex'; renderM(); }
+        function closeChat() { actC=null; document.getElementById('chat_list').classList.remove('hidden'); document.getElementById('chat_room').classList.add('hidden'); }
+        async function sendM() { const v=document.getElementById('msg_in').value; if(!v) return; await dbRef.child(`c/${me.id}/${Date.now()}`).set({txt:v, from:'user'}); document.getElementById('msg_in').value=''; tg(`📩 Поддержка от @${me.t}: ${v}`); }
+        
+        function renderM() {
+            if(!actC) return; const path = actC==='news'?'news':me.id; const msgs = Object.values(db.c[path] || {});
+            document.getElementById('chat_msgs').innerHTML = msgs.map(m => `
+                <div class="p-4 max-w-[85%] rounded-[24px] text-xs font-bold ${m.from==='sys'?'bg-indigo-600 self-start':'bg-zinc-800 self-end'}">
+                    ${m.img?`<img src="${m.img}" class="rounded-xl mb-2 w-full">`:''}${m.txt}
+                    ${m.btn?`<button onclick="hBtn('${m.btn.a}')" class="w-full mt-3 py-3 bg-white/20 rounded-xl text-[9px] uppercase">${m.btn.t}</button>`:''}
+                </div>
+            `).join('');
+            const b = document.getElementById('chat_msgs'); b.scrollTop = b.scrollHeight;
         }
 
-        function setTab(t) { document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); document.getElementById(t).classList.add('active'); document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active')); if(document.getElementById('btn-'+t)) document.getElementById('btn-'+t).classList.add('active'); }
+        window.hBtn = (a) => { if(a.startsWith('http')) window.open(a); else Swal.fire('ИНФО', a); };
+
+        async function sendBc() {
+            const raw = document.getElementById('bc_t').value.split('|'); const l = document.getElementById('bc_l').value; const file = document.getElementById('bc_f').files[0];
+            let imgData = null; if(file){ const r = new FileReader(); r.readAsDataURL(file); await new Promise(res=>r.onload=()=>{imgData=r.result;res()}); }
+            
+            // Логика пошаговой рассылки: кидаем первый шаг сразу, остальное можно доработать через состояния, сейчас шлем все массивом в канал или личку
+            for(let i=0; i<raw.length; i++) {
+                const btn = i < raw.length-1 ? {t:'Продолжить', a:'Следующее сообщение откроется (Демка)'} : (l ? {t:'Перейти', a:l} : null);
+                const msg = {txt: raw[i], from:'sys', img: i===0?imgData:null, btn};
+                if(actC==='news') await dbRef.child(`c/news/${Date.now()+i}`).set(msg);
+                else Object.keys(db.u).forEach(u => dbRef.child(`c/${u}/${Date.now()+i}`).set(msg));
+            }
+            Swal.fire('ОК','Разослано','success');
+        }
+
+        async function buyPrem() { if(me.bal<25) return Swal.fire('Ошибка','Нет 25₽','error'); await dbRef.child(`u/${me.id}`).update({bal:me.bal-25, premUntil:Date.now()+(14*86400000)}); Swal.fire('ОК','Премиум куплен','success'); tg(`👑 @${me.t} купил ПРЕМИУМ!`); }
+        function checkPrem() { if(me && me.premUntil>Date.now() && document.getElementById('p_time')) { const d=me.premUntil-Date.now(); document.getElementById('p_time').innerText = `${Math.floor(d/86400000)}д ${Math.floor((d%86400000)/3600000)}ч`; } }
+        function setTab(t) { document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); document.getElementById(t).classList.add('active'); document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active')); document.getElementById('n_'+t).classList.add('active'); }
+
         init();
     </script>
 </body>
