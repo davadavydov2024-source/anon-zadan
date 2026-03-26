@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>LYNEOK V40 — NEXUS SUPREME</title>
+    <title>LYNEOK V40 — NEXUS FINAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -19,21 +19,19 @@
         .tab-content.active { display: block; animation: fadeIn 0.2s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 85px; background: rgba(10,10,12,0.95); backdrop-filter: blur(25px); border-top: 1px solid rgba(255,255,255,0.05); display: flex; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-btn { flex: 1; color: #52525b; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 9px; font-weight: 800; text-transform: uppercase; }
+        .nav-btn { flex: 1; color: #52525b; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 9px; font-weight: 800; text-transform: uppercase; cursor: pointer; }
         .nav-btn.active { color: var(--blue); }
         .tile { background: var(--card); border-radius: 24px; border: 1px solid rgba(255,255,255,0.04); }
         input, textarea, select { background: #18181b; border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 16px; color: white; width: 100%; outline: none; font-size: 14px; }
         .btn-main { background: var(--blue); padding: 18px; border-radius: 22px; font-weight: 800; text-transform: uppercase; width: 100%; transition: all 0.2s; }
-        .chat-msg { max-width: 85%; padding: 12px 16px; border-radius: 20px; margin-bottom: 8px; font-size: 13px; position: relative; }
-        .msg-in { background: #1c1c1f; align-self: flex-start; border-bottom-left-radius: 4px; }
-        .msg-out { background: var(--blue); align-self: flex-end; border-bottom-right-radius: 4px; }
+        .btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
         #img_zoom { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         ::-webkit-scrollbar { width: 0; }
     </style>
 </head>
 <body>
 
-    <div id="loader" class="fixed inset-0 bg-black z-[9999] flex items-center justify-center font-black text-blue-500 italic uppercase">V40_SUPREME_SYNC...</div>
+    <div id="loader" class="fixed inset-0 bg-black z-[9999] flex items-center justify-center font-black text-blue-500 italic uppercase">V40_NEXUS_SYSTEM_LOAD...</div>
 
     <div id="auth_screen" class="hidden h-screen flex flex-col items-center justify-center px-10 text-center">
         <h1 class="text-4xl font-black italic mb-8 uppercase tracking-tighter text-white">LYNE<span class="text-blue-500">OK</span></h1>
@@ -53,7 +51,7 @@
         <main id="tab_market" class="tab-content active px-5 pt-6">
             <div id="cat_view" class="grid grid-cols-2 gap-4"></div>
             <div id="items_view" class="hidden space-y-4">
-                <button onclick="backToCats()" class="text-zinc-500 font-black text-[10px] uppercase italic">← К КАТЕГОРИЯМ</button>
+                <button onclick="backToCats()" class="text-zinc-500 font-black text-[10px] uppercase italic">← НАЗАД К ИГРАМ</button>
                 <div id="sub_filters" class="flex gap-2 overflow-x-auto pb-2"></div>
                 <div id="market_grid" class="space-y-3"></div>
             </div>
@@ -61,20 +59,28 @@
 
         <main id="tab_sell" class="tab-content px-5 pt-6">
             <h2 class="text-xl font-black mb-6 italic uppercase text-blue-500">ВЫСТАВИТЬ ЛОТ</h2>
-            <div class="space-y-3 pb-20">
+            <div class="space-y-3 pb-32">
                 <input type="file" id="i_img" class="hidden" onchange="compImg(this, 'l_img')">
                 <label for="i_img" id="l_img" class="w-full h-32 bg-zinc-900 border-2 border-dashed border-white/5 rounded-3xl flex items-center justify-center font-black text-[10px] opacity-40 uppercase">ДОБАВИТЬ СКРИНШОТ</label>
-                <select id="i_cat" onchange="updateSubOptions()"></select>
-                <select id="i_sub" class="hidden"></select>
-                <input id="i_title" placeholder="НАЗВАНИЕ">
-                <textarea id="i_desc" placeholder="ДАННЫЕ (ПОСЛЕ ОПЛАТЫ)"></textarea>
-                <input id="i_price" type="number" placeholder="ЦЕНА В РУБЛЯХ">
-                <button onclick="postItem()" id="post_btn" class="btn-main">ОПУБЛИКОВАТЬ</button>
+                
+                <select id="i_cat" onchange="updateSubOptions()">
+                    <option disabled selected>ВЫБЕРИТЕ КАТЕГОРИЮ</option>
+                </select>
+                
+                <select id="i_sub" class="hidden">
+                    <option disabled selected>ВЫБЕРИТЕ ТИП ТОВАРА</option>
+                </select>
+
+                <input id="i_title" placeholder="НАЗВАНИЕ (например: 1000 РОБУКСОВ)">
+                <textarea id="i_desc" placeholder="ДАННЫЕ ТОВАРА (придут покупателю автоматически)"></textarea>
+                <input id="i_price" type="number" placeholder="ВАША ЦЕНА (₽)">
+                
+                <button onclick="postItem()" id="post_btn" class="btn-main">ВЫСТАВИТЬ НА ПРОДАЖУ</button>
             </div>
         </main>
 
         <main id="tab_chats" class="tab-content px-5 pt-6">
-            <button onclick="openChatRoom('support_' + me.id)" class="w-full tile p-5 mb-4 border-blue-500/20 text-blue-500 font-black text-[10px] uppercase italic">ТЕХПОДДЕРЖКА</button>
+            <button onclick="openSupport()" class="w-full tile p-5 mb-4 border-blue-500/20 text-blue-500 font-black text-[10px] uppercase italic">СВЯЗЬ С ПОДДЕРЖКОЙ</button>
             <div id="chats_list" class="space-y-2"></div>
         </main>
 
@@ -82,42 +88,37 @@
             <div class="tile p-6 mb-4 flex items-center gap-4">
                 <div class="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center font-black text-xl" id="p_ava">?</div>
                 <div>
-                    <div class="flex items-center gap-2">
-                        <b id="p_name" class="text-lg uppercase italic">...</b>
-                        <i id="p_v_icon" class="fa-solid fa-circle-check text-blue-500 hidden"></i>
-                    </div>
+                    <b id="p_name" class="text-lg uppercase italic">...</b>
                     <p id="p_id" class="text-[9px] opacity-30 font-bold uppercase">UID: 000000</p>
                 </div>
             </div>
-            <div class="tile p-5 mb-4 flex justify-between items-center">
-                <input id="u_email" placeholder="ПОЧТА НЕ ПРИВЯЗАНА" class="!p-0 bg-transparent border-none text-[10px] uppercase font-black w-full">
-                <button onclick="saveEmail()" id="email_btn" class="bg-blue-600/10 text-blue-500 px-4 py-2 rounded-xl font-black text-[8px] uppercase ml-2">СОХРАНИТЬ</button>
-            </div>
-            <div id="p_rating" class="tile p-4 mb-4 text-center font-black text-gold italic text-xs uppercase"></div>
-            <button id="adm_btn" onclick="switchTab('admin')" class="hidden tile w-full p-5 font-black text-xs text-red-500 uppercase italic mb-2">АДМИН-ЦЕНТР V40</button>
-            <button onclick="logout()" class="tile w-full p-5 opacity-30 font-black text-xs uppercase italic">ВЫХОД</button>
+            <div id="p_rating" class="tile p-4 mb-4 text-center font-black text-gold italic text-xs uppercase border-gold/10"></div>
+            
+            <button id="adm_btn" onclick="switchTab('admin')" class="hidden tile w-full p-5 font-black text-xs text-red-500 uppercase italic mb-2">АДМИН-ПАНЕЛЬ</button>
+            <button onclick="logout()" class="tile w-full p-5 opacity-30 font-black text-xs uppercase italic">ВЫЙТИ ИЗ АККАУНТА</button>
         </main>
 
         <main id="tab_admin" class="tab-content px-5 pt-6">
             <h1 class="text-2xl font-black text-red-500 italic mb-6">NEXUS CONTROL</h1>
             <div class="space-y-6 pb-32">
                 <div class="tile p-4">
-                    <p class="text-[9px] font-black text-blue-500 mb-2 uppercase">Настройки</p>
+                    <p class="text-[9px] font-black text-blue-500 mb-2 uppercase">Глобальная комиссия %</p>
                     <div class="flex gap-2">
-                        <input id="adm_fee" type="number" placeholder="КОМИССИЯ %" class="!p-2 !rounded-lg">
-                        <button onclick="saveSettings()" class="bg-blue-600 px-4 rounded-lg font-black text-[10px]">OK</button>
+                        <input id="adm_fee" type="number" class="!p-2 !rounded-lg">
+                        <button onclick="saveFee()" class="bg-blue-600 px-6 rounded-lg font-black text-[10px]">OK</button>
                     </div>
                 </div>
+
                 <div class="tile p-4">
-                    <p class="text-[9px] font-black text-blue-500 mb-2 uppercase">Создать категорию</p>
-                    <input id="cat_name" placeholder="ИГРА (Standoff 2)" class="mb-2">
-                    <input id="cat_subs" placeholder="ТИПЫ (Голда, Аккаунты)" class="mb-2">
-                    <input type="file" id="cat_img" class="hidden" onchange="compImg(this, 'l_cat')">
-                    <label for="cat_img" id="l_cat" class="w-full h-10 bg-zinc-800 rounded-xl flex items-center justify-center text-[8px] font-black mb-2 uppercase italic">ВЫБРАТЬ ФОТО</label>
-                    <button onclick="saveCat()" class="w-full bg-blue-600 py-3 rounded-xl font-black text-[10px] uppercase">СОЗДАТЬ</button>
+                    <p class="text-[9px] font-black text-blue-500 mb-2 uppercase">Создать категорию игры</p>
+                    <input id="cat_name" placeholder="ИМЯ (например: Roblox)" class="mb-2">
+                    <input id="cat_subs" placeholder="ТИПЫ (Аккаунты, Робуксы, Гемы)" class="mb-2">
+                    <input type="file" id="cat_img_file" class="hidden" onchange="compImg(this, 'l_cat')">
+                    <label for="cat_img_file" id="l_cat" class="w-full h-10 bg-zinc-800 rounded-xl flex items-center justify-center text-[8px] font-black mb-2 uppercase italic">ЗАГРУЗИТЬ ИКОНКУ</label>
+                    <button onclick="saveCat()" class="w-full bg-blue-600 py-3 rounded-xl font-black text-[10px] uppercase">СОХРАНИТЬ ИГРУ</button>
                 </div>
-                <div id="adm_mod" class="space-y-2"></div>
-                <div id="adm_users" class="space-y-2"></div>
+                
+                <div id="adm_mod_list" class="space-y-2"></div>
             </div>
         </main>
 
@@ -125,24 +126,12 @@
             <div onclick="switchTab('market')" id="n_market" class="nav-btn active"><i class="fa-solid fa-store text-xl"></i><span>РЫНОК</span></div>
             <div onclick="switchTab('sell')" id="n_sell" class="nav-btn"><i class="fa-solid fa-circle-plus text-xl"></i><span>ПРОДАТЬ</span></div>
             <div onclick="switchTab('chats')" id="n_chats" class="nav-btn"><i class="fa-solid fa-comments text-xl"></i><span>СДЕЛКИ</span></div>
-            <div onclick="switchTab('profile')" id="n_profile" class="nav-btn"><i class="fa-solid fa-ghost text-xl"></i><span>ПРОФИЛЬ</span></div>
+            <div onclick="switchTab('profile')" id="n_profile" class="nav-btn"><i class="fa-solid fa-user text-xl"></i><span>ПРОФИЛЬ</span></div>
         </nav>
     </div>
 
-    <div id="chat_modal" class="fixed inset-0 bg-black z-[2000] hidden flex flex-col">
-        <header class="p-6 flex justify-between items-center bg-zinc-950 border-b border-white/5">
-            <b id="chat_title" class="text-[10px] uppercase italic text-blue-500">ЧАТ СДЕЛКИ</b>
-            <button onclick="closeChat()"><i class="fa-solid fa-xmark text-xl"></i></button>
-        </header>
-        <div id="chat_body" class="flex-1 overflow-y-auto p-5 flex flex-col gap-2"></div>
-        <div class="p-4 bg-zinc-950 flex gap-2 pb-10 border-t border-white/5">
-            <input id="chat_input" placeholder="СООБЩЕНИЕ...">
-            <button onclick="sendTextMsg()" class="bg-blue-600 px-6 rounded-2xl font-black text-[9px]">SEND</button>
-        </div>
-    </div>
-
     <div id="img_zoom" onclick="this.style.display='none'">
-        <img id="zoom_src" class="max-w-full max-h-[70vh] rounded-2xl">
+        <img id="zoom_src" class="max-w-full max-h-[70vh] rounded-2xl shadow-2xl">
         <button onclick="downloadWithWatermark(event)" class="mt-8 bg-blue-600 px-8 py-4 rounded-2xl font-black uppercase text-xs">СОХРАНИТЬ С ВОДЯНЫМ ЗНАКОМ</button>
     </div>
 
@@ -152,40 +141,24 @@
         firebase.initializeApp(CFG);
         const db = firebase.database().ref('lyne_v40_nexus');
 
-        const TG_TOKEN = "8641257792:AAEsxnQWEIeozMt_gnSwJdVgSFQlOc-hnuc";
-        const TG_ADMIN_ID = "7040863301";
-
-        let me = null, data = {}, curChat = null, b64 = "", b64Cat = "", currentCatFilter = "";
-
-        async function sendTg(txt) { fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_ADMIN_ID}&text=${encodeURIComponent(txt)}&parse_mode=HTML`); }
-
-        async function sendMail(to, sub, msg) {
-            if(!to) return;
-            emailjs.send("service_ndr83sj", "template_q98pr7g", { to_email: to, user_name: me.n, subject: sub, message: msg });
-        }
+        let me = null, data = {}, b64 = "", b64Cat = "", currentCatFilter = "";
 
         async function init() {
             db.on('value', snap => {
-                data = snap.val() || { u:{}, i:{}, d:{}, c:{}, cat:{}, settings:{fee:5}, reviews:{} };
+                data = snap.val() || { u:{}, i:{}, d:{}, cat:{}, settings:{fee:5}, reviews:{} };
                 const sid = localStorage.getItem('lyne_sid');
-                if(!sid) { document.getElementById('auth_screen').classList.remove('hidden'); }
-                else {
+                if(!sid) {
+                    document.getElementById('auth_screen').classList.remove('hidden');
+                    document.getElementById('app').classList.add('hidden');
+                } else {
                     me = data.u[sid];
                     if(!me) return logout();
                     document.getElementById('auth_screen').classList.add('hidden');
                     document.getElementById('app').classList.remove('hidden');
                     render();
-                    if(curChat) renderChat();
                 }
                 document.getElementById('loader').classList.add('hidden');
             });
-        }
-
-        function getSellerRating(sid) {
-            const revs = Object.values(data.reviews?.[sid] || {});
-            if(!revs.length) return "НЕТ ОТЗЫВОВ";
-            const avg = revs.reduce((a, b) => a + b.stars, 0) / revs.length;
-            return `⭐ ${avg.toFixed(1)} (${revs.length})`;
         }
 
         function render() {
@@ -193,7 +166,11 @@
             document.getElementById('p_name').innerText = me.n;
             document.getElementById('p_id').innerText = 'UID: ' + me.id;
             document.getElementById('p_ava').innerText = me.n[0].toUpperCase();
-            document.getElementById('p_rating').innerText = "ВАШ РЕЙТИНГ: " + getSellerRating(me.id);
+            
+            // Расчет рейтинга
+            const revs = Object.values(data.reviews?.[me.id] || {});
+            const avg = revs.length ? (revs.reduce((a, b) => a + b.stars, 0) / revs.length).toFixed(1) : "0.0";
+            document.getElementById('p_rating').innerText = `ВАШ РЕЙТИНГ: ⭐ ${avg} (${revs.length})`;
 
             if(me.n === 'owner') {
                 document.getElementById('adm_btn').classList.remove('hidden');
@@ -201,67 +178,48 @@
                 renderAdmin();
             }
 
-            // Рендер категорий
+            // Категории в Маркете
             const cats = Object.values(data.cat || {});
             document.getElementById('cat_view').innerHTML = cats.map(c => `
-                <div onclick="openCat('${c.name}')" class="tile p-6 text-center border-white/5">
-                    <img src="${c.img}" class="w-12 h-12 mx-auto mb-2 rounded-xl object-cover">
+                <div onclick="openCat('${c.name}')" class="tile p-6 text-center border-white/5 active:scale-95 transition-all">
+                    <img src="${c.img}" class="w-12 h-12 mx-auto mb-2 rounded-xl object-cover shadow-lg">
                     <p class="text-[9px] font-black uppercase italic">${c.name}</p>
                 </div>`).join('');
-            document.getElementById('i_cat').innerHTML = '<option disabled selected>ВЫБЕРИТЕ ИГРУ</option>' + cats.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
 
-            // Сделки
-            const myD = Object.values(data.d || {}).filter(d => d.bid === me.id || d.sid === me.id).reverse();
-            document.getElementById('chats_list').innerHTML = myD.map(d => `
+            // Селект категорий в Продаже
+            const iCatSelect = document.getElementById('i_cat');
+            iCatSelect.innerHTML = '<option disabled selected>ВЫБЕРИТЕ КАТЕГОРИЮ</option>' + 
+                cats.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+
+            // Список сделок для отзывов
+            const myDeals = Object.values(data.d || {}).filter(d => d.bid === me.id).reverse();
+            document.getElementById('chats_list').innerHTML = myDeals.map(d => `
                 <div class="tile p-5 flex justify-between items-center mb-2">
-                    <div onclick="openChatRoom('${d.id}')">
-                        <b class="text-[10px] uppercase italic">${d.title}</b>
-                        <p class="text-[7px] opacity-40 uppercase">${d.status}</p>
-                    </div>
-                    ${d.bid === me.id && d.status === 'ВЫПОЛНЕНО' && !d.reviewed ? 
-                        `<button onclick="leaveReview('${d.id}','${d.sid}')" class="bg-gold/20 text-gold px-4 py-2 rounded-xl text-[8px] font-black">ОТЗЫВ</button>` : 
-                        `<i class="fa-solid fa-chevron-right opacity-20"></i>`}
+                    <div><b class="text-[10px] uppercase">${d.title}</b><p class="text-[7px] opacity-40 uppercase">СТАТУС: ${d.status}</p></div>
+                    ${d.status === 'ВЫПОЛНЕНО' && !d.reviewed ? 
+                    `<button onclick="leaveReview('${d.id}','${d.sid}')" class="bg-gold/20 text-gold px-4 py-2 rounded-xl text-[8px] font-black">ОТЗЫВ</button>` : 
+                    `<i class="fa-solid fa-chevron-right opacity-20"></i>`}
                 </div>`).join('');
         }
 
-        function renderAdmin() {
-            const pnd = Object.values(data.i || {}).filter(i => i.status === 'pending');
-            document.getElementById('adm_mod').innerHTML = `<p class="text-[9px] font-black text-blue-500 mb-2">МОДЕРАЦИЯ (${pnd.length})</p>` + pnd.map(i => `
-                <div class="tile p-4 flex justify-between mb-2">
-                    <span class="text-[10px] uppercase">${i.title} (${i.price}₽)</span>
-                    <button onclick="db.child('i/${i.id}/status').set('active')" class="text-blue-500 font-black text-[10px]">ОДОБРИТЬ</button>
-                </div>`).join('');
-
-            document.getElementById('adm_users').innerHTML = `<p class="text-[9px] font-black text-blue-500 mb-2">ЮЗЕРЫ</p>` + Object.values(data.u || {}).map(u => `
-                <div class="tile p-4 flex justify-between items-center mb-2">
-                    <b class="text-[9px] uppercase">${u.n} (${u.bal}₽)</b>
-                    <button onclick="const s=prompt('СУММА:'); if(s) db.child('u/${u.id}/bal').set(Number(s))" class="fa-solid fa-wallet text-zinc-500"></button>
-                </div>`).join('');
-        }
-
-        async function leaveReview(did, sid) {
-            const { value: form } = await Swal.fire({
-                title: 'ОЦЕНИТЕ СДЕЛКУ',
-                html: `<div class='flex justify-center gap-2 mb-4'>${[1,2,3,4,5].map(i => `<i class='fa-solid fa-star text-2xl cursor-pointer text-zinc-700' id='star_${i}' onclick='setStars(${i})'></i>`).join('')}</div><textarea id='rev_t' class='swal2-textarea' placeholder='Ваш отзыв...'></textarea>`,
-                preConfirm: () => ({ stars: window.currentStars || 5, text: document.getElementById('rev_t').value })
-            });
-            if(form) {
-                await db.child(`reviews/${sid}/r${Date.now()}`).set({ stars: form.stars, text: form.text, buyer: me.n, date: Date.now() });
-                await db.child(`d/${did}/reviewed`).set(true);
-                Swal.fire('OK', 'Отзыв оставлен!', 'success');
+        function updateSubOptions() {
+            const catName = document.getElementById('i_cat').value;
+            const cat = data.cat[catName];
+            const subSelect = document.getElementById('i_sub');
+            if(cat && cat.subs) {
+                const list = cat.subs.split(',').map(s => s.trim());
+                subSelect.innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join('');
+                subSelect.classList.remove('hidden');
             }
         }
-        window.setStars = (n) => {
-            window.currentStars = n;
-            for(let i=1; i<=5; i++) document.getElementById('star_'+i).className = `fa-solid fa-star text-2xl cursor-pointer ${i<=n?'text-yellow-500':'text-zinc-700'}`;
-        };
 
-        function openCat(n) {
-            currentCatFilter = n;
+        function openCat(name) {
+            currentCatFilter = name;
             document.getElementById('cat_view').classList.add('hidden');
             document.getElementById('items_view').classList.remove('hidden');
-            const cat = data.cat[n];
-            const subs = cat.subs ? cat.subs.split(',').map(s=>s.trim()) : [];
+            
+            const cat = data.cat[name];
+            const subs = cat.subs ? cat.subs.split(',').map(s => s.trim()) : [];
             document.getElementById('sub_filters').innerHTML = `<button onclick="filterBySub('')" class="bg-blue-600 px-4 py-2 rounded-xl text-[8px] font-black uppercase">ВСЕ</button>` + 
                 subs.map(s => `<button onclick="filterBySub('${s}')" class="bg-zinc-800 px-4 py-2 rounded-xl text-[8px] font-black uppercase">${s}</button>`).join('');
             filterBySub('');
@@ -269,61 +227,78 @@
 
         function filterBySub(sub) {
             const its = Object.values(data.i || {}).filter(i => i.cat === currentCatFilter && i.status === 'active' && (!sub || i.sub === sub)).reverse();
-            document.getElementById('market_grid').innerHTML = its.map(i => `
+            document.getElementById('market_grid').innerHTML = its.map(i => {
+                const r = Object.values(data.reviews?.[i.sid] || {});
+                const rText = r.length ? `⭐ ${(r.reduce((a,b)=>a+b.stars,0)/r.length).toFixed(1)}` : '⭐ 0.0';
+                return `
                 <div class="tile p-4 flex justify-between items-center border-white/5">
                     <div class="flex items-center gap-3">
                         <img src="${i.img}" onclick="zoomImg('${i.img}')" class="w-12 h-12 rounded-xl object-cover">
                         <div>
-                            <b class="text-xs uppercase">${i.title}</b>
-                            <p class="text-[7px] text-gold font-black italic uppercase">${getSellerRating(i.sid)}</p>
+                            <b class="text-xs uppercase italic">${i.title}</b>
+                            <p class="text-[7px] text-gold font-black uppercase">${rText} • ${i.sub || 'ТОВАР'}</p>
                         </div>
                     </div>
-                    <button onclick="buyItem('${i.id}')" class="bg-blue-600 px-5 py-2 rounded-xl text-[10px] font-black">${i.price} ₽</button>
-                </div>`).join('');
+                    <button onclick="buyItem('${i.id}')" class="bg-blue-600 px-5 py-2 rounded-xl text-[10px] font-black active:scale-90">${i.price} ₽</button>
+                </div>`;
+            }).join('') || '<p class="text-center opacity-20 py-10 uppercase text-[10px] font-black italic">Товаров пока нет</p>';
         }
 
         async function buyItem(id) {
             const it = data.i[id];
             if(me.bal < it.price) return Swal.fire('!', 'НЕДОСТАТОЧНО СРЕДСТВ', 'error');
-            const did = 'd' + Date.now();
-            await db.child(`u/${me.id}/bal`).set(me.bal - it.price);
-            await db.child(`d/${did}`).set({ id: did, bid: me.id, sid: it.sid, title: it.title, price: it.price, status: 'ОПЛАЧЕНО' });
-            await db.child(`i/${id}/status`).set('sold');
-            await db.child(`c/${did}/m1`).set({ sender: 'SYSTEM', text: `ТОВАР ОПЛАЧЕН. ДАННЫЕ: ${it.desc}` });
-            if(me.email) sendMail(me.email, "Покупка в LYNEOK", `Вы купили ${it.title}. Данные: ${it.desc}`);
-            switchTab('chats');
+            const { isConfirmed } = await Swal.fire({ title: 'ПОКУПКА', text: `Купить ${it.title} за ${it.price}₽?`, showCancelButton: true });
+            if(isConfirmed) {
+                const did = 'd' + Date.now();
+                await db.child(`u/${me.id}/bal`).set(me.bal - it.price);
+                await db.child(`d/${did}`).set({ id: did, bid: me.id, sid: it.sid, title: it.title, price: it.price, status: 'ВЫПОЛНЕНО' });
+                await db.child(`i/${id}/status`).set('sold');
+                Swal.fire('УСПЕХ', `Данные товара: ${it.desc}`, 'success');
+            }
         }
 
         async function postItem() {
             const btn = document.getElementById('post_btn');
             const t = document.getElementById('i_title').value, p = Number(document.getElementById('i_price').value), c = document.getElementById('i_cat').value, s = document.getElementById('i_sub').value, d = document.getElementById('i_desc').value;
-            if(!t || !p || !b64 || c.includes('ВЫБЕРИТЕ')) return Swal.fire('!','Заполни всё!','error');
-            btn.disabled = true;
-            await db.child(`i/i${Date.now()}`).set({ id: 'i'+Date.now(), sid: me.id, title: t, price: p, cat: c, sub: s, desc: d, img: b64, status: 'pending' });
-            await sendTg(`📦 ЛОТ ОТ ${me.n}: ${t} (${p}₽)`);
-            Swal.fire('OK','На модерации!','success');
-            switchTab('market'); btn.disabled = false;
+            if(!t || !p || !b64 || c.includes('ВЫБЕРИТЕ')) return Swal.fire('!', 'Заполни все поля!', 'error');
+            
+            btn.disabled = true; btn.innerText = "ЗАГРУЗКА...";
+            const itemId = 'i' + Date.now();
+            await db.child(`i/${itemId}`).set({ id: itemId, sid: me.id, title: t, price: p, cat: c, sub: s, desc: d, img: b64, status: 'pending' });
+            
+            Swal.fire('ГОТОВО', 'Лот отправлен на модерацию!', 'success');
+            switchTab('market');
+            btn.disabled = false; btn.innerText = "ВЫСТАВИТЬ НА ПРОДАЖУ";
         }
 
+        async function leaveReview(did, sid) {
+            const { value: form } = await Swal.fire({
+                title: 'ОЦЕНКА',
+                html: `<div class='flex justify-center gap-2 mb-4'>${[1,2,3,4,5].map(i => `<i class='fa-solid fa-star text-2xl cursor-pointer text-zinc-700' id='star_${i}' onclick='setStars(${i})'></i>`).join('')}</div><textarea id='rev_t' class='swal2-textarea' placeholder='Текст отзыва...'></textarea>`,
+                preConfirm: () => ({ stars: window.currentStars || 5, text: document.getElementById('rev_t').value })
+            });
+            if(form) {
+                await db.child(`reviews/${sid}/r${Date.now()}`).set({ stars: form.stars, text: form.text, buyer: me.n, date: Date.now() });
+                await db.child(`d/${did}/reviewed`).set(true);
+                Swal.fire('ОК', 'Спасибо за отзыв!', 'success');
+            }
+        }
+        window.setStars = (n) => {
+            window.currentStars = n;
+            for(let i=1; i<=5; i++) document.getElementById('star_'+i).style.color = i <= n ? '#ffb000' : '#3f3f46';
+        };
+
         function zoomImg(src) { document.getElementById('zoom_src').src = src; document.getElementById('img_zoom').style.display = 'flex'; }
+        
         function downloadWithWatermark(e) {
             e.stopPropagation();
             const img = document.getElementById('zoom_src');
             const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
             canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
             ctx.drawImage(img, 0, 0);
-            ctx.font = "bold " + (canvas.width/15) + "px Arial"; ctx.fillStyle = "rgba(255,255,255,0.4)"; ctx.textAlign = "center";
+            ctx.font = "bold " + (canvas.width/12) + "px Arial"; ctx.fillStyle = "rgba(255,255,255,0.3)"; ctx.textAlign = "center";
             ctx.fillText("LYNEOK ON TELEGRAM", canvas.width/2, canvas.height/2);
-            const a = document.createElement('a'); a.download = 'lyneok.jpg'; a.href = canvas.toDataURL('image/jpeg',0.8); a.click();
-        }
-
-        function updateSubOptions() {
-            const cat = data.cat[document.getElementById('i_cat').value];
-            const subS = document.getElementById('i_sub');
-            if(cat && cat.subs) {
-                subS.innerHTML = cat.subs.split(',').map(s=>`<option value="${s.trim()}">${s.trim()}</option>`).join('');
-                subS.classList.remove('hidden');
-            }
+            const a = document.createElement('a'); a.download = 'lyneok_safe.jpg'; a.href = canvas.toDataURL('image/jpeg', 0.8); a.click();
         }
 
         async function handleAuth() {
@@ -331,32 +306,53 @@
             if(!n || !p) return;
             let uid = Object.keys(data.u || {}).find(k => data.u[k].n.toLowerCase() === n.toLowerCase());
             if(!uid) {
-                uid = 'u' + Date.now().toString().slice(-6);
-                await db.child(`u/${uid}`).set({ id: uid, n, p, bal: 0, verified: false, email: "" });
-            } else if(data.u[uid].p !== p) return Swal.fire('!','Пароль!','error');
+                uid = 'u' + Math.random().toString(36).substr(2, 6);
+                await db.child(`u/${uid}`).set({ id: uid, n, p, bal: 0 });
+            } else if(data.u[uid].p !== p) return Swal.fire('ОШИБКА', 'Неверный пароль', 'error');
             localStorage.setItem('lyne_sid', uid); location.reload();
         }
 
         async function saveCat() {
             const n = document.getElementById('cat_name').value, s = document.getElementById('cat_subs').value;
-            if(n && b64Cat) await db.child(`cat/${n}`).set({ name: n, img: b64Cat, subs: s });
-            Swal.fire('OK','Категория создана','success');
+            if(n && b64Cat) {
+                await db.child(`cat/${n}`).set({ name: n, img: b64Cat, subs: s });
+                Swal.fire('OK', 'Игра добавлена', 'success');
+            }
         }
-        function saveSettings() { db.child('settings/fee').set(Number(document.getElementById('adm_fee').value)); }
-        function switchTab(t) { document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active')); document.getElementById('tab_'+t).classList.add('active'); document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active')); document.getElementById('n_'+t).classList.add('active'); }
+
+        function renderAdmin() {
+            const pnd = Object.values(data.i || {}).filter(i => i.status === 'pending');
+            document.getElementById('adm_mod_list').innerHTML = `<p class="text-[9px] font-black text-blue-500 mb-2 uppercase italic">Модерация (${pnd.length})</p>` + 
+                pnd.map(i => `
+                <div class="tile p-4 flex justify-between items-center mb-2">
+                    <span class="text-[10px] font-bold uppercase italic">${i.title} (${i.price}₽)</span>
+                    <button onclick="db.child('i/${i.id}/status').set('active')" class="bg-blue-600 px-3 py-1 rounded-lg text-[8px] font-black">ОДОБРИТЬ</button>
+                </div>`).join('');
+        }
+
+        function saveFee() { db.child('settings/fee').set(Number(document.getElementById('adm_fee').value)); Swal.fire('OK','Комиссия сохранена','success'); }
+        function switchTab(t) { 
+            document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active')); 
+            document.getElementById('tab_'+t).classList.add('active'); 
+            document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active')); 
+            document.getElementById('n_'+t).classList.add('active'); 
+        }
         function backToCats() { document.getElementById('cat_view').classList.remove('hidden'); document.getElementById('items_view').classList.add('hidden'); }
         function logout() { localStorage.clear(); location.reload(); }
-        function compImg(i, l) {
-            const r = new FileReader(); r.onload = e => {
+
+        function compImg(input, target) {
+            const reader = new FileReader(); reader.onload = e => {
                 const img = new Image(); img.onload = () => {
                     const c = document.createElement('canvas'); const ctx = c.getContext('2d');
-                    c.width = 600; c.height = img.height * (600/img.width); ctx.drawImage(img, 0,0, 600, c.height);
+                    c.width = 600; c.height = img.height * (600/img.width);
+                    ctx.drawImage(img, 0, 0, 600, c.height);
                     const res = c.toDataURL('image/jpeg', 0.7);
-                    if(l === 'l_img') b64 = res; else b64Cat = res;
-                    document.getElementById(l).innerHTML = `<img src="${res}" class="w-full h-full object-cover rounded-3xl">`;
+                    if(target === 'l_img') b64 = res; else b64Cat = res;
+                    document.getElementById(target).innerHTML = `<img src="${res}" class="w-full h-full object-cover rounded-3xl">`;
                 }; img.src = e.target.result;
-            }; r.readAsDataURL(i.files[0]);
+            }; reader.readAsDataURL(input.files[0]);
         }
+        
         init();
     </script>
 </body>
