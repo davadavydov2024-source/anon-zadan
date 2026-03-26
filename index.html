@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>LYNEOK V41.8 — NICKNAME CONTROL</title>
+    <title>LYNEOK V41.9 — NESTED MARKET</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -66,8 +66,9 @@
             <div class="space-y-4">
                 <input type="file" id="i_img" class="hidden" onchange="compImg(this, 'l_img')">
                 <label for="i_img" id="l_img" class="w-full h-32 bg-zinc-900 border-2 border-dashed border-white/10 rounded-3xl flex items-center justify-center font-black text-[10px] opacity-40 uppercase">ФОТО ТОВАРА</label>
-                <select id="i_cat"></select>
-                <input id="i_title" placeholder="Название">
+                
+                <select id="i_cat" onchange="updateSubcats()"></select>
+                <select id="i_subcat" class="hidden"></select> <input id="i_title" placeholder="Название лота">
                 <textarea id="i_desc" placeholder="Описание / Данные для выдачи" rows="4"></textarea>
                 <input id="i_price" type="number" placeholder="Цена (от 30₽)">
                 <button onclick="postItem()" class="btn-main">ВЫСТАВИТЬ</button>
@@ -116,22 +117,34 @@
         <main id="tab_admin" class="tab-content">
             <h1 class="text-2xl font-black text-red-500 mb-6 italic uppercase tracking-tighter">OWNER CONTROL</h1>
             <div class="space-y-4">
+                
+                <div class="tile p-5 border border-gold/20">
+                    <p class="text-[10px] font-black text-gold mb-3 uppercase italic"><i class="fa-solid fa-folder-plus"></i> Добавить Игру</p>
+                    <input id="new_cat_name" placeholder="Название игры (напр. Brawl Stars)" class="mb-2">
+                    <input id="new_cat_img" placeholder="URL картинки (Иконка игры)" class="mb-2">
+                    <input id="new_cat_subs" placeholder="Категории вещей (через запятую: Аккаунты, Гемы, Услуги)" class="mb-2 text-blue-400">
+                    <button onclick="addCategory()" class="w-full bg-gold/10 text-gold border border-gold/20 p-4 rounded-2xl font-black text-[10px] uppercase mt-2">СОЗДАТЬ ИГРУ</button>
+                </div>
+
                 <div class="tile p-5">
+                    <p class="text-[10px] font-black text-blue-500 mb-3 uppercase italic">Управление юзером</p>
                     <input id="u_search" placeholder="ЛОГИН ПОЛЬЗОВАТЕЛЯ" class="mb-3">
                     <div id="u_mail_status" class="mb-3 p-3 bg-zinc-900 rounded-xl text-[9px] font-black uppercase hidden border border-white/5"></div>
                     <div class="grid grid-cols-2 gap-2">
                         <button onclick="adminAction('bal')" class="bg-zinc-800 p-4 rounded-xl text-[9px] font-black uppercase">Баланс</button>
                         <button onclick="adminAction('ver')" class="bg-blue-600 p-4 rounded-xl text-[9px] font-black uppercase">Галочка</button>
-                        <button onclick="adminAction('info')" class="bg-zinc-800 p-4 rounded-xl text-[9px] font-black uppercase">Почта/Инфо</button>
+                        <button onclick="adminAction('info')" class="bg-zinc-800 p-4 rounded-xl text-[9px] font-black uppercase">Инфо</button>
                         <button onclick="adminAction('ban')" class="bg-red-600 p-4 rounded-xl text-[9px] font-black uppercase">БАН</button>
                     </div>
                 </div>
+                
                 <div class="tile p-5">
                     <p class="text-[10px] font-black text-blue-500 mb-3 uppercase italic">Ответ в поддержку</p>
                     <input id="sup_uid" placeholder="ЛОГИН (КОМУ ОТВЕЧАЕМ)" class="mb-2">
                     <textarea id="sup_msg" placeholder="Сообщение..."></textarea>
                     <button onclick="answerSupport()" class="w-full bg-indigo-600 p-4 rounded-2xl font-black text-[10px] uppercase mt-3">ОТВЕТИТЬ</button>
                 </div>
+                
                 <div id="adm_mod"></div>
             </div>
         </main>
@@ -150,7 +163,6 @@
         const db = firebase.database().ref('lyne_v41_ulti');
         
         emailjs.init("YOUR_PUBLIC_KEY");
-
         const TG_TOKEN = "8641257792:AAEsxnQWEIeozMt_gnSwJdVgSFQlOc-hnuc";
         const TG_ADMIN = "7040863301";
 
@@ -161,11 +173,9 @@
             if(targetMail) emailjs.send("service_id", "template_id", { to_email: targetMail, message: msg, subject: title });
         }
 
-        // Вспомогательная функция для поиска юзера по логину
         function getUserByNick(nick) {
             if(!nick) return null;
-            const searchName = nick.toLowerCase().trim();
-            return Object.values(data.u || {}).find(u => u.n.toLowerCase() === searchName);
+            return Object.values(data.u || {}).find(u => u.n.toLowerCase() === nick.toLowerCase().trim());
         }
 
         function init() {
@@ -190,8 +200,6 @@
                     render();
                 }
                 document.getElementById('loader').style.display = 'none';
-            }, () => {
-                document.getElementById('loader').innerHTML = "<p class='text-red-500 font-black'>ОШИБКА ПОДКЛЮЧЕНИЯ</p>";
             });
         }
 
@@ -217,7 +225,10 @@
             if(me.n.toLowerCase() === 'owwner' || me.n.toLowerCase() === 'артём') document.getElementById('adm_btn').classList.remove('hidden');
 
             const cats = Object.values(data.cat || {});
+            // Рендер маркета
             document.getElementById('cat_view').innerHTML = cats.map(c => `<div onclick="openCat('${c.name}')" class="tile p-6 text-center active:bg-zinc-900 transition-colors"><img src="${c.img}" class="w-12 h-12 mx-auto mb-2 rounded-xl object-cover shadow-lg"><p class="text-[10px] font-black uppercase italic tracking-tighter">${c.name}</p></div>`).join('');
+            
+            // Рендер селектора в создании лота
             document.getElementById('i_cat').innerHTML = '<option disabled selected>ВЫБЕРИТЕ ИГРУ</option>' + cats.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
 
             const myD = Object.values(data.d || {}).filter(d => d.bid === me.id || d.sid === me.id).reverse();
@@ -229,14 +240,48 @@
             if(me.n.toLowerCase() === 'owwner' || me.n.toLowerCase() === 'артём') renderAdmin();
         }
 
+        // НОВАЯ ФУНКЦИЯ: Подтягивание подкатегорий
+        function updateSubcats() {
+            const catName = document.getElementById('i_cat').value;
+            const catInfo = Object.values(data.cat || {}).find(c => c.name === catName);
+            const subSelect = document.getElementById('i_subcat');
+
+            if(catInfo && catInfo.subs && catInfo.subs.length > 0) {
+                subSelect.innerHTML = '<option disabled selected>КАТЕГОРИЯ ВЕЩЕЙ</option>' + catInfo.subs.map(s => `<option value="${s}">${s}</option>`).join('');
+                subSelect.classList.remove('hidden');
+            } else {
+                subSelect.classList.add('hidden');
+            }
+        }
+
+        // НОВАЯ ФУНКЦИЯ: Создание игры админом
+        function addCategory() {
+            const name = document.getElementById('new_cat_name').value.trim();
+            const img = document.getElementById('new_cat_img').value.trim();
+            const subsRaw = document.getElementById('new_cat_subs').value.trim();
+
+            if(!name || !img || !subsRaw) return Swal.fire('!', 'Заполните все три поля!', 'warning');
+
+            // Разбиваем строку через запятую на массив, убираем пробелы
+            const subs = subsRaw.split(',').map(s => s.trim()).filter(s => s);
+            const cid = 'c' + Date.now();
+
+            db.child(`cat/${cid}`).set({ id: cid, name, img, subs });
+            
+            Swal.fire('ГОТОВО', `Игра "${name}" с категориями [${subs.join(', ')}] добавлена!`, 'success');
+            document.getElementById('new_cat_name').value = '';
+            document.getElementById('new_cat_img').value = '';
+            document.getElementById('new_cat_subs').value = '';
+        }
+
         function renderAdmin() {
             const pnd = Object.values(data.i || {}).filter(i => i.status === 'pending');
             document.getElementById('adm_mod').innerHTML = `<p class="text-[11px] font-black text-blue-500 mb-3 uppercase italic">Модерация лотов (${pnd.length})</p>` + pnd.map(i => `
-                <div class="tile p-3 flex justify-between items-center mb-1 bg-zinc-900">
-                    <span class="text-[9px] uppercase font-black">${i.title} (${i.price}₽)</span>
+                <div class="tile p-3 mb-1 bg-zinc-900">
+                    <span class="text-[10px] uppercase font-black block mb-2">${i.title} (${i.price}₽) <br><span class="text-[8px] opacity-50">${i.cat} > ${i.subcat || 'Без категории'}</span></span>
                     <div class="flex gap-1">
-                        <button onclick="db.child('i/${i.id}/status').set('active')" class="bg-green-600 px-3 py-2 rounded-xl text-[8px] font-black">OK</button>
-                        <button onclick="db.child('i/${i.id}').remove()" class="bg-red-600 px-3 py-2 rounded-xl text-[8px] font-black">DEL</button>
+                        <button onclick="db.child('i/${i.id}/status').set('active')" class="bg-green-600 px-3 py-2 rounded-xl text-[8px] font-black w-full">ОДОБРИТЬ</button>
+                        <button onclick="db.child('i/${i.id}').remove()" class="bg-red-600 px-3 py-2 rounded-xl text-[8px] font-black w-full">УДАЛИТЬ</button>
                     </div>
                 </div>`).join('') || '<p class="opacity-30 text-[9px] uppercase">Пусто</p>';
         }
@@ -260,28 +305,26 @@
             });
         }
 
-        // Обновленная функция ответа через Ник
         function answerSupport() {
             const nick = document.getElementById('sup_uid').value.trim();
             const txt = document.getElementById('sup_msg').value.trim();
             const u = getUserByNick(nick);
 
-            if(!u) return Swal.fire('!', `Пользователь с логином "${nick}" не найден!`, 'error');
+            if(!u) return Swal.fire('!', `Пользователь "${nick}" не найден!`, 'error');
             if(!txt) return Swal.fire('!', 'Введите текст сообщения', 'warning');
 
             const mId = Date.now();
             db.child(`sup/${u.id}/${mId}`).set({ txt, from: 'admin', date: mId });
             Swal.fire('ОК', `Ответ отправлен пользователю ${u.n}`, 'success');
-            document.getElementById('sup_msg').value = ''; // очищаем поле
+            document.getElementById('sup_msg').value = '';
         }
 
-        // Обновленная функция управления через Ник
         function adminAction(act) {
             const nick = document.getElementById('u_search').value.trim();
             const u = getUserByNick(nick);
             
-            if(!u) return Swal.fire('?', `Юзер с логином "${nick}" не найден`, 'error');
-            const uid = u.id; // Берем его скрытый UID
+            if(!u) return Swal.fire('?', `Юзер "${nick}" не найден`, 'error');
+            const uid = u.id;
 
             if(act === 'info') {
                 document.getElementById('u_mail_status').innerHTML = `UID: <span class="opacity-50">${u.id}</span><br>Имя: ${u.n}<br>TG: ${u.tg}<br>MAIL: ${u.mail || 'НЕТ'}`;
@@ -303,38 +346,6 @@
             Swal.fire('ГОТОВО', 'Ссылка на твой профиль скопирована!', 'success');
         }
 
-        function renderPublicProfile(uid) {
-            const u = data.u[uid];
-            if(!u) return document.body.innerHTML = "<div class='h-screen flex items-center justify-center font-black uppercase opacity-20'>User Not Found</div>";
-            const items = Object.values(data.i || {}).filter(i => i.sid === uid && i.status === 'active');
-            const reviews = data.reviews && data.reviews[uid] ? Object.values(data.reviews[uid]) : [];
-            
-            document.body.innerHTML = `
-                <div class="p-8 pb-32 h-screen overflow-y-auto bg-[#050506] text-white">
-                    <div class="w-20 h-20 bg-gradient-to-br from-blue-600 to-blue-400 rounded-3xl mx-auto mb-4 flex items-center justify-center text-3xl font-black shadow-xl shadow-blue-500/20">${u.n[0].toUpperCase()}</div>
-                    <h1 class="text-2xl font-black italic uppercase text-center">${u.n} ${u.ver ? '<i class="fa-solid fa-circle-check text-blue-500"></i>' : ''}</h1>
-                    <p class="opacity-30 text-[9px] mb-8 tracking-[0.2em] uppercase text-center font-black">LYNEOK OFFICIAL VENDOR</p>
-                    
-                    <div class="grid grid-cols-2 gap-3 mb-8">
-                        <div class="tile p-5 text-center"><p class="text-[8px] opacity-30 uppercase font-black">Товаров</p><b class="text-xl">${items.length}</b></div>
-                        <div class="tile p-5 text-center"><p class="text-[8px] opacity-30 uppercase font-black">Отзывов</p><b class="text-xl text-gold">${reviews.length}</b></div>
-                    </div>
-
-                    <h2 class="text-[10px] font-black uppercase mb-4 opacity-40">Товары продавца</h2>
-                    <div class="space-y-3 mb-10">
-                        ${items.map(i => `<div class="tile p-4 flex justify-between items-center"><b class="text-xs uppercase">${i.title}</b><b class="text-blue-500 text-xs">${i.price} ₽</b></div>`).join('') || '<p class="opacity-20 text-[10px] uppercase font-black">Активных товаров нет</p>'}
-                    </div>
-
-                    <h2 class="text-[10px] font-black uppercase mb-4 opacity-40">Последние отзывы</h2>
-                    <div class="space-y-3">
-                        ${reviews.map(r => `<div class="tile p-4"><div class="flex justify-between mb-1"><b class="text-gold text-[10px]">⭐⭐⭐⭐⭐</b><span class="opacity-20 text-[8px] uppercase">${r.from}</span></div><p class="text-xs italic">"${r.txt}"</p></div>`).join('') || '<p class="opacity-20 text-[10px] uppercase font-black">Отзывов пока нет</p>'}
-                    </div>
-                </div>
-                <div class="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black to-transparent">
-                    <button onclick="location.href='${window.location.origin + window.location.pathname}'" class="btn-main">ПЕРЕЙТИ В МАРКЕТ</button>
-                </div>`;
-        }
-
         // Вспомогательные функции
         function switchTab(t) {
             document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
@@ -349,6 +360,27 @@
                 b64 = e.target.result;
                 document.getElementById(type).innerHTML = `<img src="${b64}" class="w-full h-full object-cover rounded-2xl">`;
             }; r.readAsDataURL(i.files[0]);
+        }
+        
+        // Базовая заглушка для публикации лота (чтобы база понимала структуру)
+        function postItem() {
+            const cat = document.getElementById('i_cat').value;
+            const subcat = document.getElementById('i_subcat').value;
+            const title = document.getElementById('i_title').value;
+            const price = document.getElementById('i_price').value;
+            
+            if(cat === 'ВЫБЕРИТЕ ИГРУ' || !title || !price) return Swal.fire('!', 'Заполните основные поля', 'warning');
+            if(!document.getElementById('i_subcat').classList.contains('hidden') && subcat === 'КАТЕГОРИЯ ВЕЩЕЙ') {
+                return Swal.fire('!', 'Выберите категорию вещи!', 'warning');
+            }
+
+            const iid = 'i' + Date.now();
+            db.child(`i/${iid}`).set({
+                id: iid, sid: me.id, cat: cat, subcat: subcat !== 'КАТЕГОРИЯ ВЕЩЕЙ' ? subcat : '',
+                title: title, price: Number(price), status: 'pending', img: b64 || ''
+            });
+            Swal.fire('ОТПРАВЛЕНО', 'Лот ушел на модерацию', 'success');
+            switchTab('market');
         }
 
         init();
