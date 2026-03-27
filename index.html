@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>LYNEOK OMEGA V120.1</title>
+    <title>LYNEOK OMEGA V120.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@700&family=Orbitron:wght@900&family=UnifrakturMaguntia&display=swap');
@@ -47,6 +48,9 @@
         .msg { max-width: 85%; padding: 10px 14px; border-radius: 18px; font-size: 13px; line-height: 1.4; position: relative; }
         .msg-me { align-self: flex-end; background: var(--blue); color: white; border-bottom-right-radius: 4px; }
         .msg-op { align-self: flex-start; background: #2c2c2e; color: white; border-bottom-left-radius: 4px; }
+        
+        /* ДОБАВЛЕНО: Спец-стиль сообщения админа в чате */
+        .msg-admin { border: 1px solid rgba(0, 122, 255, 0.5); box-shadow: 0 0 10px rgba(0, 122, 255, 0.2); }
     </style>
 </head>
 <body>
@@ -62,7 +66,7 @@
                     <i class="fa-solid fa-plus text-zinc-500"></i>
                 </label>
                 <input id="r_tg" placeholder="Telegram (@username)">
-                </div>
+            </div>
             <input id="a_n" placeholder="Логин">
             <input id="a_p" type="password" placeholder="Пароль">
             <button onclick="handleAuth()" id="a_btn" class="btn-blue">Войти</button>
@@ -133,6 +137,11 @@
 
             <div class="space-y-8">
                 <section>
+                    <h3 class="text-[10px] font-black text-yellow-500 uppercase mb-4"><i class="fa-solid fa-eye"></i> Мониторинг сделок (Live)</h3>
+                    <div id="ad_all_deals" class="space-y-2"></div>
+                </section>
+
+                <section>
                     <h3 class="text-[10px] font-black text-zinc-500 uppercase mb-4">Тикеты техподдержки</h3>
                     <div id="ad_tickets" class="space-y-2"></div>
                 </section>
@@ -161,6 +170,12 @@
             <button onclick="closeChatModal()" class="text-zinc-500 text-2xl">&times;</button>
         </header>
         <div id="chat_body" class="flex-1 overflow-y-auto chat-container"></div>
+        
+        <div id="chat_admin_actions" class="hidden p-3 bg-red-900/20 border-t border-red-500/30 flex gap-2">
+            <button onclick="admDealAction('confirm')" class="flex-1 bg-green-600 text-white text-xs font-black py-3 rounded-xl"><i class="fa-solid fa-check mr-1"></i> ПОДТВЕРДИТЬ</button>
+            <button onclick="admDealAction('cancel')" class="flex-1 bg-red-600 text-white text-xs font-black py-3 rounded-xl"><i class="fa-solid fa-xmark mr-1"></i> ОТМЕНИТЬ</button>
+        </div>
+
         <div class="p-4 border-t border-white/5 flex gap-2 bg-zinc-900">
             <input id="chat_input" placeholder="Сообщение..." class="flex-1">
             <button onclick="sendMessage()" class="bg-blue-600 w-12 h-12 rounded-xl flex items-center justify-center"><i class="fa-solid fa-paper-plane"></i></button>
@@ -168,6 +183,26 @@
     </div>
 
     <script>
+        // ДОБАВЛЕНО: Инициализация EmailJS с твоими ключами из скриншотов
+        (function(){
+            emailjs.init("9M8GxYWeMi6hJP6Rg");
+        })();
+        
+        const EMAILJS_KEYS = {
+            serviceID: "service_ndr83sj",
+            templateID: "template_q98pr7g"
+        };
+
+        // ДОБАВЛЕНО: Функция отправки письма
+        function sendSystemEmail(to_email, subject, user_name, message) {
+            emailjs.send(EMAILJS_KEYS.serviceID, EMAILJS_KEYS.templateID, {
+                to_email: to_email,
+                subject: subject,
+                user_name: user_name,
+                message: message
+            }).then(() => console.log('Email sent!'), (err) => console.log('Email error:', err));
+        }
+
         const FB_CFG = { apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI", databaseURL: "https://dogx-base-default-rtdb.firebaseio.com" };
         const TG = { tok: "8641257792:AAEsxnQWEIeozMt_gnSwJdVgSFQlOc-hnuc", chat: "7040863301" };
         
@@ -222,18 +257,30 @@
             activeChat = id;
             document.getElementById('chat_title').innerText = title;
             document.getElementById('chat_modal').classList.remove('hidden');
+            
+            // ДОБАВЛЕНО: Показ панели управления сделкой для админа
+            const admActions = document.getElementById('chat_admin_actions');
+            admActions.classList.add('hidden');
+            if (me.n.toLowerCase() === 'owwner' && id.startsWith('d')) {
+                const dealData = data.d[id];
+                if(dealData && dealData.status !== 'completed' && dealData.status !== 'cancelled') {
+                    admActions.classList.remove('hidden');
+                }
+            }
+
             renderMessages();
             if(me.n === 'owwner' && id.startsWith('support_')) db.child(`requests/${id.split('_')[1]}/status`).set('reading');
         }
 
         function closeChatModal() { activeChat = null; document.getElementById('chat_modal').classList.add('hidden'); }
 
-        function sendMessage() {
-            const text = document.getElementById('chat_input').value.trim();
+        function sendMessage(customText = null) {
+            const text = customText || document.getElementById('chat_input').value.trim();
             if(!text || !activeChat) return;
             const mid = Date.now();
             db.child(`msgs/${activeChat}/${mid}`).set({ sender: me.n, text: text, time: mid });
-            document.getElementById('chat_input').value = "";
+            if(!customText) document.getElementById('chat_input').value = "";
+            
             if(activeChat.startsWith('support_') && me.n !== 'owwner') {
                 const uid = me.id;
                 db.child(`requests/support_${uid}`).set({ id:uid, name:me.n, status:'open', time:Date.now() });
@@ -242,13 +289,53 @@
 
         function renderMessages() {
             const msgs = Object.values(data.msgs[activeChat] || {});
-            document.getElementById('chat_body').innerHTML = msgs.map(m => `<div class="msg ${m.sender === me.n ? 'msg-me' : 'msg-op'}"><p class="text-[9px] opacity-50 mb-1 font-black">${m.sender}</p>${m.text}</div>`).join('');
+            document.getElementById('chat_body').innerHTML = msgs.map(m => {
+                const isMe = m.sender === me.n;
+                const isAdmin = m.sender.toLowerCase() === 'owwner';
+                // ДОБАВЛЕНО: Подсветка имени админа с галочкой
+                const senderNameHTML = `<b class="${isAdmin ? 'text-blue-400 font-black' : 'font-black opacity-50'} text-[9px] mb-1 block">${m.sender} ${isAdmin ? '<i class="fa-solid fa-circle-check"></i>' : ''}</b>`;
+                
+                return `<div class="msg ${isMe ? 'msg-me' : 'msg-op'} ${isAdmin ? 'msg-admin' : ''}">${senderNameHTML}${m.text}</div>`;
+            }).join('');
             const b = document.getElementById('chat_body');
             b.scrollTop = b.scrollHeight;
         }
 
+        // ДОБАВЛЕНО: Логика кнопок управления сделкой для админа
+        function admDealAction(action) {
+            if(!activeChat || !activeChat.startsWith('d') || !data.d[activeChat]) return;
+            const deal = data.d[activeChat];
+            
+            if(action === 'confirm') {
+                db.child(`d/${deal.id}/status`).set('completed');
+                sendMessage("✅ АДМИНИСТРАТОР ПОДТВЕРДИЛ СДЕЛКУ. Средства успешно переведены продавцу.");
+                Tst.fire({icon:'success', title:'Сделка подтверждена'});
+                closeChatModal();
+            } else if(action === 'cancel') {
+                // Возврат средств (откатываем то, что списали при покупке)
+                db.child(`u/${deal.bid}/bal`).transaction(b => (b||0) + deal.p);
+                db.child(`u/${deal.sid}/bal`).transaction(b => (b||0) - Math.floor(deal.p * 0.9));
+                db.child(`d/${deal.id}/status`).set('cancelled');
+                sendMessage("❌ АДМИНИСТРАТОР ОТМЕНИЛ СДЕЛКУ. Средства возвращены покупателю.");
+                Tst.fire({icon:'info', title:'Сделка отменена'});
+                closeChatModal();
+            }
+        }
+
         function renderAdmin() {
             const search = document.getElementById('u_search').value.toLowerCase();
+            
+            // ДОБАВЛЕНО: Рендер всех сделок для админа
+            const allDeals = Object.values(data.d || {});
+            document.getElementById('ad_all_deals').innerHTML = allDeals.reverse().map(d => `
+                <div class="glass p-3 flex justify-between items-center cursor-pointer border-l-4 ${d.status === 'completed' ? 'border-green-500' : d.status === 'cancelled' ? 'border-red-500' : 'border-yellow-500'}" onclick="openChat('${d.id}', 'СДЕЛКА: ${d.t}')">
+                    <div class="text-[10px]">
+                        <b>${d.t}</b> (${d.p}₽)<br>
+                        <span class="text-zinc-500">Покупатель: ${d.bn} | Статус: ${d.status || 'В процессе'}</span>
+                    </div>
+                    <i class="fa-solid fa-eye text-blue-500"></i>
+                </div>`).join('');
+
             const tickets = Object.values(data.requests || {}).filter(r => r.status === 'open' || r.status === 'reading');
             document.getElementById('ad_tickets').innerHTML = tickets.map(t => `<div onclick="openChat('support_${t.id}', 'SUPPORT: ${t.name}')" class="glass p-3 flex justify-between items-center cursor-pointer border-l-4 ${t.status==='open' ? 'border-red-500' : 'border-blue-500'}"><div><b class="text-xs">${t.name}</b></div><i class="fa-solid fa-comment-dots text-zinc-600"></i></div>`).join('');
 
@@ -285,7 +372,7 @@
 
         function renderDeals() {
             const list = Object.values(data.d || {}).filter(d => d.bid === me.id || d.sid === me.id);
-            document.getElementById('deals_list').innerHTML = list.reverse().map(d => `<div class="glass p-4 flex justify-between items-center"><div><b class="text-xs block mb-1">${d.t}</b><span class="text-[10px] text-zinc-500">${d.p} ₽</span></div><div class="flex gap-2"><button onclick="openChat('${d.id}', 'СДЕЛКА: ${d.t}')" class="bg-zinc-800 p-3 rounded-xl"><i class="fa-solid fa-comments"></i></button>${d.bid === me.id ? `<button onclick="Swal.fire('Данные','${d.acc}')" class="bg-blue-600 px-3 py-1 rounded-xl text-[10px] font-black">ИНФО</button>` : ''}</div></div>`).join('');
+            document.getElementById('deals_list').innerHTML = list.reverse().map(d => `<div class="glass p-4 flex justify-between items-center"><div><b class="text-xs block mb-1">${d.t}</b><span class="text-[10px] ${d.status === 'cancelled' ? 'text-red-500' : 'text-zinc-500'}">${d.p} ₽ ${d.status === 'cancelled' ? '(ОТМЕНЕНА)' : ''}</span></div><div class="flex gap-2"><button onclick="openChat('${d.id}', 'СДЕЛКА: ${d.t}')" class="bg-zinc-800 p-3 rounded-xl"><i class="fa-solid fa-comments"></i></button>${d.bid === me.id ? `<button onclick="Swal.fire('Данные','${d.acc}')" class="bg-blue-600 px-3 py-1 rounded-xl text-[10px] font-black">ИНФО</button>` : ''}</div></div>`).join('');
         }
 
         function buyItem(iid) {
@@ -294,12 +381,27 @@
             const did = 'd'+Date.now();
             db.child(`u/${me.id}/bal`).transaction(b => b - i.price);
             db.child(`u/${i.sid}/bal`).transaction(b => (b||0) + Math.floor(i.price * 0.9));
-            db.child(`d/${did}`).set({ id:did, bid:me.id, bn:me.n, sid:i.sid, t:i.title, p:i.price, acc:i.acc_data, time:Date.now() });
-            db.child(`i/${iid}`).remove().then(() => { Tst.fire({icon:'success',title:'Куплено!'}); switchT('chats'); });
+            db.child(`d/${did}`).set({ id:did, bid:me.id, bn:me.n, sid:i.sid, t:i.title, p:i.price, acc:i.acc_data, time:Date.now(), status: 'active' });
+            db.child(`i/${iid}`).remove().then(() => { 
+                Tst.fire({icon:'success',title:'Куплено!'}); 
+                // ДОБАВЛЕНО: Отправка Email админу при новой покупке на почту из скриншота
+                sendSystemEmail("robuxofficial01@gmail.com", "Новая сделка на маркете!", me.n, `Товар: ${i.title} за ${i.price}₽`);
+                switchT('chats'); 
+            });
         }
 
         function askPay() { Swal.fire({title:'Пополнение', input:'number'}).then(r => { if(r.value >= 50) { Tst.fire({icon:'info',title:'Заявка отправлена'}); bot(`💰 ${me.n} +${r.value}₽`); } }); }
-        function askOut() { Swal.fire({title:'Вывод', html:'<input id="os" type="number" placeholder="Сумма"><input id="oc" placeholder="Карта">', preConfirm:()=>({s:document.getElementById('os').value, c:document.getElementById('oc').value}) }).then(r => { if(r.value.s >= 467 && r.value.s <= me.bal) { db.child(`u/${me.id}/bal`).transaction(b => b - r.value.s); db.child(`outs/out${Date.now()}`).set({id:'out'+Date.now(), uid:me.id, name:me.n, sum:r.value.s, card:r.value.c, status:'pending'}); } }); }
+        
+        function askOut() { 
+            Swal.fire({title:'Вывод', html:'<input id="os" type="number" placeholder="Сумма"><input id="oc" placeholder="Карта">', preConfirm:()=>({s:document.getElementById('os').value, c:document.getElementById('oc').value}) }).then(r => { 
+                if(r.value.s >= 467 && r.value.s <= me.bal) { 
+                    db.child(`u/${me.id}/bal`).transaction(b => b - r.value.s); 
+                    db.child(`outs/out${Date.now()}`).set({id:'out'+Date.now(), uid:me.id, name:me.n, sum:r.value.s, card:r.value.c, status:'pending'});
+                    // ДОБАВЛЕНО: Email уведомление админу при выводе средств
+                    sendSystemEmail("robuxofficial01@gmail.com", "Запрос на вывод средств!", me.n, `Сумма: ${r.value.s}₽ на реквизиты: ${r.value.c}`);
+                } 
+            }); 
+        }
 
         function postItem() {
             const t = document.getElementById('s_t').value, p = Number(document.getElementById('s_p').value);
