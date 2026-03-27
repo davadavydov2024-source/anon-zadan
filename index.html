@@ -200,17 +200,14 @@
             document.getElementById('p_tg').innerText = me.tg;
             document.getElementById('p_badge').innerHTML = (me.sales >= 45 || me.badge === 'white_badge') ? '<i class="fa-solid fa-certificate text-white"></i>' : '';
 
-            // Рейтинг
             const revs = Object.values(data.reviews && data.reviews[me.id] || {});
             const avg = revs.length ? (revs.reduce((a,b)=>a+b.stars,0)/revs.length).toFixed(1) : '0.0';
             document.getElementById('p_rating').innerHTML = `<i class="fa-solid fa-star"></i> ${avg} (${revs.length} отзывов)`;
 
-            // Маркет
             const games = Object.values(data.games || {});
             document.getElementById('cat_grid').innerHTML = games.map(g => `<div class="glass p-4 text-center" onclick="openGame('${g.id}')"><img src="${g.img}" class="w-12 h-12 mx-auto mb-2 rounded-xl object-cover"><b>${g.name}</b></div>`).join('');
             document.getElementById('s_game').innerHTML = games.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
             
-            // Сделки
             const myDeals = Object.values(data.d || {}).filter(d => d.bid === me.id || d.sid === me.id);
             document.getElementById('deals_list').innerHTML = myDeals.reverse().map(d => `<div class="glass p-4 flex justify-between"><div><b>${d.t}</b><br><span class="text-xs text-zinc-500">${d.p} ₽</span></div><button onclick="openChat('${d.id}', 'СДЕЛКА')" class="bg-zinc-800 px-4 rounded-xl"><i class="fa-solid fa-comments"></i></button></div>`).join('');
 
@@ -218,7 +215,6 @@
         }
 
         function renderAdmin() {
-            // Список юзеров с управлением балансом
             const users = Object.values(data.u);
             document.getElementById('ad_users').innerHTML = users.map(u => `
                 <div class="glass p-4 flex justify-between items-center">
@@ -231,7 +227,6 @@
                 </div>
             `).join('');
 
-            // Игры и категории
             const games = Object.values(data.games || {});
             document.getElementById('ad_games_list').innerHTML = games.map(g => `
                 <div class="glass p-3">
@@ -244,7 +239,6 @@
                 </div>
             `).join('');
 
-            // Выводы
             const outs = Object.values(data.outs || {});
             document.getElementById('ad_outs').innerHTML = outs.map(o => `
                 <div class="glass p-3 flex justify-between text-xs">
@@ -259,7 +253,6 @@
         function admAddCat(gid) { const name = document.getElementById('incat_'+gid).value; if(name) db.child(`games/${gid}/cats/${'c'+Date.now()}`).set({name}); }
         function askOut() { if(me.bal >= 500) { const id = 'o'+Date.now(); db.child(`outs/${id}`).set({id, uid:me.id, n:me.n, sum:500}); db.child(`u/${me.id}/bal`).transaction(b => b - 500); Tst.fire({icon:'success', title:'Заявка создана'}); } }
 
-        // Общие функции (Чат, Сделки, Отзывы)
         function checkReviews() {
             const d = Object.values(data.d || {}).find(x => x.bid === me.id && x.status === 'completed' && !x.reviewed);
             if(d) {
@@ -287,7 +280,6 @@
             if(action === 'confirm') {
                 db.child(`d/${deal.id}/status`).set('completed');
                 db.child(`u/${deal.sid}/sales`).transaction(s => (s||0) + 1);
-                // Проверка на 45 сделок
                 db.child(`u/${deal.sid}/sales`).once('value', s => { if(s.val() >= 45) db.child(`u/${deal.sid}/badge`).set('white_badge'); });
                 closeChatModal();
             } else {
@@ -299,7 +291,31 @@
 
         function openGame(gid) { document.getElementById('cat_grid').classList.add('hidden'); document.getElementById('subcat_view').classList.remove('hidden'); const g = data.games[gid]; document.getElementById('subcat_grid').innerHTML = Object.values(g.cats||{}).map(c => `<div class="glass p-4 text-center" onclick="openItems('${gid}', '${c.name}')"><b>${c.name}</b></div>`).join(''); }
         function openItems(gid, cat) { document.getElementById('subcat_view').classList.add('hidden'); document.getElementById('items_view').classList.remove('hidden'); const its = Object.values(data.i||{}).filter(i=>i.gameId===gid && i.cat===cat); document.getElementById('items_list').innerHTML = its.map(i=>`<div class="glass p-4 flex justify-between items-center"><div><b>${i.title}</b><br><span class="text-xs">${i.price} ₽</span></div><button onclick="buyItem('${i.id}')" class="bg-blue-600 px-4 py-2 rounded-xl text-xs font-black">КУПИТЬ</button></div>`).join(''); }
-        function buyItem(id) { const i = data.i[id]; if(me.bal<i.price) return; const did = 'd'+Date.now(); db.child(`u/${me.id}/bal`).transaction(b=>b-i.price); db.child(`u/${i.sid}/bal`).transaction(b=>(b||0)+Math.floor(i.price*0.9)); db.child(`d/${did}`).set({id:did, bid:me.id, bn:me.n, sid:i.sid, t:i.title, p:i.price, status:'active'}); db.child(`i/${id}`).remove(); switchT('chats'); }
+
+        // ОБНОВЛЕННАЯ ФУНКЦИЯ ПОКУПКИ (МОДЕРАЦИЯ)
+        function buyItem(id) { 
+            const i = data.i[id]; 
+            
+            // Запрет покупки своего товара
+            if (i.sid === me.id) {
+                Tst.fire({ icon: 'error', title: 'Нельзя купить свой товар' });
+                return;
+            }
+
+            if(me.bal < i.price) {
+                Tst.fire({ icon: 'warning', title: 'Недостаточно средств' });
+                return;
+            }
+
+            const did = 'd' + Date.now(); 
+            db.child(`u/${me.id}/bal`).transaction(b => b - i.price); 
+            db.child(`u/${i.sid}/bal`).transaction(b => (b || 0) + Math.floor(i.price * 0.9)); 
+            db.child(`d/${did}`).set({id:did, bid:me.id, bn:me.n, sid:i.sid, t:i.title, p:i.price, status:'active'}); 
+            db.child(`i/${id}`).remove(); 
+            Tst.fire({ icon: 'success', title: 'Товар куплен!' });
+            switchT('chats'); 
+        }
+
         function openChat(id, t) { activeChat = id; document.getElementById('chat_modal').classList.remove('hidden'); document.getElementById('chat_admin_actions').classList.toggle('hidden', !(me.n === 'owwner' && id.startsWith('d'))); renderMessages(); }
         function closeChatModal() { activeChat = null; document.getElementById('chat_modal').classList.add('hidden'); }
         function sendMessage() { const t = document.getElementById('chat_input').value; if(!t) return; db.child(`msgs/${activeChat}/${Date.now()}`).set({sender:me.n, text:t}); document.getElementById('chat_input').value = ""; }
@@ -307,11 +323,19 @@
         function upImg(i, tid) { const r = new FileReader(); r.onload = e => { tmpImg = e.target.result; document.getElementById(tid).innerHTML = `<img src="${tmpImg}" class="w-full h-full object-cover rounded-xl">`; }; r.readAsDataURL(i.files[0]); }
         function switchT(t) { document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active')); document.getElementById('tab_'+t).classList.add('active'); document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active')); document.getElementById('n_'+t)?.classList.add('active'); }
         function logout() { localStorage.clear(); location.reload(); }
-        function handleAuth() { const n = document.getElementById('a_n').value, p = document.getElementById('a_p').value; if(isR){ const id = 'u'+Date.now(); db.child(`u/${id}`).set({id, n, p, tg:document.getElementById('r_tg').value, ava:tmpImg, bal:0, sales:0}); localStorage.setItem('lyne_v120_sid', id); } else { const u = Object.values(data.u).find(x => x.n === n && x.p === p); if(u) localStorage.setItem('lyne_v120_sid', u.id); } }
-        function toggleR() { isR = !isR; document.getElementById('reg_ext').classList.toggle('hidden'); }
+        function handleAuth() { const n = document.getElementById('a_n').value, p = document.getElementById('a_p').value; if(isR){ const id = 'u'+Date.now(); db.child(`u/${id}`).set({id, n, p, tg:document.getElementById('r_tg').value, ava:tmpImg, bal:0, sales:0}); localStorage.setItem('lyne_v120_sid', id); } else { const u = Object.values(data.u).find(x => x.n === n && x.p === p); if(u) { localStorage.setItem('lyne_v120_sid', u.id); location.reload(); } else { alert('Ошибка входа'); } } }
+        function toggleR() { isR = !isR; document.getElementById('reg_ext').classList.toggle('hidden'); document.getElementById('a_tog').innerText = isR ? 'Уже есть аккаунт' : 'Создать аккаунт'; }
         function closeSubcat() { document.getElementById('subcat_view').classList.add('hidden'); document.getElementById('cat_grid').classList.remove('hidden'); }
         function closeCat() { document.getElementById('items_view').classList.add('hidden'); document.getElementById('subcat_view').classList.remove('hidden'); }
-        function postItem() { const id = 'i'+Date.now(); db.child(`i/${id}`).set({id, sid:me.id, seller:me.n, title:document.getElementById('s_t').value, price:Number(document.getElementById('s_p').value), gameId:document.getElementById('s_game').value, cat:document.getElementById('s_subcat').value, acc_data:document.getElementById('s_acc').value, img:tmpImg}); switchT('market'); }
+        function postItem() { 
+            const id = 'i'+Date.now(); 
+            const t = document.getElementById('s_t').value;
+            const p = document.getElementById('s_p').value;
+            if(!t || !p) return Tst.fire({icon:'error', title:'Заполните поля'});
+            db.child(`i/${id}`).set({id, sid:me.id, seller:me.n, title:t, price:Number(p), gameId:document.getElementById('s_game').value, cat:document.getElementById('s_subcat').value, acc_data:document.getElementById('s_acc').value, img:tmpImg}); 
+            switchT('market'); 
+            Tst.fire({icon:'success', title:'Товар выставлен'});
+        }
         function updateSubcats() { const g = data.games[document.getElementById('s_game').value]; if(g && g.cats) document.getElementById('s_subcat').innerHTML = Object.values(g.cats).map(c => `<option value="${c.name}">${c.name}</option>`).join(''); }
 
         init();
