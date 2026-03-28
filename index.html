@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>LYNEOK OMEGA V120.16 CLEAN</title>
+    <title>LYNEOK OMEGA V120.17 CUSTOM</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -12,7 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Press+Start+2P&family=Ruslan+Display&family=Kelly+Slab&family=Underdog&family=Lobster&family=Pacifico&family=Monoton&family=Jura:wght@700&family=Playfair+Display:wght@900&family=Courier+Prime&family=Zeyada&family=Dancing+Script:wght@700&family=EB+Garamond:ital@1&family=Montserrat+Alternates:wght@900&family=Caveat:wght@700&family=Unbounded:wght@900&family=Russo+One&family=Bad+Script&family=Bungee+Shade&display=swap" rel="stylesheet">
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
@@ -23,11 +23,30 @@
         .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+        /* ГРАДИЕНТНЫЕ НИКИ */
+        .n-sunset { background: linear-gradient(45deg, #ff5f6d, #ffc371); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+        .n-ocean { background: linear-gradient(45deg, #2193b0, #6dd5ed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+        .n-forest { background: linear-gradient(45deg, #11998e, #38ef7d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+        .n-gold { background: linear-gradient(45deg, #bf953f, #fcf6ba, #b38728); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+        .n-royal { background: linear-gradient(45deg, #6a11cb, #2575fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+        .n-fire { background: linear-gradient(45deg, #f12711, #f5af19); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
         .nick-rainbow { background: linear-gradient(to right, red, orange, yellow, green, cyan, blue, violet); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: rainbow_anim 3s linear infinite; font-weight: 900; background-size: 200%; }
         @keyframes rainbow_anim { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
-        .nick-neon { color: #fff; text-shadow: 0 0 10px var(--blue), 0 0 20px var(--blue); }
-        .badge-neon { color: #00f2ff; filter: drop-shadow(0 0 5px #00f2ff); }
+
+        /* ГРАДИЕНТНЫЕ ГАЛОЧКИ */
+        .b-grad-blue { background: linear-gradient(45deg, #00c6ff, #0072ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .b-grad-purple { background: linear-gradient(45deg, #833ab4, #fd1d1d, #fcb045); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .b-grad-green { background: linear-gradient(45deg, #96fbc4, #f9f586); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .badge-rainbow { background: linear-gradient(to right, red, yellow, lime, cyan, blue, magenta); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* КЛАССЫ ШРИФТОВ */
+        .f-1 { font-family: 'Comfortaa'; } .f-2 { font-family: 'Press Start 2P'; } .f-3 { font-family: 'Ruslan Display'; }
+        .f-4 { font-family: 'Kelly Slab'; } .f-5 { font-family: 'Underdog'; } .f-6 { font-family: 'Lobster'; }
+        .f-7 { font-family: 'Pacifico'; } .f-8 { font-family: 'Monoton'; } .f-9 { font-family: 'Jura'; }
+        .f-10 { font-family: 'Playfair Display'; } .f-11 { font-family: 'Courier Prime'; } .f-12 { font-family: 'Zeyada'; }
+        .f-13 { font-family: 'Dancing Script'; } .f-14 { font-family: 'EB Garamond'; } .f-15 { font-family: 'Montserrat Alternates'; }
+        .f-16 { font-family: 'Caveat'; } .f-17 { font-family: 'Unbounded'; } .f-18 { font-family: 'Russo One'; }
+        .f-19 { font-family: 'Bad Script'; } .f-20 { font-family: 'Bungee Shade'; }
 
         .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 80px; background: rgba(10,10,10,0.8); backdrop-filter: blur(20px); display: flex; z-index: 1000; border-top: 1px solid rgba(255,255,255,0.05); padding-bottom: env(safe-area-inset-bottom); }
         .nav-btn { flex: 1; color: #636366; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 10px; font-weight: 700; }
@@ -88,8 +107,7 @@
             <div class="glass p-5 space-y-4">
                 <input type="file" id="s_img" class="hidden" onchange="upImg(this, 'l_s_img')">
                 <label for="s_img" id="l_s_img" class="w-full h-40 bg-zinc-900 rounded-2xl flex items-center justify-center border-2 border-dashed border-zinc-800"><i class="fa-solid fa-camera text-2xl text-zinc-700"></i></label>
-                <select id="s_game" onchange="updateSubcatsSell()"></select>
-                <select id="s_subcat"></select>
+                <select id="s_game"></select>
                 <input id="s_t" placeholder="Название товара">
                 <textarea id="s_acc" rows="3" placeholder="Описание/Данные..."></textarea>
                 <input id="s_p" type="number" placeholder="Цена ₽">
@@ -104,7 +122,7 @@
 
         <main id="tab_profile" class="tab-content">
             <div class="glass p-6 mb-4 text-center relative">
-                <button onclick="shareProf()" class="absolute top-6 right-6 text-zinc-500 active:text-blue-500"><i class="fa-solid fa-share-nodes text-xl"></i></button>
+                <button onclick="shareProf()" class="absolute top-6 right-6 text-zinc-500"><i class="fa-solid fa-share-nodes text-xl"></i></button>
                 <img id="p_ava" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-4 border-zinc-900">
                 <div class="flex items-center justify-center gap-1">
                     <span id="p_n" class="text-2xl font-black">...</span>
@@ -115,14 +133,6 @@
                     <button onclick="askOut()" class="btn-blue !text-[10px]">ВЫВОД</button>
                 </div>
             </div>
-
-            <div id="email_connect_box" class="hidden glass p-5 mb-4 flex justify-between items-center border-blue-500/20">
-                <div>
-                    <b class="text-xs">Уведомления на Email</b>
-                    <p class="text-[9px] opacity-40">Письма при новых продажах</p>
-                </div>
-                <button onclick="toggleEmailConn()" id="email_toggle_btn" class="bg-zinc-800 px-4 py-2 rounded-xl text-[10px] font-bold">ОТКЛЮЧЕНО</button>
-            </div>
             
             <div class="mb-4">
                 <h3 class="text-[10px] font-black uppercase text-zinc-500 mb-3 ml-2 tracking-widest">Активные лоты</h3>
@@ -130,34 +140,14 @@
             </div>
 
             <button id="adm_btn" onclick="switchT('admin')" class="hidden w-full bg-red-600/10 text-red-500 py-4 rounded-2xl font-black mb-4 border border-red-600/20 uppercase text-xs tracking-widest">Админ-Панель</button>
-            <button onclick="logout()" class="w-full py-4 text-red-500 opacity-30 text-[10px] font-black uppercase tracking-widest">Выйти из аккаунта</button>
+            <button onclick="logout()" class="w-full py-4 text-red-500 opacity-30 text-[10px] font-black uppercase tracking-widest">Выйти</button>
         </main>
 
         <main id="tab_admin" class="tab-content">
             <h1 class="text-3xl font-black italic mb-6">OMEGA PANEL</h1>
-            
-            <section class="glass p-5 mb-8 border-blue-500/20">
-                <h3 class="text-[10px] font-black text-blue-500 uppercase mb-4">Настройки EmailJS</h3>
-                <div class="grid gap-2">
-                    <input id="ad_ejs_service" placeholder="Service ID" class="!p-3 !text-xs">
-                    <input id="ad_ejs_template" placeholder="Template ID" class="!p-3 !text-xs">
-                    <input id="ad_ejs_key" placeholder="Public Key" class="!p-3 !text-xs">
-                    <div class="flex items-center gap-2 mt-2 px-1">
-                        <input type="checkbox" id="ad_ejs_active" class="!w-4 !h-4">
-                        <label for="ad_ejs_active" class="text-[10px] font-bold">Включить кнопку почты в профилях</label>
-                    </div>
-                    <button onclick="admSaveEJS()" class="bg-blue-600 py-4 rounded-xl text-[10px] font-black mt-2 uppercase">Обновить конфигурацию</button>
-                </div>
-            </section>
-
             <section class="mb-8">
-                <h3 class="text-[10px] font-black text-yellow-500 uppercase mb-4">Пользователи</h3>
+                <h3 class="text-[10px] font-black text-yellow-500 uppercase mb-4">Пользователи & Стили</h3>
                 <div id="ad_users" class="space-y-4"></div>
-            </section>
-
-            <section class="mb-8">
-                <h3 class="text-[10px] font-black text-red-500 uppercase mb-4">Финансы</h3>
-                <div id="ad_money_list" class="space-y-3"></div>
             </section>
         </main>
 
@@ -169,29 +159,20 @@
         </nav>
     </div>
 
-    <div id="item_modal" class="hidden fixed inset-0 z-[10002] bg-black/95 overflow-y-auto">
-        <div class="relative w-full aspect-square"><img id="im_img" class="w-full h-full object-cover"><button onclick="closeItemModal()" class="absolute top-6 right-6 w-10 h-10 bg-black/50 rounded-full text-2xl flex items-center justify-center">&times;</button></div>
-        <div class="p-6">
-            <h1 id="im_title" class="text-3xl font-black italic mb-2"></h1>
-            <span id="im_price" class="text-2xl text-blue-500 font-black block mb-6"></span>
-            <div class="glass p-5 mb-6"><p id="im_desc" class="text-sm opacity-60 leading-relaxed"></p></div>
-            <div class="flex items-center justify-between glass p-4 mb-20">
-                <div class="flex items-center gap-3"><img id="im_s_ava" class="w-10 h-10 rounded-full object-cover bg-zinc-800"><b id="im_s_n" class="text-sm"></b></div>
-                <button id="im_buy_btn" class="bg-blue-600 px-8 py-3 rounded-xl text-xs font-black uppercase italic">Купить</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         firebase.initializeApp({ apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI", databaseURL: "https://dogx-base-default-rtdb.firebaseio.com" });
         const db = firebase.database().ref('lyne_v120_omega');
         const Tst = Swal.mixin({ toast: true, position: 'top', timer: 2000, showConfirmButton: false, background: '#1c1c1e', color: '#fff' });
 
-        let me = null, data = {}, isR = false, tmpImg = "", curG = null;
+        let me = null, data = {}, isR = false, tmpImg = "";
+
+        const fonts = ["Inter", "Comfortaa", "Press Start 2P", "Ruslan Display", "Kelly Slab", "Underdog", "Lobster", "Pacifico", "Monoton", "Jura", "Playfair Display", "Courier Prime", "Zeyada", "Dancing Script", "EB Garamond", "Montserrat Alternates", "Caveat", "Unbounded", "Russo One", "Bad Script", "Bungee Shade"];
+        const nicks = ["nick-rainbow", "n-sunset", "n-ocean", "n-forest", "n-gold", "n-royal", "n-fire"];
+        const badges = ["badge-rainbow", "b-grad-blue", "b-grad-purple", "b-grad-green"];
 
         function init() {
             db.on('value', snap => {
-                data = snap.val() || { u:{}, i:{}, d:{}, games:{}, settings:{}, money_req:{} };
+                data = snap.val() || { u:{}, i:{}, d:{}, games:{} };
                 const sid = localStorage.getItem('lyne_v120_sid');
                 document.getElementById('loader').style.display = 'none';
                 if (sid && data.u[sid]) {
@@ -202,7 +183,6 @@
                     render();
                 } else { 
                     document.getElementById('auth_scr').classList.remove('hidden'); 
-                    document.getElementById('app').classList.add('hidden');
                 }
             });
         }
@@ -212,157 +192,58 @@
             document.getElementById('h_bal').innerText = me.bal + ' ₽';
             document.getElementById('h_ava').src = me.ava;
             document.getElementById('p_ava').src = me.ava;
-            document.getElementById('p_n').innerText = me.n;
-            document.getElementById('p_n').className = 'text-2xl font-black ' + (me.nickEffect || '');
+            
+            // Применяем шрифт и градиент
+            const pN = document.getElementById('p_n');
+            pN.innerText = me.n;
+            pN.className = `text-2xl font-black ${me.nickEffect || ''} ${me.fontClass || ''}`;
             document.getElementById('p_badge').innerHTML = me.badgeType ? `<i class="fa-solid fa-circle-check ${me.badgeType}"></i>` : '';
 
-            if(data.settings?.ejs_active) {
-                document.getElementById('email_connect_box').classList.remove('hidden');
-                const btn = document.getElementById('email_toggle_btn');
-                btn.innerText = me.email_notify ? 'ПОДКЛЮЧЕНО' : 'ОТКЛЮЧЕНО';
-                btn.className = me.email_notify ? 'bg-blue-600 px-4 py-2 rounded-xl text-[10px] font-bold' : 'bg-zinc-800 px-4 py-2 rounded-xl text-[10px] font-bold';
-            }
-
-            const gs = Object.values(data.games || {});
-            document.getElementById('cat_grid').innerHTML = gs.map(g => `<div class="glass p-5 text-center transition" onclick="openGame('${g.id}')"><img src="${g.img}" class="w-16 h-16 mx-auto mb-3 rounded-2xl object-cover"><b class="text-[10px] uppercase font-black tracking-widest">${g.name}</b></div>`).join('');
-            document.getElementById('s_game').innerHTML = gs.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
-
-            const myDeals = Object.values(data.d || {}).filter(d => d.bid === me.id || d.sid === me.id);
-            document.getElementById('deals_list').innerHTML = myDeals.reverse().map(d => `
-                <div class="glass p-4 flex justify-between items-center">
-                    <div><b class="text-sm italic">${d.t}</b><div class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">${d.p} ₽ • ${d.status}</div></div>
-                    <button onclick="Tst.fire({icon:'info', title:'Чат в разработке'})" class="bg-blue-600/10 text-blue-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase">ЧАТ</button>
-                </div>
-            `).join('');
-
-            if(me.n.toLowerCase() === 'owwner') {
-                document.getElementById('ad_ejs_service').value = data.settings?.ejs_service || '';
-                document.getElementById('ad_ejs_template').value = data.settings?.ejs_template || '';
-                document.getElementById('ad_ejs_key').value = data.settings?.ejs_key || '';
-                document.getElementById('ad_ejs_active').checked = data.settings?.ejs_active || false;
-                renderAdminUsers();
-                renderAdminMoney();
-            }
+            // Отрисовка юзеров в админке
+            if(me.n.toLowerCase() === 'owwner') renderAdminUsers();
         }
 
-        // --- АДМИНКА (УДАЛЕНИЕ) ---
         function renderAdminUsers() {
             document.getElementById('ad_users').innerHTML = Object.values(data.u).map(u => `
-                <div class="glass p-4 border border-white/5">
-                    <div class="flex items-center gap-3 mb-4">
+                <div class="glass p-4 border border-white/5 space-y-3">
+                    <div class="flex items-center gap-3">
                         <img src="${u.ava}" class="w-8 h-8 rounded-full object-cover">
-                        <b class="text-xs ${u.nickEffect || ''}">${u.n}</b>
-                        <button onclick="admDeleteAcc('${u.id}')" class="ml-auto bg-red-600/10 text-red-500 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase border border-red-500/20">УДАЛИТЬ АККАУНТ</button>
+                        <b class="text-xs ${u.nickEffect || ''} ${u.fontClass || ''}">${u.n}</b>
+                        <button onclick="admDeleteAcc('${u.id}')" class="ml-auto text-red-500 text-[9px] font-black uppercase">УДАЛИТЬ</button>
                     </div>
-                    <div class="flex gap-2">
-                        <input id="adb_val_${u.id}" type="number" value="${u.bal}" class="!p-2 !text-xs !w-24">
-                        <button onclick="admSetBal('${u.id}')" class="bg-blue-600 text-white px-4 rounded-lg text-[10px] font-bold italic">ОК</button>
+                    <div class="grid grid-cols-1 gap-2">
+                        <select onchange="admSetStyle('${u.id}', 'fontClass', this.value)" class="!p-2 !text-[10px]">
+                            <option value="">Шрифт: Обычный</option>
+                            ${fonts.map((f, i) => `<option value="f-${i+1}" ${u.fontClass==='f-'+(i+1)?'selected':''}>${f}</option>`).join('')}
+                        </select>
+                        <select onchange="admSetStyle('${u.id}', 'nickEffect', this.value)" class="!p-2 !text-[10px]">
+                            <option value="">Ник: Обычный</option>
+                            ${nicks.map(n => `<option value="${n}" ${u.nickEffect===n?'selected':''}>${n}</option>`).join('')}
+                        </select>
+                        <select onchange="admSetStyle('${u.id}', 'badgeType', this.value)" class="!p-2 !text-[10px]">
+                            <option value="">Галочка: Нет</option>
+                            ${badges.map(b => `<option value="${b}" ${u.badgeType===b?'selected':''}>${b}</option>`).join('')}
+                        </select>
                     </div>
                 </div>
             `).join('');
+        }
+
+        function admSetStyle(uid, type, val) {
+            db.child(`u/${uid}/${type}`).set(val);
+            Tst.fire({icon:'success', title:'Стиль обновлен'});
         }
 
         function admDeleteAcc(uid) {
-            Swal.fire({
-                title: 'Удалить навсегда?',
-                text: "Данные пользователя будут стерты безвозвратно!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                background: '#1c1c1e', color: '#fff'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    db.child(`u/${uid}`).remove();
-                    Tst.fire({icon:'success', title:'Аккаунт стерт'});
-                }
-            });
-        }
-
-        function admHandleMoney(rid, approve) {
-            const req = data.money_req[rid];
-            if(approve) db.child(`u/${req.uid}/bal`).transaction(b => (b || 0) + (req.type === 'deposit' ? req.amt : -req.amt));
-            db.child(`money_req/${rid}/status`).set(approve ? 'approved' : 'rejected');
-            Tst.fire({icon:'info', title:'Готово'});
-        }
-
-        function renderAdminMoney() {
-            const reqs = Object.values(data.money_req || {}).filter(r => r.status === 'pending');
-            document.getElementById('ad_money_list').innerHTML = reqs.map(r => `
-                <div class="glass p-4 flex justify-between items-center">
-                    <div><b class="text-xs uppercase">${r.n}</b><br><span class="${r.type==='deposit'?'text-green-500':'text-red-500'} text-[10px] font-bold">${r.amt}₽</span></div>
-                    <div class="flex gap-2">
-                        <button onclick="admHandleMoney('${r.id}', true)" class="bg-green-600 px-4 py-2 rounded-lg text-[9px] font-black uppercase">OK</button>
-                        <button onclick="admHandleMoney('${r.id}', false)" class="bg-zinc-800 px-4 py-2 rounded-lg text-[9px] font-black uppercase">X</button>
-                    </div>
-                </div>`).join('');
-        }
-
-        // --- ОСТАЛЬНОЙ ФУНКЦИОНАЛ ---
-        function admSaveEJS() {
-            db.child('settings').update({
-                ejs_service: document.getElementById('ad_ejs_service').value,
-                ejs_template: document.getElementById('ad_ejs_template').value,
-                ejs_key: document.getElementById('ad_ejs_key').value,
-                ejs_active: document.getElementById('ad_ejs_active').checked
-            });
-            Tst.fire({icon:'success', title:'Сохранено'});
+            if(confirm('Удалить аккаунт?')) { db.child(`u/${uid}`).remove(); Tst.fire({icon:'success', title:'Стерт'}); }
         }
 
         function shareProf() {
-            const link = window.location.href + "?u=" + me.id;
-            navigator.clipboard.writeText(link);
-            Tst.fire({icon:'success', title:'Ссылка скопирована!'});
+            navigator.clipboard.writeText(window.location.href + "?u=" + me.id);
+            Tst.fire({icon:'success', title:'Ссылка в буфере'});
         }
 
-        function showRules() {
-            Swal.fire({
-                title: 'Наша политика',
-                text: '1. Запрещен скам. 2. Фейк товары караются удалением аккаунта. 3. Вывод средств до 24 часов.',
-                background: '#1c1c1e', color: '#fff'
-            });
-        }
-
-        function topUp() {
-            Swal.fire({title:'Сумма пополнения', input:'number', background:'#1c1c1e', color:'#fff'}).then(res => {
-                if(res.value > 0) {
-                    const rid = 'req'+Date.now();
-                    db.child(`money_req/${rid}`).set({id:rid, uid:me.id, n:me.n, amt:Number(res.value), type:'deposit', status:'pending'});
-                    Tst.fire({icon:'info', title:'Заявка создана'});
-                }
-            });
-        }
-
-        function askOut() {
-            Swal.fire({title:'Сумма вывода', input:'number', background:'#1c1c1e', color:'#fff'}).then(res => {
-                if(res.value > 0 && res.value <= me.bal) {
-                    const rid = 'req'+Date.now();
-                    db.child(`money_req/${rid}`).set({id:rid, uid:me.id, n:me.n, amt:Number(res.value), type:'withdraw', status:'pending'});
-                    Tst.fire({icon:'info', title:'Заявка на вывод создана'});
-                }
-            });
-        }
-
-        function handleAuth() { 
-            const n = document.getElementById('a_n').value, p = document.getElementById('a_p').value; 
-            if(isR) { 
-                if(!document.getElementById('reg_rules').checked) return Tst.fire({icon:'warning', title:'Примите правила'});
-                const id = 'u'+Date.now(); 
-                db.child(`u/${id}`).set({ id, n, p, ava:tmpImg||'https://ui-avatars.com/api/?name='+n, bal:0 }); 
-                localStorage.setItem('lyne_v120_sid', id); location.reload();
-            } else { 
-                const u = Object.values(data.u).find(x => x.n === n && x.p === p); 
-                if(u) { localStorage.setItem('lyne_v120_sid', u.id); location.reload(); } else { Tst.fire({icon:'error', title:'Ошибка'}); } 
-            } 
-        }
-
-        function toggleR() { 
-            isR = !isR; 
-            document.getElementById('reg_ext').classList.toggle('hidden'); 
-            document.getElementById('a_btn').innerText = isR ? 'Зарегистрироваться' : 'Войти';
-            document.getElementById('a_tog').innerText = isR ? 'Вход' : 'Создать аккаунт';
-        }
-
+        function logout() { localStorage.clear(); location.reload(); }
         function switchT(t) { 
             document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active')); 
             document.getElementById('tab_'+t).classList.add('active'); 
@@ -370,9 +251,21 @@
             document.getElementById('n_'+t)?.classList.add('active'); 
         }
 
+        function handleAuth() { 
+            const n = document.getElementById('a_n').value, p = document.getElementById('a_p').value; 
+            if(isR) { 
+                if(!document.getElementById('reg_rules').checked) return Tst.fire({icon:'warning', title:'Правила!'});
+                const id = 'u'+Date.now(); db.child(`u/${id}`).set({ id, n, p, ava:tmpImg||'https://ui-avatars.com/api/?name='+n, bal:0 }); 
+                localStorage.setItem('lyne_v120_sid', id); location.reload();
+            } else { 
+                const u = Object.values(data.u).find(x => x.n === n && x.p === p); 
+                if(u) { localStorage.setItem('lyne_v120_sid', u.id); location.reload(); } else { Tst.fire({icon:'error', title:'Ошибка'}); } 
+            } 
+        }
+
+        function toggleR() { isR = !isR; document.getElementById('reg_ext').classList.toggle('hidden'); }
         function upImg(i, tid) { const r = new FileReader(); r.onload = e => { tmpImg = e.target.result; document.getElementById(tid).innerHTML = `<img src="${tmpImg}" class="w-full h-full object-cover rounded-full">`; }; r.readAsDataURL(i.files[0]); }
-        function logout() { localStorage.clear(); location.reload(); }
-        function admSetBal(uid) { db.child(`u/${uid}/bal`).set(Number(document.getElementById('adb_val_'+uid).value)); Tst.fire({icon:'success', title:'ОК'}); }
+        function showRules() { Swal.fire({ title: 'Политика', text: 'Будь честным!', background: '#1c1c1e', color: '#fff' }); }
 
         init();
     </script>
