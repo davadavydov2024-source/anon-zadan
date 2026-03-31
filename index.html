@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Press+Start+2P&family=Ruslan+Display&family=Kelly+Slab&family=Underdog&family=Lobster&family=Pacifico&family=Monoton&family=Jura:wght@700&family=Playfair+Display:wght@900&family=Courier+Prime&family=Zeyada&family=Dancing+Script:wght@700&family=EB+Garamond:ital@1&family=Montserrat+Alternates:wght@900&family=Caveat:wght@700&family=Unbounded:wght@900&family=Russo+One&family=Bad+Script&family=Bungee+Shade&family=Rubik+Glitch&family=Creepster&family=Nosifer&family=Rubik+Microbe&family=Silkscreen&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Press+Start+2P&family=Lobster&family=Pacifico&family=Monoton&family=Jura:wght@700&family=Caveat:wght@700&family=Unbounded:wght@900&family=Russo+One&family=Bad+Script&display=swap" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
         :root { --bg: #050505; --card: #121214; --text: #ffffff; --blue: #007aff; --gray: #1c1c1e; }
@@ -24,12 +24,28 @@
         input, textarea, select { background: var(--gray); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 16px; color: white; width: 100%; outline: none; font-size: 14px; transition: 0.3s; } input:focus, textarea:focus { border-color: var(--blue); }
         .btn-blue { background: var(--blue); color: white; border-radius: 18px; font-weight: 900; padding: 18px; width: 100%; border: none; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-style: italic; } .btn-blue:active { transform: scale(0.96); }
         #loader { background: #000; z-index: 10000; position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        @keyframes rainbow_anim { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         
-        .star-rating i { color: #4b5563; transition: color 0.2s; }
-        .star-rating i.active { color: #eab308; text-shadow: 0 0 10px rgba(234, 179, 8, 0.5); }
+        /* Анимации и эффекты */
+        @keyframes rainbowAnim { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes glowPulse { 0% { opacity: 0.8; filter: drop-shadow(0 0 5px currentColor); } 50% { opacity: 1; filter: drop-shadow(0 0 15px currentColor); } 100% { opacity: 0.8; filter: drop-shadow(0 0 5px currentColor); } }
+        
+        /* Шрифты */
+        .f-1 { font-family: 'Comfortaa', cursive; } .f-2 { font-family: 'Press Start 2P', cursive; } .f-3 { font-family: 'Lobster', cursive; } .f-4 { font-family: 'Pacifico', cursive; } .f-5 { font-family: 'Monoton', cursive; } .f-6 { font-family: 'Jura', sans-serif; } .f-7 { font-family: 'Caveat', cursive; } .f-8 { font-family: 'Unbounded', cursive; } .f-9 { font-family: 'Russo One', sans-serif; } .f-10 { font-family: 'Bad Script', cursive; }
+        
+        /* Цвета ника */
+        .color-rainbow { background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: rainbowAnim 3s linear infinite; }
+        .color-neon { color: #00f2fe; text-shadow: 0 0 10px #00f2fe, 0 0 20px #00f2fe; }
+        
+        /* Галочки */
+        .tick { margin-left: 6px; font-size: 0.8em; display: inline-block; animation: glowPulse 2s infinite; }
+        .tick-1 { color: transparent; background: linear-gradient(45deg, #ff0000, #fffb00, #00ffd5, #7a00ff); -webkit-background-clip: text; background-size: 200%; animation: rainbowAnim 2s linear infinite, glowPulse 2s infinite; }
+        .tick-2 { color: #00f2fe; filter: drop-shadow(0 0 8px #00f2fe); }
+        .tick-3 { color: #ff0844; filter: drop-shadow(0 0 8px #ff0844); }
+        .tick-4 { color: #0ba360; filter: drop-shadow(0 0 8px #0ba360); }
+        .tick-5 { color: #f59e0b; filter: drop-shadow(0 0 8px #f59e0b); }
+
+        .star-rating i { color: #4b5563; transition: color 0.2s; } .star-rating i.active { color: #eab308; text-shadow: 0 0 10px rgba(234, 179, 8, 0.5); }
     </style>
-    <style id="dynamic_styles"></style>
 </head>
 <body>
     <div id="loader"><div class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div></div>
@@ -49,10 +65,12 @@
         </div>
     </div>
 
-    <div id="ban_scr" class="hidden fixed inset-0 z-[9998] bg-red-950 flex flex-col items-center justify-center p-8 text-center">
+    <div id="ban_scr" class="hidden fixed inset-0 z-[10000] bg-red-950 flex flex-col items-center justify-center p-8 text-center">
         <i class="fa-solid fa-triangle-exclamation text-6xl text-red-500 mb-6"></i>
         <h1 class="text-3xl font-black mb-2 uppercase italic text-red-500">Доступ закрыт</h1>
-        <p class="text-xs font-black text-red-300 opacity-60 mb-8 uppercase tracking-widest" id="ban_time_text"></p>
+        <p class="text-xs font-black text-red-300 opacity-60 mb-2 uppercase tracking-widest">Ваш аккаунт заблокирован</p>
+        <b class="text-xl text-white mb-6" id="ban_time_text"></b>
+        <p class="text-[10px] text-zinc-400">Оспорить: <span id="ban_appeal_email" class="text-blue-400"></span></p>
     </div>
 
     <div id="app" class="hidden h-screen flex flex-col">
@@ -90,16 +108,20 @@
         </main>
 
         <main id="tab_chats" class="tab-content">
-            <h2 class="text-3xl font-black mb-6 italic">Мои Сделки</h2>
+            <h2 class="text-3xl font-black mb-6 italic">Сделки & Чаты</h2>
             <div id="deals_list" class="space-y-4"></div>
         </main>
 
         <main id="tab_profile" class="tab-content">
             <div class="glass p-8 mb-6 text-center border border-white/5 relative">
                 <img id="p_ava" class="w-28 h-28 mx-auto mb-6 rounded-full object-cover border-4 border-zinc-900 shadow-2xl">
-                <div class="flex items-center justify-center gap-2 mb-2"><span id="p_n" class="text-3xl font-black">...</span></div>
+                <div class="flex items-center justify-center mb-2 text-3xl font-black" id="p_n_container"></div>
                 <div class="text-sm font-black text-yellow-500 mb-8" id="p_rating"><i class="fa-solid fa-star"></i> Нет оценок</div>
-                <div class="grid grid-cols-2 gap-4"><button onclick="Tst.fire({icon:'info', title:'В разработке'})" class="bg-white text-black py-4 rounded-2xl font-black text-xs uppercase italic">Пополнить</button><button onclick="Tst.fire({icon:'info', title:'В разработке'})" class="bg-zinc-800 text-white py-4 rounded-2xl font-black text-xs uppercase italic">Вывести</button></div>
+                <div class="grid grid-cols-2 gap-4 mb-6"><button onclick="Tst.fire({icon:'info', title:'В разработке'})" class="bg-white text-black py-4 rounded-2xl font-black text-xs uppercase italic">Пополнить</button><button onclick="Tst.fire({icon:'info', title:'В разработке'})" class="bg-zinc-800 text-white py-4 rounded-2xl font-black text-xs uppercase italic">Вывести</button></div>
+                <div id="user_email_block" class="hidden bg-zinc-900 p-4 rounded-xl border border-white/5">
+                    <p class="text-[10px] uppercase font-black text-zinc-400 mb-2">Привязка Email</p>
+                    <div class="flex gap-2"><input id="u_email_input" placeholder="Ваш Email" class="!py-2 !text-xs"><button onclick="saveUserEmail()" class="bg-blue-600 px-3 rounded-xl text-xs font-black">Сохранить</button></div>
+                </div>
             </div>
 
             <button id="adm_btn" onclick="switchT('admin')" class="hidden w-full bg-red-600/10 text-red-500 py-5 rounded-3xl font-black mb-4 border border-red-600/20 uppercase text-xs tracking-[3px] italic"><i class="fa-solid fa-crown mr-2"></i>TITAN PANEL</button>
@@ -109,12 +131,23 @@
         <main id="tab_admin" class="tab-content">
             <h1 class="text-4xl font-black italic mb-8 tracking-tighter">TITAN <span class="text-red-500">SYSTEM</span></h1>
             
-            <section class="glass p-6 mb-8 border-green-600/20">
+            <section class="glass p-6 mb-6 border-blue-600/20">
+                <h3 class="text-[11px] font-black text-blue-500 uppercase mb-4">EmailJS & Настройки</h3>
+                <div class="space-y-3">
+                    <input id="ad_em_service" placeholder="Service ID" class="!py-2 !text-xs">
+                    <input id="ad_em_template" placeholder="Template ID" class="!py-2 !text-xs">
+                    <input id="ad_em_key" placeholder="Public Key" class="!py-2 !text-xs">
+                    <input id="ad_em_admin" placeholder="Почта админа (для копий)" class="!py-2 !text-xs">
+                    <label class="flex items-center gap-3"><input type="checkbox" id="ad_em_toggle" class="!w-5 !h-5"><span class="text-xs font-bold text-zinc-300">Разрешить юзерам привязку Email</span></label>
+                    <button onclick="saveAdminEmailJS()" class="w-full bg-blue-600 py-3 rounded-xl text-[10px] font-black uppercase">Сохранить настройки Email</button>
+                </div>
+            </section>
+
+            <section class="glass p-6 mb-6 border-green-600/20">
                 <div class="flex justify-between items-center mb-5">
-                    <h3 class="text-[11px] font-black text-green-500 uppercase">Игры и Подкатегории</h3>
+                    <h3 class="text-[11px] font-black text-green-500 uppercase">Игры и Категории</h3>
                     <button onclick="admDeleteAllGames()" class="bg-red-600/20 text-red-500 px-3 py-1 rounded-lg text-[9px] font-black uppercase">Удалить все</button>
                 </div>
-                
                 <div class="space-y-4">
                     <div class="flex gap-2">
                         <input id="ad_g_name" placeholder="Имя игры" class="!py-3 !text-xs flex-1">
@@ -128,8 +161,8 @@
             </section>
 
             <section class="mb-8">
-                <h3 class="text-[11px] font-black text-red-500 uppercase mb-5 ml-2">Пользователи</h3>
-                <div id="ad_users" class="space-y-4"></div>
+                <h3 class="text-[11px] font-black text-red-500 uppercase mb-5 ml-2">Управление Пользователями</h3>
+                <div id="ad_users" class="space-y-3"></div>
             </section>
         </main>
 
@@ -154,7 +187,7 @@
                 <img id="im_seller_ava" class="w-12 h-12 rounded-full object-cover">
                 <div>
                     <p class="text-xs text-zinc-500 uppercase font-black">Продавец</p>
-                    <b id="im_seller_name" class="text-sm"></b>
+                    <div id="im_seller_name_container" class="text-sm font-bold"></div>
                     <div id="im_seller_rating" class="text-xs text-yellow-500 font-black mt-1"><i class="fa-solid fa-star"></i> ...</div>
                 </div>
             </div>
@@ -165,10 +198,18 @@
     </div>
 
     <div id="chat_modal" class="hidden fixed inset-0 z-[10005] bg-black flex flex-col">
-        <header class="p-5 flex justify-between items-center bg-zinc-900 border-b border-white/10 relative">
+        <header class="p-4 flex justify-between items-center bg-zinc-900 border-b border-white/10 relative">
             <button onclick="closeChat()" class="text-blue-500 text-xs font-black uppercase z-10"><i class="fa-solid fa-chevron-left mr-2"></i>Назад</button>
-            <b id="chat_title" class="text-[10px] uppercase font-black absolute w-full text-center left-0 pointer-events-none">Чат</b>
+            <div class="text-center absolute w-full left-0 pointer-events-none">
+                <b id="chat_title" class="text-[10px] uppercase font-black block">Чат</b>
+                <span id="chat_status" class="text-[8px] uppercase font-black"></span>
+            </div>
         </header>
+        <div id="chat_adm_panel" class="hidden p-3 bg-red-950/50 border-b border-red-500/20 flex gap-2 justify-center">
+            <button onclick="admConfirmDeal()" class="bg-green-600 px-4 py-2 rounded text-[10px] font-black uppercase">Подтвердить</button>
+            <button onclick="admRejectDeal()" class="bg-red-600 px-4 py-2 rounded text-[10px] font-black uppercase">Отклонить</button>
+        </div>
+
         <div id="chat_msgs" class="flex-1 overflow-y-auto p-4 space-y-3 pb-24"></div>
         <div class="p-4 bg-zinc-900 border-t border-white/10 fixed bottom-0 left-0 right-0 flex gap-2 pb-[env(safe-area-inset-bottom)]">
             <input id="chat_input" placeholder="Сообщение..." class="!py-3">
@@ -177,43 +218,61 @@
     </div>
 
     <script>
-        // Шрифты и стили из V122
-        const fList = ["Inter", "Comfortaa", "Press Start 2P", "Ruslan Display", "Kelly Slab", "Underdog", "Lobster", "Pacifico", "Monoton", "Jura", "Playfair Display", "Courier Prime", "Zeyada", "Dancing Script", "EB Garamond", "Montserrat Alternates", "Caveat", "Unbounded", "Russo One", "Bad Script", "Bungee Shade", "Rubik Glitch", "Creepster", "Nosifer", "Rubik Microbe", "Silkscreen"];
-        const cColors = ["#ef4444", "#f97316", "#f59e0b", "#eab308", "#84cc16", "#22c55e", "#10b981", "#14b8a6", "#06b6d4", "#0ea5e9", "#3b82f6", "#6366f1", "#8b5cf6", "#a855f7", "#d946ef", "#ec4899", "#f43f5e", "#ffffff", "#94a3b8", "linear-gradient(45deg,#ff0000,#ff7300,#fffb00,#48ff00,#00ffd5,#002bff,#7a00ff,#ff00c8,#ff0000)", "linear-gradient(90deg,#00f2fe,#4facfe)", "linear-gradient(90deg,#ff0844,#ffb199)", "linear-gradient(90deg,#f83600,#f9d423)", "linear-gradient(90deg,#0ba360,#3cba92)", "linear-gradient(to right, #b8c6db 0%, #f5f7fa 100%)"];
-        
-        let styleStr = fList.map((f,i)=>`.f-${i}{font-family:'${f}'}`).join(' ');
-        styleStr += cColors.map((c,i)=> c.includes('gradient') ? `.c-${i}{background:${c};-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation: rainbow_anim 3s linear infinite;background-size:200%;} .b-${i}{background:${c};-webkit-background-clip:text;-webkit-text-fill-color:transparent;}` : `.c-${i}{color:${c};text-shadow: 0 0 10px ${c}80;} .b-${i}{color:${c};text-shadow: 0 0 10px ${c}80;}`).join(' ');
-        document.getElementById('dynamic_styles').innerHTML = styleStr;
-
-        // Инициализация Firebase
         firebase.initializeApp({ apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI", databaseURL: "https://dogx-base-default-rtdb.firebaseio.com" });
         const db = firebase.database().ref('lyne_v122_titan');
         const Tst = Swal.mixin({ toast: true, position: 'top', timer: 2000, showConfirmButton: false, background: '#1c1c1e', color: '#fff' });
 
-        let me = null, data = {}, isR = false, tmpImg = "", curG = null, curSub = null, curChat = null;
+        let me = null, data = {}, isR = false, tmpImg = "", curG = null, curSub = null, curChatId = null;
         let globalRating = 5;
 
         function init() {
             db.on('value', snap => {
-                data = snap.val() || { u:{}, i:{}, d:{}, games:{}, chats:{} };
+                data = snap.val() || { u:{}, i:{}, d:{}, games:{}, chats:{}, settings:{} };
                 document.getElementById('loader').style.display = 'none';
 
                 const sid = localStorage.getItem('lyne_v122_sid');
                 if (sid && data.u && data.u[sid]) { 
                     me = data.u[sid];
+                    
+                    // Проверка бана
+                    if (me.ban && me.ban.until > Date.now()) {
+                        document.getElementById('ban_scr').classList.remove('hidden');
+                        document.getElementById('app').classList.add('hidden');
+                        document.getElementById('auth_scr').classList.add('hidden');
+                        let left = Math.ceil((me.ban.until - Date.now()) / 60000);
+                        document.getElementById('ban_time_text').innerText = left + ' МИНУТ';
+                        document.getElementById('ban_appeal_email').innerText = me.ban.email || 'Не указана';
+                        return;
+                    }
+
                     document.getElementById('auth_scr').classList.add('hidden');
+                    document.getElementById('ban_scr').classList.add('hidden');
                     document.getElementById('app').classList.remove('hidden'); 
+                    
                     if(me.n?.toLowerCase() === 'owwner') document.getElementById('adm_btn').classList.remove('hidden'); 
                     render(); 
-                    if(curChat) renderChat();
+                    if(curChatId) renderChatMsgs();
                 } else { 
                     document.getElementById('auth_scr').classList.remove('hidden'); 
                     document.getElementById('app').classList.add('hidden'); 
+                    document.getElementById('ban_scr').classList.add('hidden');
                 }
             }, err => {
                 document.getElementById('loader').style.display = 'none';
                 Tst.fire({icon:'error', title:'Ошибка БД'});
             });
+        }
+
+        // --- ГЕНЕРАЦИЯ ИМЕНИ (ШРИФТ, ЦВЕТ, ГАЛОЧКА) ---
+        function generateNameHTML(user) {
+            let n = user.n || 'User';
+            let cClass = user.p_color || ''; // color-rainbow, color-neon
+            let fClass = user.p_font ? `f-${user.p_font}` : ''; // f-1 to f-10
+            let tClass = user.p_tick ? `tick-${user.p_tick}` : ''; // tick-1 to tick-5
+            
+            let html = `<span class="${cClass} ${fClass}">${n}</span>`;
+            if (user.p_tick) html += `<i class="fa-solid fa-circle-check tick ${tClass}"></i>`;
+            return html;
         }
 
         function getAvgRating(uid) {
@@ -230,12 +289,16 @@
             document.getElementById('h_ava').src = me.ava || '';
             document.getElementById('p_ava').src = me.ava || '';
             
-            const pN = document.getElementById('p_n');
-            pN.innerText = me.n || 'User';
-            pN.className = `text-3xl font-black ${me.nickEffect || ''} ${me.fontClass || ''}`;
+            document.getElementById('p_n_container').innerHTML = generateNameHTML(me);
             
             const myRating = getAvgRating(me.id);
             document.getElementById('p_rating').innerHTML = `<i class="fa-solid fa-star"></i> ${myRating > 0 ? myRating : 'Нет оценок'}`;
+
+            // EmailJS юзера
+            if(data.settings?.emailjs?.enabled) {
+                document.getElementById('user_email_block').classList.remove('hidden');
+                document.getElementById('u_email_input').value = me.email || '';
+            } else { document.getElementById('user_email_block').classList.add('hidden'); }
 
             // Маркет
             if(!curG && !curSub) {
@@ -256,14 +319,21 @@
             }
             
             // Сделки
-            const deals = Object.values(data.d || {}).filter(d => d.bid === me.id || d.sid === me.id).reverse();
-            document.getElementById('deals_list').innerHTML = deals.length ? deals.map(d => `
-                <div class="glass p-5 flex justify-between items-center border-l-4 ${d.status === 'Закрыто'?'border-l-green-500':'border-l-blue-500'}">
-                    <div><b class="text-sm italic block">${d.t}</b><span class="text-[9px] uppercase opacity-40">${d.p} ₽</span></div>
-                    <button onclick="openChat('${d.id}')" class="bg-blue-600/20 text-blue-500 px-3 py-1 rounded-lg text-[9px] font-black">ЧАТ</button>
-                </div>`).join('') : '<p class="text-center text-xs opacity-50 font-black uppercase">Нет сделок</p>';
+            const isAdm = me.n?.toLowerCase() === 'owwner';
+            const deals = Object.values(data.d || {}).filter(d => d.bid === me.id || d.sid === me.id || isAdm).reverse();
             
-            if(me.n?.toLowerCase() === 'owwner') renderAdmin();
+            document.getElementById('deals_list').innerHTML = deals.length ? deals.map(d => {
+                let stColor = d.status === 'Завершено' ? 'text-green-500' : (d.status === 'Отменено' ? 'text-red-500' : 'text-yellow-500');
+                return `
+                <div class="glass p-4 flex justify-between items-center border-l-4 border-zinc-800">
+                    <div>
+                        <b class="text-sm italic block">${d.t}</b>
+                        <span class="text-[9px] uppercase opacity-60">${d.p} ₽ | <span class="${stColor}">${d.status}</span></span>
+                    </div>
+                    <button onclick="openChat('${d.id}')" class="bg-blue-600/20 text-blue-500 px-3 py-2 rounded-lg text-[9px] font-black">ЧАТ</button>
+                </div>`}).join('') : '<p class="text-center text-xs opacity-50 font-black uppercase">Нет сделок</p>';
+            
+            if(isAdm) renderAdmin();
         }
 
         // --- ЛОГИКА МАРКЕТА И КАТЕГОРИЙ ---
@@ -282,11 +352,8 @@
             `).join('') : '<p class="text-center text-xs opacity-50">Нет подкатегорий</p>';
         }
 
-        function closeSubcat() { 
-            document.getElementById('subcat_view').classList.add('hidden'); 
-            document.getElementById('market_main').classList.remove('hidden'); 
-            curG = null; 
-        }
+        function closeSubcat() { curG = null; document.getElementById('subcat_view').classList.add('hidden'); document.getElementById('market_main').classList.remove('hidden'); }
+        function closeItems() { curSub = null; document.getElementById('items_view').classList.add('hidden'); document.getElementById('subcat_view').classList.remove('hidden'); }
 
         function openSub(gid, sid) {
             curSub = sid;
@@ -296,7 +363,7 @@
             const items = Object.values(data.i || {}).filter(item => item.gid === gid && item.sid === sid && item.status === 'active');
             document.getElementById('items_list').innerHTML = items.length ? items.map(item => `
                 <div class="glass flex gap-4 p-4 active:scale-95 cursor-pointer" onclick="openItemModal('${item.id}')">
-                    <img src="${item.img || 'https://via.placeholder.com/150'}" class="w-20 h-20 rounded-2xl object-cover">
+                    <img src="${item.img}" class="w-20 h-20 rounded-2xl object-cover">
                     <div class="flex-1 flex flex-col justify-center">
                         <b class="text-sm font-black leading-tight mb-1">${item.t}</b>
                         <span class="text-blue-500 font-black italic">${item.p} ₽</span>
@@ -305,66 +372,48 @@
             `).join('') : '<p class="text-center text-xs opacity-50">Пусто</p>';
         }
 
-        function closeItems() {
-            document.getElementById('items_view').classList.add('hidden');
-            document.getElementById('subcat_view').classList.remove('hidden');
-            curSub = null;
-        }
-
         // --- ЛОГИКА ПРОДАЖИ ---
         function updateSubcatsSell() {
             const gid = document.getElementById('s_game').value;
             const subSelect = document.getElementById('s_subcat');
             if(gid && data.games && data.games[gid] && data.games[gid].sub) {
                 subSelect.innerHTML = '<option value="">Подкатегория</option>' + Object.values(data.games[gid].sub).map(s => `<option value="${s.id}">${s.n}</option>`).join('');
-            } else {
-                subSelect.innerHTML = '<option value="">Сначала выберите игру</option>';
-            }
+            } else { subSelect.innerHTML = '<option value="">Сначала выберите игру</option>'; }
             calcCom();
         }
 
         function calcCom() {
             const p = parseInt(document.getElementById('s_p').value) || 0;
-            const perc = data.settings?.com || 5; // Комиссия 5% по умолчанию
-            const com = Math.floor(p * (perc / 100));
-            document.getElementById('s_com_perc').innerText = perc;
+            const com = Math.floor(p * 0.05);
+            document.getElementById('s_com_perc').innerText = 5;
             document.getElementById('s_com_val').innerText = com + ' ₽';
             document.getElementById('s_total').innerText = (p - com) + ' ₽';
         }
 
         function postItem() {
-            const gid = document.getElementById('s_game').value;
-            const sid = document.getElementById('s_subcat').value;
-            const t = document.getElementById('s_t').value;
-            const acc = document.getElementById('s_acc').value;
-            const p = parseInt(document.getElementById('s_p').value);
-
+            const gid = document.getElementById('s_game').value, sid = document.getElementById('s_subcat').value, t = document.getElementById('s_t').value, acc = document.getElementById('s_acc').value, p = parseInt(document.getElementById('s_p').value);
             if(!gid || !sid || !t || !p || !tmpImg) return Tst.fire({icon:'error', title:'Заполните все поля и фото'});
 
             const id = 'i' + Date.now();
             db.child(`i/${id}`).set({ id, gid, sid, t, acc, p, img: tmpImg, sellerId: me.id, status: 'active', time: Date.now() });
-            
             Tst.fire({icon:'success', title:'Лот опубликован'});
             switchT('market');
-            document.getElementById('s_t').value = ''; document.getElementById('s_p').value = ''; document.getElementById('s_acc').value = '';
+            document.getElementById('s_t').value = ''; document.getElementById('s_p').value = ''; document.getElementById('s_acc').value = ''; tmpImg = "";
             document.getElementById('l_s_img').innerHTML = '<i class="fa-solid fa-image text-3xl text-zinc-700"></i><span class="text-[10px] font-black uppercase text-zinc-600">Загрузить фото товара</span>';
-            tmpImg = "";
         }
 
-        // --- МОДАЛКА ТОВАРА, ПОКУПКА И РЕЙТИНГ ---
+        // --- ПОКУПКА (ESCROW) ---
         function openItemModal(itemId) {
-            const item = data.i[itemId];
-            if(!item) return;
+            const item = data.i[itemId]; if(!item) return;
             const seller = data.u[item.sellerId] || { n: 'Unknown', ava: 'https://via.placeholder.com/150' };
-            const sRating = getAvgRating(item.sellerId);
-
+            
             document.getElementById('im_img').src = item.img;
             document.getElementById('im_title').innerText = item.t;
             document.getElementById('im_price').innerText = item.p + ' ₽';
             document.getElementById('im_desc').innerText = item.acc;
-            document.getElementById('im_seller_name').innerText = seller.n;
+            document.getElementById('im_seller_name_container').innerHTML = generateNameHTML(seller);
             document.getElementById('im_seller_ava').src = seller.ava;
-            document.getElementById('im_seller_rating').innerHTML = `<i class="fa-solid fa-star"></i> ${sRating > 0 ? sRating : 'Нет оценок'}`;
+            document.getElementById('im_seller_rating').innerHTML = `<i class="fa-solid fa-star"></i> ${getAvgRating(item.sellerId) || 'Нет оценок'}`;
 
             document.getElementById('im_buy_btn').onclick = () => buyItem(itemId);
             document.getElementById('item_modal').classList.remove('hidden');
@@ -375,179 +424,208 @@
             if(me.id === item.sellerId) return Tst.fire({icon:'error', title:'Свой лот нельзя купить'});
             if(me.bal < item.p) return Tst.fire({icon:'error', title:'Недостаточно средств'});
 
-            Swal.fire({
-                title: 'Подтверждение',
-                text: `Списать ${item.p} ₽ за лот?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#007aff',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Купить',
-                background: '#1c1c1e', color: '#fff'
-            }).then((result) => {
-                if(result.isConfirmed) {
-                    // Списание и перевод (упрощенно без комиссии в этой функции для скорости)
+            Swal.fire({ title: 'Подтверждение', text: `Купить за ${item.p} ₽?`, icon: 'warning', showCancelButton: true, confirmButtonColor: '#007aff', confirmButtonText: 'Купить', background: '#1c1c1e', color: '#fff'
+            }).then((res) => {
+                if(res.isConfirmed) {
+                    // Списываем только у покупателя (Escrow)
                     db.child(`u/${me.id}/bal`).set(me.bal - item.p);
-                    const sellerBal = data.u[item.sellerId].bal || 0;
-                    db.child(`u/${item.sellerId}/bal`).set(sellerBal + item.p);
-                    
-                    // Меняем статус лота
                     db.child(`i/${itemId}/status`).set('sold');
                     
-                    // Создаем сделку/чат
                     const dealId = 'd' + Date.now();
-                    db.child(`d/${dealId}`).set({ id: dealId, t: item.t, p: item.p, sid: item.sellerId, bid: me.id, status: 'Закрыто', time: Date.now() });
+                    db.child(`d/${dealId}`).set({ id: dealId, t: item.t, p: item.p, sid: item.sellerId, bid: me.id, status: 'Ожидает', time: Date.now() });
                     
                     document.getElementById('item_modal').classList.add('hidden');
-                    
-                    // Вызов окна рейтинга
-                    showRatingModal(item.sellerId, sellerBal);
+                    switchT('chats'); Tst.fire({icon:'success', title:'Сделка начата!'});
                 }
             });
         }
 
+        // --- ЧАТЫ И АДМИН МОДЕРАЦИЯ ---
+        function openChat(did) {
+            curChatId = did;
+            document.getElementById('chat_modal').classList.remove('hidden');
+            renderChatMsgs();
+        }
+        function closeChat() { curChatId = null; document.getElementById('chat_modal').classList.add('hidden'); }
+
+        function renderChatMsgs() {
+            if(!curChatId) return;
+            const deal = data.d[curChatId]; if(!deal) return;
+            
+            document.getElementById('chat_title').innerText = deal.t;
+            document.getElementById('chat_status').innerText = 'Статус: ' + deal.status;
+            
+            const isAdm = me.n?.toLowerCase() === 'owwner';
+            const admPanel = document.getElementById('chat_adm_panel');
+            if(isAdm && deal.status === 'Ожидает') admPanel.classList.remove('hidden');
+            else admPanel.classList.add('hidden');
+
+            const msgs = Object.values(data.chats[curChatId] || {});
+            const box = document.getElementById('chat_msgs');
+            box.innerHTML = msgs.map(m => {
+                let isMe = m.uid === me.id;
+                let isSys = m.uid === 'sys';
+                if(isSys) return `<div class="text-center text-[10px] text-zinc-500 my-2">${m.text}</div>`;
+                return `<div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
+                    <div class="max-w-[70%] rounded-2xl px-4 py-2 text-sm ${isMe ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-zinc-800 text-white rounded-tl-none'}">
+                        <b class="text-[9px] block opacity-50 mb-1">${m.un}</b>${m.text}
+                    </div></div>`;
+            }).join('');
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function sendMsg() {
+            const inp = document.getElementById('chat_input');
+            const txt = inp.value.trim();
+            if(!txt || !curChatId) return;
+            
+            const isAdm = me.n?.toLowerCase() === 'owwner';
+            db.child(`chats/${curChatId}`).push({ uid: me.id, un: isAdm ? 'ADMIN' : me.n, text: txt, time: Date.now() });
+            inp.value = '';
+        }
+
+        function admConfirmDeal() {
+            const deal = data.d[curChatId];
+            const sellerBal = data.u[deal.sid].bal || 0;
+            // Перевод продавцу (минус комиссия если нужно, тут полная сумма для примера)
+            db.child(`u/${deal.sid}/bal`).set(sellerBal + deal.p);
+            db.child(`d/${curChatId}/status`).set('Завершено');
+            db.child(`chats/${curChatId}`).push({ uid: 'sys', text: 'Администратор подтвердил сделку. Деньги переведены продавцу.', time: Date.now() });
+            showRatingModal(deal.sid); // Предлагаем оценить (админу или покупателю - зависит от логики, тут вызовет у того кто нажал, то есть админа, это ок для теста)
+        }
+
+        function admRejectDeal() {
+            const deal = data.d[curChatId];
+            const buyerBal = data.u[deal.bid].bal || 0;
+            db.child(`u/${deal.bid}/bal`).set(buyerBal + deal.p); // Возврат
+            db.child(`d/${curChatId}/status`).set('Отменено');
+            db.child(`chats/${curChatId}`).push({ uid: 'sys', text: 'Администратор отклонил сделку. Деньги возвращены покупателю.', time: Date.now() });
+        }
+
+        // --- РЕЙТИНГ ---
         function setStarUI(val) {
             globalRating = val;
             const stars = document.querySelectorAll('#star-rating-container i');
-            stars.forEach((star, index) => {
-                if(index < val) { star.classList.add('active'); star.classList.replace('fa-regular', 'fa-solid'); }
-                else { star.classList.remove('active'); star.classList.replace('fa-solid', 'fa-regular'); }
-            });
+            stars.forEach((s, i) => { if(i < val) { s.classList.add('active'); s.classList.replace('fa-regular', 'fa-solid'); } else { s.classList.remove('active'); s.classList.replace('fa-solid', 'fa-regular'); } });
         }
-
         function showRatingModal(sellerId) {
-            globalRating = 5; // default
-            Swal.fire({
-                title: 'Покупка успешна!',
-                html: `
-                    <p class="text-xs text-zinc-400 mb-4">Оцените продавца от 1 до 5 звезд:</p>
-                    <div id="star-rating-container" class="star-rating flex justify-center gap-3 text-4xl cursor-pointer">
-                        <i class="fa-solid fa-star active" onclick="setStarUI(1)"></i>
-                        <i class="fa-solid fa-star active" onclick="setStarUI(2)"></i>
-                        <i class="fa-solid fa-star active" onclick="setStarUI(3)"></i>
-                        <i class="fa-solid fa-star active" onclick="setStarUI(4)"></i>
-                        <i class="fa-solid fa-star active" onclick="setStarUI(5)"></i>
-                    </div>
-                `,
-                confirmButtonText: 'Оценить',
-                confirmButtonColor: '#007aff',
-                background: '#1c1c1e', color: '#fff',
-                allowOutsideClick: false
-            }).then(() => {
-                db.child(`u/${sellerId}/ratings`).push(globalRating);
-                Tst.fire({icon: 'success', title: 'Оценка сохранена!'});
-                switchT('chats');
-            });
+            globalRating = 5;
+            Swal.fire({ title: 'Оцените продавца', html: `<div id="star-rating-container" class="star-rating flex justify-center gap-3 text-4xl cursor-pointer"><i class="fa-solid fa-star active" onclick="setStarUI(1)"></i><i class="fa-solid fa-star active" onclick="setStarUI(2)"></i><i class="fa-solid fa-star active" onclick="setStarUI(3)"></i><i class="fa-solid fa-star active" onclick="setStarUI(4)"></i><i class="fa-solid fa-star active" onclick="setStarUI(5)"></i></div>`, confirmButtonText: 'Оценить', background: '#1c1c1e', color: '#fff', allowOutsideClick: false })
+            .then(() => { db.child(`u/${sellerId}/ratings`).push(globalRating); Tst.fire({icon: 'success', title: 'Сохранено!'}); });
         }
 
-        // --- АДМИН ПАНЕЛЬ (ИГРЫ И ПОДКАТЕГОРИИ) ---
+        // --- АДМИН ПАНЕЛЬ (ПОЛНАЯ) ---
         function renderAdmin() {
+            // EmailJS Настройки
+            const s = data.settings?.emailjs || {};
+            document.getElementById('ad_em_service').value = s.service || '';
+            document.getElementById('ad_em_template').value = s.template || '';
+            document.getElementById('ad_em_key').value = s.key || '';
+            document.getElementById('ad_em_admin').value = s.adminEmail || '';
+            document.getElementById('ad_em_toggle').checked = s.enabled || false;
+
             // Пользователи
             const users = Object.values(data.u || {});
             document.getElementById('ad_users').innerHTML = users.map(u => `
-                <div class="glass p-4 flex justify-between items-center mb-2">
-                    <div class="flex items-center gap-3"><img src="${u.ava}" class="w-8 h-8 rounded-full"><b class="text-xs">${u.n}</b></div>
-                    <div class="flex gap-2">
-                        <button onclick="db.child('u/${u.id}/bal').set(${u.bal + 100})" class="bg-green-600/20 text-green-500 p-2 rounded text-[10px] font-black">+100</button>
+                <div class="glass p-4 mb-2 border border-white/5">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center gap-3"><img src="${u.ava}" class="w-8 h-8 rounded-full"><div><div class="text-sm font-bold">${generateNameHTML(u)}</div><span class="text-[9px] text-zinc-500">UID: ${u.id.substring(0,6)}... | Баланс: ${u.bal} ₽</span></div></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mt-3">
+                        <button onclick="admSetBal('${u.id}', ${u.bal})" class="bg-blue-600/20 text-blue-500 py-2 rounded text-[9px] font-black uppercase">Баланс</button>
+                        <button onclick="admPerks('${u.id}')" class="bg-purple-600/20 text-purple-400 py-2 rounded text-[9px] font-black uppercase">Перки (Цвет/Шрифт)</button>
+                        ${(u.ban && u.ban.until > Date.now()) 
+                            ? `<button onclick="admUnban('${u.id}')" class="bg-green-600/20 text-green-500 py-2 rounded text-[9px] font-black uppercase col-span-2">РАЗБАНИТЬ</button>` 
+                            : `<button onclick="admBan('${u.id}')" class="bg-red-600/20 text-red-500 py-2 rounded text-[9px] font-black uppercase col-span-2">БАН</button>`}
                     </div>
                 </div>`).join('');
 
-            // Игры и их подкатегории
+            // Игры (код старый)
             document.getElementById('ad_games_list').innerHTML = Object.values(data.games || {}).map(g => `
-                <div class="glass p-4 mb-3 border border-white/5">
-                    <div class="flex justify-between items-center mb-3">
-                        <div class="flex items-center gap-2"><img src="${g.img}" class="w-6 h-6 rounded"><b class="text-sm font-black">${g.name}</b></div>
-                        <button onclick="db.child('games/${g.id}').remove()" class="text-red-500 text-[10px] uppercase font-black bg-red-600/10 px-2 py-1 rounded">Удалить игру</button>
-                    </div>
-                    <div class="bg-black/50 p-3 rounded-xl">
-                        <div class="flex gap-2 mb-2">
-                            <input id="sub_add_${g.id}" placeholder="Имя подкатегории..." class="!py-2 !text-[10px]">
-                            <button onclick="admAddSub('${g.id}')" class="bg-blue-600 px-3 rounded-xl text-[9px] font-black uppercase">Добавить</button>
-                        </div>
-                        <div class="space-y-1">
-                            ${Object.values(g.sub || {}).map(s => `
-                                <div class="flex justify-between items-center text-[10px] text-zinc-400">
-                                    <span>- ${s.n}</span>
-                                    <button onclick="db.child('games/${g.id}/sub/${s.id}').remove()" class="text-red-500"><i class="fa-solid fa-trash"></i></button>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
+                <div class="glass p-3 mb-2 border border-white/5">
+                    <div class="flex justify-between items-center mb-2"><div class="flex items-center gap-2"><img src="${g.img}" class="w-6 h-6 rounded"><b class="text-xs">${g.name}</b></div><button onclick="db.child('games/${g.id}').remove()" class="text-red-500 text-[9px] bg-red-600/10 px-2 py-1 rounded">УДАЛИТЬ</button></div>
+                    <div class="flex gap-2 mb-2"><input id="sub_add_${g.id}" placeholder="Подкатегория" class="!py-1 !text-[10px]"><button onclick="admAddSub('${g.id}')" class="bg-blue-600 px-2 rounded text-[9px]">Добавить</button></div>
+                    <div class="space-y-1">${Object.values(g.sub || {}).map(s => `<div class="flex justify-between text-[10px] text-zinc-400"><span>- ${s.n}</span><button onclick="db.child('games/${g.id}/sub/${s.id}').remove()" class="text-red-500"><i class="fa-solid fa-trash"></i></button></div>`).join('')}</div>
                 </div>`).join('');
         }
 
-        function admAddGame() {
-            const n = document.getElementById('ad_g_name').value;
-            const img = document.getElementById('ad_g_img_base64').value;
-            if(n) {
-                const id = 'g' + Date.now();
-                db.child(`games/${id}`).set({id, name: n, img: img || 'https://via.placeholder.com/150'});
-                Tst.fire({icon:'success', title:'Игра добавлена'});
-                document.getElementById('ad_g_name').value = '';
-            }
+        // Админские функции пользователей
+        function admSetBal(uid, cur) {
+            let val = prompt("Введите точный баланс (можно отрицательный):", cur);
+            if(val !== null && !isNaN(val)) { db.child(`u/${uid}/bal`).set(Number(val)); Tst.fire({icon:'success', title:'Баланс изменен'}); }
         }
 
-        function admAddSub(gid) {
-            const n = document.getElementById(`sub_add_${gid}`).value;
-            if(n) {
-                const id = 'sub' + Date.now();
-                db.child(`games/${gid}/sub/${id}`).set({id, n});
-                Tst.fire({icon:'success', title:'Подкатегория добавлена'});
-            }
+        function admBan(uid) {
+            let min = prompt("Время бана в минутах:", "1440");
+            if(!min || isNaN(min)) return;
+            let email = prompt("Почта для связи/апелляции:", "admin@lyneok.com");
+            db.child(`u/${uid}/ban`).set({ until: Date.now() + (Number(min)*60000), email: email });
+            Tst.fire({icon:'success', title:'Забанен'});
         }
+        function admUnban(uid) { db.child(`u/${uid}/ban`).remove(); Tst.fire({icon:'success', title:'Разбанен'}); }
 
-        function admDeleteAllGames() {
+        function admPerks(uid) {
             Swal.fire({
-                title: 'Точно удалить все?',
-                text: "Это удалит все игры и подкатегории безвозвратно!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Да, снести всё!',
-                background: '#1c1c1e', color: '#fff'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    db.child('games').remove();
-                    Tst.fire('Удалено!', 'Все игры очищены.', 'success');
+                title: 'Настройки профиля',
+                html: `
+                    <select id="pk_color" class="w-full bg-zinc-800 p-3 rounded mb-3 text-white">
+                        <option value="">Обычный цвет</option>
+                        <option value="color-rainbow">Радужный перелив</option>
+                        <option value="color-neon">Светящийся Неон</option>
+                    </select>
+                    <select id="pk_font" class="w-full bg-zinc-800 p-3 rounded mb-3 text-white">
+                        <option value="">Стандартный шрифт</option>
+                        <option value="1">Comfortaa</option><option value="2">Press Start 2P</option>
+                        <option value="3">Lobster</option><option value="4">Pacifico</option>
+                        <option value="5">Monoton</option><option value="6">Jura</option>
+                        <option value="7">Caveat</option><option value="8">Unbounded</option>
+                        <option value="9">Russo One</option><option value="10">Bad Script</option>
+                    </select>
+                    <select id="pk_tick" class="w-full bg-zinc-800 p-3 rounded mb-3 text-white">
+                        <option value="">Без галочки</option>
+                        <option value="1">Радужная галочка</option>
+                        <option value="2">Неон Синяя</option>
+                        <option value="3">Неон Красная</option>
+                        <option value="4">Неон Зеленая</option>
+                        <option value="5">Золотая/Оранжевая</option>
+                    </select>
+                `,
+                background: '#1c1c1e', color: '#fff', showCancelButton: true, confirmButtonText: 'Сохранить'
+            }).then((res) => {
+                if(res.isConfirmed) {
+                    db.child(`u/${uid}/p_color`).set(document.getElementById('pk_color').value);
+                    db.child(`u/${uid}/p_font`).set(document.getElementById('pk_font').value);
+                    db.child(`u/${uid}/p_tick`).set(document.getElementById('pk_tick').value);
+                    Tst.fire({icon:'success', title:'Перки выданы'});
                 }
             });
         }
 
+        function saveAdminEmailJS() {
+            db.child('settings/emailjs').set({
+                service: document.getElementById('ad_em_service').value,
+                template: document.getElementById('ad_em_template').value,
+                key: document.getElementById('ad_em_key').value,
+                adminEmail: document.getElementById('ad_em_admin').value,
+                enabled: document.getElementById('ad_em_toggle').checked
+            });
+            Tst.fire({icon:'success', title:'Email настройки сохранены'});
+        }
+
+        function saveUserEmail() {
+            const e = document.getElementById('u_email_input').value;
+            if(e.includes('@')) { db.child(`u/${me.id}/email`).set(e); Tst.fire({icon:'success', title:'Почта сохранена'}); }
+        }
+
+        // Админ: Игры
+        function admAddGame() { const n = document.getElementById('ad_g_name').value, img = document.getElementById('ad_g_img_base64').value; if(n) { const id = 'g' + Date.now(); db.child(`games/${id}`).set({id, name: n, img: img || 'https://via.placeholder.com/150'}); Tst.fire({icon:'success', title:'Игра добавлена'}); document.getElementById('ad_g_name').value = ''; } }
+        function admAddSub(gid) { const n = document.getElementById(`sub_add_${gid}`).value; if(n) { const id = 'sub' + Date.now(); db.child(`games/${gid}/sub/${id}`).set({id, n}); } }
+        function admDeleteAllGames() { Swal.fire({title:'Удалить все?', icon:'warning', showCancelButton:true, confirmButtonColor:'#d33', confirmButtonText:'Снести', background:'#1c1c1e', color:'#fff'}).then(r=>{if(r.isConfirmed) db.child('games').remove();}); }
+
         // --- УТИЛИТЫ ---
-        function upImg(i, tid, setHtml, hiddenId) {
-            const r = new FileReader();
-            r.onload = e => {
-                const res = e.target.result;
-                if(setHtml) document.getElementById(tid).innerHTML = `<img src="${res}" class="w-full h-full object-cover rounded-3xl">`;
-                if(hiddenId) document.getElementById(hiddenId).value = res;
-                tmpImg = res;
-            };
-            if(i.files[0]) r.readAsDataURL(i.files[0]);
-        }
-
-        function handleAuth() {
-            const n = document.getElementById('a_n').value, p = document.getElementById('a_p').value;
-            if(isR) {
-                const id = 'u' + Date.now();
-                db.child(`u/${id}`).set({id, n, p, bal:0, ava: tmpImg || 'https://via.placeholder.com/150'});
-                localStorage.setItem('lyne_v122_sid', id);
-                location.reload();
-            } else {
-                const u = Object.values(data.u || {}).find(x => x.n === n && x.p === p);
-                if(u) { localStorage.setItem('lyne_v122_sid', u.id); location.reload(); }
-                else { Tst.fire({icon:'error', title:'Неверный вход'}); }
-            }
-        }
-
-        function switchT(t) {
-            document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));
-            document.getElementById('tab_'+t).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
-            document.getElementById('n_'+t)?.classList.add('active');
-            if(t === 'market') { curG = null; curSub = null; document.getElementById('market_main').classList.remove('hidden'); document.getElementById('subcat_view').classList.add('hidden'); document.getElementById('items_view').classList.add('hidden'); }
-        }
-
+        function upImg(i, tid, setHtml, hiddenId) { const r = new FileReader(); r.onload = e => { const res = e.target.result; if(setHtml) document.getElementById(tid).innerHTML = `<img src="${res}" class="w-full h-full object-cover rounded-3xl">`; if(hiddenId) document.getElementById(hiddenId).value = res; tmpImg = res; }; if(i.files[0]) r.readAsDataURL(i.files[0]); }
+        function handleAuth() { const n = document.getElementById('a_n').value, p = document.getElementById('a_p').value; if(isR) { const id = 'u' + Date.now(); db.child(`u/${id}`).set({id, n, p, bal:0, ava: tmpImg || 'https://via.placeholder.com/150'}); localStorage.setItem('lyne_v122_sid', id); location.reload(); } else { const u = Object.values(data.u || {}).find(x => x.n === n && x.p === p); if(u) { localStorage.setItem('lyne_v122_sid', u.id); location.reload(); } else { Tst.fire({icon:'error', title:'Неверный вход'}); } } }
+        function switchT(t) { document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active')); document.getElementById('tab_'+t).classList.add('active'); document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active')); document.getElementById('n_'+t)?.classList.add('active'); if(t === 'market') { curG = null; curSub = null; document.getElementById('market_main').classList.remove('hidden'); document.getElementById('subcat_view').classList.add('hidden'); document.getElementById('items_view').classList.add('hidden'); } }
         function toggleR() { isR=!isR; document.getElementById('reg_ext').classList.toggle('hidden'); document.getElementById('a_btn').innerText=isR?'Создать':'Войти'; }
         function logout() { localStorage.clear(); location.reload(); }
 
