@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LYNEOK — Экосистема Цифровых Сделок</title>
+    <title>LYNEOK — Экосистема Сделок</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -16,7 +16,8 @@
             --border: rgba(255, 255, 255, 0.08);
         }
 
-        * { -webkit-tap-highlight-color: transparent; user-select: none; }
+        /* Запрет зума и выделения */
+        * { -webkit-tap-highlight-color: transparent; user-select: none; outline: none; }
         input, textarea { user-select: text; }
 
         body {
@@ -40,26 +41,20 @@
 
         .glass { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid var(--border); }
         .glass-hover:hover { background: rgba(255, 255, 255, 0.06); border-color: var(--accent); transition: 0.3s; }
-
-        .chat-box { height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .msg { padding: 10px 14px; border-radius: 15px; max-width: 80%; font-size: 0.85rem; }
-        .msg-admin { background: #3b82f6; align-self: flex-start; border-bottom-left-radius: 2px; }
-        .msg-user { background: #1e293b; align-self: flex-end; border-bottom-right-radius: 2px; }
         
         .section-fade { animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .hidden { display: none !important; }
-        .star-active { color: #fbbf24; }
+
+        /* Стили чата */
+        .chat-box { height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .msg { padding: 10px 14px; border-radius: 15px; max-width: 80%; font-size: 0.8rem; }
+        .msg-admin { background: #3b82f6; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .msg-user { background: #1e293b; align-self: flex-end; border-bottom-right-radius: 2px; }
     </style>
 </head>
 <body class="min-h-screen">
-
-<div id="maintenance-overlay" class="fixed inset-0 z-[9999] bg-[#0a0b10] hidden flex flex-col items-center justify-center p-6 text-center">
-    <img id="mt-img-display" src="https://i.postimg.cc/85zK6P1F/mainte.png" class="w-64 mb-8 rounded-2xl">
-    <h1 id="mt-title-display" class="text-4xl font-extrabold text-white mb-4 uppercase italic">Тех. перерыв</h1>
-    <p id="mt-text-display" class="text-gray-400 max-w-md">Мы скоро вернемся!</p>
-</div>
 
 <nav class="glass sticky top-0 z-[100] px-6 py-4 flex justify-between items-center">
     <div class="flex items-center gap-3 cursor-pointer" onclick="navigate('market')">
@@ -70,11 +65,10 @@
     </div>
 
     <div class="hidden lg:flex gap-6 text-[10px] font-bold uppercase tracking-widest text-gray-400">
-        <button onclick="navigate('market')" class="hover:text-blue-500 transition"><i class="fas fa-home mr-1"></i> Главная</button>
-        <button onclick="navigate('adm-goods')" class="hover:text-blue-500 transition"><i class="fas fa-plus-circle mr-1"></i> Создать товар</button>
-        <button onclick="navigate('chats')" class="hover:text-blue-500 transition"><i class="fas fa-comments mr-1"></i> Чаты</button>
-        <button onclick="navigate('profile')" class="hover:text-blue-500 transition"><i class="fas fa-user mr-1"></i> Профиль</button>
-        <button id="nav-admin-btn" onclick="navigate('admin-panel')" class="text-red-500 hidden hover:scale-110 transition">Admin Panel 😈</button>
+        <button onclick="navigate('market')" class="hover:text-blue-500 transition">Главная</button>
+        <button onclick="navigate('chats')" class="hover:text-blue-500 transition">Чаты</button>
+        <button onclick="navigate('profile')" class="hover:text-blue-500 transition">Профиль</button>
+        <button id="nav-admin-btn" onclick="navigate('admin-panel')" class="text-red-500 hidden hover:scale-110 transition uppercase">Admin UI 😈</button>
     </div>
 
     <div class="flex items-center gap-4">
@@ -91,103 +85,100 @@
 <main class="max-w-7xl mx-auto p-4 md:p-8">
 
     <section id="sec-auth" class="section-fade max-w-md mx-auto py-12">
-        <div class="glass p-8 rounded-[2rem] shadow-2xl">
-            <h2 class="text-3xl font-extrabold text-center mb-6 italic uppercase">Вход / Регистрация</h2>
+        <div class="glass p-8 rounded-[2.5rem] shadow-2xl">
+            <h2 class="text-3xl font-extrabold text-center mb-8 italic uppercase">Вход в Lyneok</h2>
             <div class="space-y-4">
                 <div class="flex justify-center mb-4">
                     <label class="relative cursor-pointer group">
                         <div class="w-24 h-24 rounded-full bg-gray-900 border-2 border-dashed border-gray-700 flex items-center justify-center overflow-hidden">
                             <img id="reg-preview" class="hidden w-full h-full object-cover">
-                            <i class="fas fa-image text-gray-600 group-hover:text-blue-500 transition"></i>
+                            <i class="fas fa-camera text-gray-600 group-hover:text-blue-500 transition"></i>
                         </div>
                         <input type="file" id="reg-file" class="hidden" onchange="handleImgPreview(this, 'reg-preview')">
                     </label>
                 </div>
                 <input type="text" id="reg-nick" placeholder="Никнейм" class="w-full bg-gray-900 border border-border p-4 rounded-2xl outline-none focus:border-blue-500">
                 <input type="password" id="reg-pass" placeholder="Пароль" class="w-full bg-gray-900 border border-border p-4 rounded-2xl outline-none focus:border-blue-500">
-                <button onclick="authAction()" class="w-full bg-blue-600 py-4 rounded-2xl font-black text-white shadow-xl hover:bg-blue-700 transition">ВОЙТИ В СИСТЕМУ</button>
+                <button onclick="authAction()" class="w-full bg-blue-600 py-4 rounded-2xl font-black text-white shadow-xl hover:scale-[1.02] transition-all">ВОЙТИ / СОЗДАТЬ</button>
             </div>
         </div>
     </section>
 
     <section id="sec-market" class="section-fade hidden">
-        <h1 class="text-4xl font-black tracking-tighter uppercase italic mb-8">Каталог игр</h1>
+        <h1 class="text-5xl font-black tracking-tighter uppercase italic mb-8">Витрина</h1>
         <div id="market-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
-    </section>
-
-    <section id="sec-reviews" class="section-fade hidden">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-3xl font-black uppercase italic">Отзывы</h2>
-            <button onclick="openModal('modal-review')" class="bg-blue-600 px-6 py-2 rounded-xl text-[10px] font-black uppercase">Оставить отзыв</button>
-        </div>
-        <div id="reviews-list" class="grid md:grid-cols-2 gap-4"></div>
     </section>
 
     <section id="sec-profile" class="section-fade hidden">
         <div class="grid lg:grid-cols-3 gap-8">
-            <div class="glass p-8 rounded-[2rem] text-center">
+            <div class="glass p-8 rounded-[2.5rem] text-center">
                 <img id="prof-img" src="" class="w-32 h-32 rounded-full mx-auto border-4 border-blue-600 mb-4 object-cover">
-                <h3 id="prof-nick" class="text-2xl font-black mb-4">NICKNAME</h3>
+                <h3 id="prof-nick" class="text-2xl font-black mb-6 uppercase">User</h3>
                 
-                <div class="bg-gray-900 p-4 rounded-2xl mb-6">
-                    <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">Ваш кошелек</p>
+                <div class="bg-gray-900 p-5 rounded-2xl mb-6">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">Баланс</p>
                     <p id="prof-balance" class="text-3xl font-black text-green-400">0.00₽</p>
                 </div>
 
                 <div class="space-y-2 mb-6">
-                    <input type="text" id="promo-input" placeholder="Введите промокод..." class="w-full bg-black/40 border border-border p-3 rounded-xl text-xs outline-none">
-                    <button onclick="applyPromo()" class="w-full bg-yellow-600 py-3 rounded-xl font-bold text-xs uppercase italic">Активировать промо</button>
+                    <input type="text" id="promo-input" placeholder="Введите промокод..." class="w-full bg-black/40 border border-border p-3 rounded-xl text-xs outline-none focus:border-yellow-500">
+                    <button onclick="applyPromo()" class="w-full bg-yellow-600 py-3 rounded-xl font-bold text-[10px] uppercase italic">Активировать</button>
                 </div>
 
-                <button onclick="navigate('reviews')" class="w-full bg-gray-800 py-3 rounded-xl font-bold mb-2 text-xs uppercase">Мои отзывы</button>
-                <button onclick="requestDeposit()" class="w-full bg-blue-600 py-3 rounded-xl font-bold text-xs uppercase">Пополнить</button>
+                <button onclick="requestDeposit()" class="w-full bg-blue-600 py-4 rounded-xl font-black uppercase text-xs">Пополнить баланс</button>
             </div>
             
-            <div class="lg:col-span-2 glass p-8 rounded-[2rem]">
-                <h4 class="text-xl font-black mb-6 uppercase italic">История операций</h4>
-                <div id="user-deals-list" class="space-y-4 text-gray-500 italic text-sm">Здесь пока пусто...</div>
+            <div class="lg:col-span-2 glass p-8 rounded-[2.5rem]">
+                <h4 class="text-xl font-black mb-6 uppercase italic">История сделок</h4>
+                <div id="user-deals" class="text-gray-600 italic text-sm">Сделок пока нет...</div>
             </div>
         </div>
     </section>
 
     <section id="sec-admin" class="section-fade hidden">
         <div class="flex items-center gap-4 mb-8">
-            <div class="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white"><i class="fas fa-crown"></i></div>
-            <h2 class="text-4xl font-black italic uppercase italic">Админ-Центр</h2>
+            <div class="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white"><i class="fas fa-crown text-xl"></i></div>
+            <h2 class="text-4xl font-black italic uppercase">Control Center</h2>
         </div>
+
         <div class="grid grid-cols-12 gap-8">
             <div class="col-span-12 lg:col-span-3 space-y-2">
-                <button onclick="admTab('adm-users')" class="w-full text-left p-5 rounded-2xl glass-hover font-bold text-xs uppercase tracking-wider">Юзеры</button>
-                <button onclick="admTab('adm-goods')" class="w-full text-left p-5 rounded-2xl glass-hover font-bold text-xs uppercase tracking-wider">Добавить товар</button>
-                <button onclick="admTab('adm-sys')" class="w-full text-left p-5 rounded-2xl glass-hover font-bold text-xs uppercase tracking-wider">Система</button>
+                <button onclick="admTab('adm-users')" class="w-full text-left p-5 rounded-2xl glass-hover font-bold text-xs uppercase"><i class="fas fa-users mr-3 text-blue-500"></i> Юзеры</button>
+                <button onclick="admTab('adm-promos')" class="w-full text-left p-5 rounded-2xl glass-hover font-bold text-xs uppercase"><i class="fas fa-gift mr-3 text-yellow-500"></i> Промокоды</button>
+                <button onclick="admTab('adm-sys')" class="w-full text-left p-5 rounded-2xl glass-hover font-bold text-xs uppercase"><i class="fas fa-cog mr-3 text-gray-500"></i> Система</button>
             </div>
-            <div class="col-span-12 lg:col-span-9 glass p-8 rounded-3xl min-h-[400px]">
+
+            <div class="col-span-12 lg:col-span-9 glass p-8 rounded-[2.5rem] min-h-[450px]">
                 <div id="adm-users" class="adm-content hidden">
-                    <table class="w-full text-xs uppercase">
-                        <tr class="text-gray-500 border-b border-border">
-                            <th class="pb-4 text-left">Ник</th>
-                            <th class="pb-4 text-left">Баланс</th>
-                            <th class="pb-4 text-right">Статус</th>
-                        </tr>
-                        <tbody id="adm-user-table-body"></tbody>
-                    </table>
-                </div>
-                <div id="adm-goods" class="adm-content hidden">
-                    <h3 class="text-xl font-black mb-6">НОВЫЙ ТОВАР</h3>
-                    <div class="space-y-4">
-                        <label class="w-full h-32 rounded-2xl bg-gray-900 border-2 border-dashed border-gray-700 flex items-center justify-center overflow-hidden cursor-pointer">
-                            <img id="good-img-preview" class="hidden w-full h-full object-cover">
-                            <span id="good-ph" class="text-gray-600 font-bold uppercase text-[10px]">Прикрепить фото товара</span>
-                            <input type="file" class="hidden" onchange="handleImgPreview(this, 'good-img-preview')">
-                        </label>
-                        <input type="text" id="g-name" placeholder="Название" class="w-full bg-gray-900 border border-border p-4 rounded-xl outline-none">
-                        <input type="number" id="g-price" placeholder="Цена ₽" class="w-full bg-gray-900 border border-border p-4 rounded-xl outline-none">
-                        <button onclick="alert('Товар добавлен!')" class="w-full bg-blue-600 py-4 rounded-xl font-black uppercase">Опубликовать</button>
+                    <h3 class="text-2xl font-black mb-6 uppercase">Пользователи</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left uppercase">
+                            <tr class="text-gray-500 border-b border-border">
+                                <th class="pb-4">Никнейм</th>
+                                <th class="pb-4">Баланс</th>
+                                <th class="pb-4 text-right">Статус</th>
+                            </tr>
+                            <tbody id="adm-user-list"></tbody>
+                        </table>
                     </div>
                 </div>
-                <div id="adm-sys" class="adm-content hidden">
-                    <h3 class="text-xl font-black mb-6">ЗАГЛУШКА</h3>
-                    <input type="checkbox" onchange="toggleMT(this.checked)" class="mb-4"> Активировать перерыв
+
+                <div id="adm-promos" class="adm-content hidden">
+                    <h3 class="text-2xl font-black mb-8 uppercase italic">Управление Промокодами 🤖</h3>
+                    <div class="glass p-6 rounded-3xl space-y-4 mb-8">
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="text" id="new-promo-name" placeholder="Название (например: HAPPY)" class="bg-gray-900 border border-border p-4 rounded-xl outline-none text-xs uppercase font-bold">
+                            <input type="number" id="new-promo-reward" placeholder="Сумма ₽" class="bg-gray-900 border border-border p-4 rounded-xl outline-none text-xs">
+                        </div>
+                        <button onclick="admCreatePromo()" class="w-full bg-yellow-600 py-4 rounded-xl font-black uppercase italic shadow-lg shadow-yellow-600/20">Создать Промокод</button>
+                    </div>
+                    <h4 class="font-bold text-xs uppercase mb-4 text-gray-500">Активные коды:</h4>
+                    <div id="adm-promo-list" class="space-y-2"></div>
+                </div>
+
+                <div id="adm-sys" class="adm-content hidden text-center py-12">
+                    <i class="fas fa-tools text-5xl text-gray-700 mb-4"></i>
+                    <p class="text-gray-500 italic">Настройки системы в разработке...</p>
                 </div>
             </div>
         </div>
@@ -195,27 +186,9 @@
 
 </main>
 
-<div id="modal-review" class="fixed inset-0 z-[200] bg-black/90 hidden flex items-center justify-center p-6">
-    <div class="glass max-w-md w-full p-8 rounded-3xl">
-        <h3 class="text-xl font-black uppercase mb-6 italic">Ваш отзыв</h3>
-        <div class="flex gap-2 mb-6" id="star-rating">
-            <i class="fas fa-star text-xl cursor-pointer star-active" onclick="setStar(1)"></i>
-            <i class="fas fa-star text-xl cursor-pointer star-active" onclick="setStar(2)"></i>
-            <i class="fas fa-star text-xl cursor-pointer star-active" onclick="setStar(3)"></i>
-            <i class="fas fa-star text-xl cursor-pointer star-active" onclick="setStar(4)"></i>
-            <i class="fas fa-star text-xl cursor-pointer star-active" onclick="setStar(5)"></i>
-        </div>
-        <textarea id="review-text" class="w-full bg-gray-900 p-4 rounded-xl h-24 outline-none mb-4 text-xs" placeholder="Текст отзыва..."></textarea>
-        <div class="flex gap-2">
-            <button onclick="closeModal('modal-review')" class="flex-1 bg-gray-800 py-3 rounded-xl font-bold uppercase text-[10px]">Закрыть</button>
-            <button onclick="submitReview()" class="flex-1 bg-blue-600 py-3 rounded-xl font-bold uppercase text-[10px]">Отправить</button>
-        </div>
-    </div>
-</div>
-
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, get, child, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI",
@@ -231,33 +204,34 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // 🧠 ГЛОБАЛЬНЫЙ ОБЪЕКТ
+    // ГЛОБАЛЬНЫЙ ОБЪЕКТ
     window.lyneok = {
         user: null,
-        promos: { "START": 500, "LYNEOK2026": 1000, "ARTEM": 5000 },
-        usersList: [],
-        reviews: [
-            { user: 'Admin', text: 'Добро пожаловать!', stars: 5 }
-        ]
-    };
-
-    // 🚀 СТАРТ
-    window.onload = () => {
-        window.navigate('sec-auth');
-        renderMarket();
-        renderReviews();
     };
 
     // НАВИГАЦИЯ
     window.navigate = (id) => {
         document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-        const map = { 'market': 'sec-market', 'profile': 'sec-profile', 'admin-panel': 'sec-admin', 'auth': 'sec-auth', 'reviews': 'sec-reviews', 'adm-goods': 'sec-admin' };
+        const map = { 'market': 'sec-market', 'profile': 'sec-profile', 'admin-panel': 'sec-admin', 'auth': 'sec-auth' };
         document.getElementById(map[id] || id).classList.remove('hidden');
         if(id === 'profile') renderProfile();
         if(id === 'admin-panel') admTab('adm-users');
     };
 
-    // АВТОРИЗАЦИЯ + ЗАЩИТА НИКОВ
+    // 📸 ПРЕДПРОСМОТР
+    window.handleImgPreview = (input, imgId) => {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.getElementById(imgId);
+                img.src = e.target.result;
+                img.classList.remove('hidden');
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    };
+
+    // 🔐 АВТОРИЗАЦИЯ + УНИКАЛЬНОСТЬ
     window.authAction = async () => {
         const nick = document.getElementById('reg-nick').value.trim();
         const pass = document.getElementById('reg-pass').value.trim();
@@ -269,55 +243,97 @@
         const snapshot = await get(child(dbRef, `users/${nick}`));
 
         if (snapshot.exists()) {
-            // Если юзер есть - проверяем пароль (Вход)
             const existingUser = snapshot.val();
             if(existingUser.pass === pass) {
                 window.lyneok.user = existingUser;
             } else {
-                return alert("Этот ник уже занят другим пользователем или пароль неверный!");
+                return alert("Этот никнейм уже занят! Введите верный пароль.");
             }
         } else {
-            // Если юзера нет - РЕГИСТРАЦИЯ
-            // Защита: нельзя регать owwner если ты не первый
-            if(nick.toLowerCase() === 'owwner') return alert("Регистрация под ником owwner запрещена!");
+            // Защита owwner
+            if(nick.toLowerCase() === 'owwner' && pass !== 'admin') return alert("Доступ запрещен!");
 
             const newUser = {
                 nick, pass, balance: 0, 
-                avatar: avatar.includes('data') ? avatar : 'https://i.postimg.cc/mD3m6v90/user-default.png',
-                style: ''
+                avatar: avatar.includes('data') ? avatar : 'https://i.postimg.cc/mD3m6v90/user-default.png'
             };
             await set(ref(db, 'users/' + nick), newUser);
             window.lyneok.user = newUser;
         }
 
-        if(window.lyneok.user.nick === 'owwner') {
-            document.getElementById('nav-admin-btn').classList.remove('hidden');
-        }
-
+        if(window.lyneok.user.nick === 'owwner') document.getElementById('nav-admin-btn').classList.remove('hidden');
         updateNav();
-        window.navigate('market');
+        navigate('market');
     };
 
-    // ПРОМОКОДЫ
+    // 💰 ПРОМОКОДЫ
     window.applyPromo = async () => {
-        const code = document.getElementById('promo-input').value.toUpperCase();
-        if(window.lyneok.promos[code]) {
-            const reward = window.lyneok.promos[code];
+        const code = document.getElementById('promo-input').value.trim().toUpperCase();
+        if(!code) return;
+
+        const dbRef = ref(db);
+        const snapshot = await get(child(dbRef, `promos/${code}`));
+
+        if(snapshot.exists()) {
+            const reward = parseInt(snapshot.val());
             window.lyneok.user.balance += reward;
-            delete window.lyneok.promos[code]; // Одноразовый для сессии
             
-            // Сохраняем в Firebase
+            // Сохраняем баланс
             await set(ref(db, 'users/' + window.lyneok.user.nick), window.lyneok.user);
-            
-            alert(`Успех! Зачислено ${reward}₽`);
+            // Удаляем промокод (делаем его одноразовым для всех)
+            await remove(ref(db, `promos/${code}`));
+
+            alert(`Активировано! Зачислено ${reward}₽`);
             updateNav();
             renderProfile();
             document.getElementById('promo-input').value = '';
         } else {
-            alert("Неверный или уже использованный промокод!");
+            alert("Промокод не существует или уже использован!");
         }
     };
 
+    // 😈 АДМИНКА: СОЗДАТЬ ПРОМО
+    window.admCreatePromo = async () => {
+        const name = document.getElementById('new-promo-name').value.trim().toUpperCase();
+        const reward = document.getElementById('new-promo-reward').value;
+
+        if(!name || !reward) return alert("Заполни поля промокода!");
+
+        await set(ref(db, 'promos/' + name), reward);
+        alert(`Промокод ${name} на ${reward}₽ создан!`);
+        document.getElementById('new-promo-name').value = '';
+        document.getElementById('new-promo-reward').value = '';
+        renderAdminPromos();
+    };
+
+    async function renderAdminPromos() {
+        const dbRef = ref(db);
+        const snapshot = await get(child(dbRef, 'promos'));
+        const container = document.getElementById('adm-promo-list');
+        container.innerHTML = "";
+
+        if(snapshot.exists()) {
+            const promos = snapshot.val();
+            for(let key in promos) {
+                container.innerHTML += `
+                    <div class="flex justify-between items-center bg-white/5 p-4 rounded-xl">
+                        <span class="font-bold text-yellow-500">${key}</span>
+                        <span class="text-xs font-black">${promos[key]}₽</span>
+                        <button onclick="admDeletePromo('${key}')" class="text-red-500 text-[10px] uppercase font-bold">Удалить</button>
+                    </div>
+                `;
+            }
+        } else {
+            container.innerHTML = "<p class='text-gray-600 text-[10px] italic uppercase'>Активных кодов нет</p>";
+        }
+    }
+
+    window.admDeletePromo = async (key) => {
+        await remove(ref(db, `promos/${key}`));
+        renderAdminPromos();
+    };
+
+    // ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
     function updateNav() {
         const u = window.lyneok.user;
         document.getElementById('nav-balance').innerText = u.balance.toLocaleString() + '₽';
@@ -337,72 +353,49 @@
         document.querySelectorAll('.adm-content').forEach(c => c.classList.add('hidden'));
         document.getElementById(id).classList.remove('hidden');
         if(id === 'adm-users') renderAdminUsers();
+        if(id === 'adm-promos') renderAdminPromos();
     };
 
     async function renderAdminUsers() {
-        const dbRef = ref(db);
-        const snapshot = await get(child(dbRef, `users`));
+        const snapshot = await get(child(ref(db), 'users'));
+        const body = document.getElementById('adm-user-list');
+        body.innerHTML = "";
         if(snapshot.exists()) {
             const users = snapshot.val();
-            const body = document.getElementById('adm-user-table-body');
-            body.innerHTML = Object.values(users).map(u => `
-                <tr class="border-b border-border">
-                    <td class="py-4 font-bold ${u.nick === 'owwner' ? 'nick-rainbow' : 'text-blue-500'}">${u.nick}</td>
-                    <td class="py-4 text-green-400">${u.balance}₽</td>
-                    <td class="py-4 text-right"><button class="bg-red-600/20 text-red-500 px-2 py-1 rounded">Блокировать</button></td>
-                </tr>
-            `).join('');
+            Object.values(users).forEach(u => {
+                body.innerHTML += `
+                    <tr class="border-b border-border">
+                        <td class="py-4 font-bold ${u.nick === 'owwner' ? 'nick-rainbow' : 'text-blue-500'}">${u.nick}</td>
+                        <td class="py-4 text-green-400">${u.balance}₽</td>
+                        <td class="py-4 text-right"><button class="text-red-500 font-bold">БАН</button></td>
+                    </tr>
+                `;
+            });
         }
     }
 
-    // Вспомогательные функции
-    window.handleImgPreview = (input, imgId) => {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                document.getElementById(imgId).src = e.target.result;
-                document.getElementById(imgId).classList.remove('hidden');
-                if(imgId === 'good-img-preview') document.getElementById('good-ph').classList.add('hidden');
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    };
-
-    window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
-    window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
-
+    // ИНИЦИАЛИЗАЦИЯ МАРКЕТА
     function renderMarket() {
         const games = [
             { name: 'Roblox', img: 'https://i.postimg.cc/P5tY8H9D/roblox.jpg' },
             { name: 'Brawl Stars', img: 'https://i.postimg.cc/g2f7Xm3T/brawl.jpg' },
-            { name: 'Standoff 2', img: 'https://i.postimg.cc/mD3m6v90/user-default.png' }
+            { name: 'Standoff 2', img: 'https://i.pravatar.cc/300' },
+            { name: 'Telegram Premium', img: 'https://i.pravatar.cc/301' }
         ];
         document.getElementById('market-grid').innerHTML = games.map(g => `
-            <div class="glass-hover rounded-3xl overflow-hidden h-40 relative cursor-pointer">
-                <img src="${g.img}" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-black/40 flex items-end p-4">
-                    <span class="font-black italic uppercase text-xs">${g.name}</span>
-                </div>
+            <div class="glass-hover rounded-[2rem] overflow-hidden h-44 relative cursor-pointer group">
+                <img src="${g.img}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+                <div class="absolute bottom-4 left-4 font-black italic uppercase text-xs tracking-tighter">${g.name}</div>
             </div>
         `).join('');
     }
 
-    window.submitReview = () => {
-        const text = document.getElementById('review-text').value;
-        if(!text) return;
-        window.lyneok.reviews.unshift({ user: window.lyneok.user.nick, text, stars: 5 });
-        renderReviews();
-        closeModal('modal-review');
+    window.onload = () => {
+        renderMarket();
     };
-
-    function renderReviews() {
-        document.getElementById('reviews-list').innerHTML = window.lyneok.reviews.map(r => `
-            <div class="glass p-4 rounded-2xl border-l-4 border-blue-600">
-                <div class="flex justify-between mb-2"><span class="font-bold text-[10px]">${r.user}</span><span class="text-yellow-500 text-[8px]">★★★★★</span></div>
-                <p class="text-xs text-gray-400 italic">"${r.text}"</p>
-            </div>
-        `).join('');
-    }
+    
+    window.requestDeposit = () => alert("Заявка создана! Напишите админу в чат.");
 </script>
 
 </body>
