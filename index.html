@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LYNEOK — Экосистема Цифровых Сделок</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -16,14 +16,17 @@
             --border: rgba(255, 255, 255, 0.08);
         }
 
+        * { -webkit-tap-highlight-color: transparent; user-select: none; }
+        input, textarea { user-select: text; }
+
         body {
             background-color: var(--bg-dark);
             color: #f1f5f9;
             font-family: 'Montserrat', sans-serif;
             overflow-x: hidden;
+            touch-action: pan-y;
         }
 
-        /* КАСТОМИЗАЦИЯ (25 Цветов, Радуга, Неон) */
         .nick-rainbow {
             background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
             -webkit-background-clip: text;
@@ -35,39 +38,27 @@
         }
         @keyframes rainbow-flow { to { background-position: 200% center; } }
 
-        .nick-neon {
-            color: #00f7ff;
-            text-shadow: 0 0 5px #00f7ff, 0 0 15px #00f7ff;
-            font-weight: 800;
-        }
-
-        /* Эффекты стекла */
         .glass { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid var(--border); }
         .glass-hover:hover { background: rgba(255, 255, 255, 0.06); border-color: var(--accent); transition: 0.3s; }
 
-        /* Чат */
-        .chat-box { height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .msg { padding: 10px 14px; border-radius: 15px; max-width: 80%; font-size: 0.9rem; position: relative; }
-        .msg-admin { background: #3b82f6; align-self: flex-start; color: white; border-bottom-left-radius: 2px; }
+        .chat-box { height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .msg { padding: 10px 14px; border-radius: 15px; max-width: 80%; font-size: 0.85rem; }
+        .msg-admin { background: #3b82f6; align-self: flex-start; border-bottom-left-radius: 2px; }
         .msg-user { background: #1e293b; align-self: flex-end; border-bottom-right-radius: 2px; }
-
-        /* Анимация секций */
+        
         .section-fade { animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Скрытые элементы */
         .hidden { display: none !important; }
+        .star-active { color: #fbbf24; }
     </style>
 </head>
 <body class="min-h-screen">
 
 <div id="maintenance-overlay" class="fixed inset-0 z-[9999] bg-[#0a0b10] hidden flex flex-col items-center justify-center p-6 text-center">
-    <img id="mt-img-display" src="https://i.postimg.cc/85zK6P1F/mainte.png" class="w-64 mb-8 rounded-2xl shadow-2xl shadow-blue-500/20">
-    <h1 id="mt-title-display" class="text-4xl font-extrabold text-white mb-4 uppercase">Технический перерыв</h1>
-    <p id="mt-text-display" class="text-gray-400 max-w-md mb-8">Мы обновляем Lyneok, чтобы торговля стала еще комфортнее. Загляните в наши соцсети!</p>
-    <div id="mt-links-display" class="flex gap-4">
-        <a href="#" class="bg-blue-600 px-8 py-3 rounded-xl font-bold">Наш Telegram</a>
-    </div>
+    <img id="mt-img-display" src="https://i.postimg.cc/85zK6P1F/mainte.png" class="w-64 mb-8 rounded-2xl">
+    <h1 id="mt-title-display" class="text-4xl font-extrabold text-white mb-4 uppercase italic">Тех. перерыв</h1>
+    <p id="mt-text-display" class="text-gray-400 max-w-md">Мы скоро вернемся!</p>
 </div>
 
 <nav class="glass sticky top-0 z-[100] px-6 py-4 flex justify-between items-center">
@@ -78,10 +69,12 @@
         <span class="text-2xl font-black tracking-tighter uppercase italic">Lyneok</span>
     </div>
 
-    <div class="hidden lg:flex gap-8 text-xs font-bold uppercase tracking-widest text-gray-400">
-        <button onclick="navigate('market')" class="hover:text-blue-500 transition">Маркетплейс</button>
-        <button onclick="navigate('my-orders')" class="hover:text-blue-500 transition">Мои покупки</button>
-        <button onclick="navigate('admin-panel')" class="text-red-500 hover:scale-110 transition">Admin UI 😈</button>
+    <div class="hidden lg:flex gap-6 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+        <button onclick="navigate('market')" class="hover:text-blue-500 transition"><i class="fas fa-home mr-1"></i> Главная</button>
+        <button onclick="navigate('adm-goods')" class="hover:text-blue-500 transition"><i class="fas fa-plus-circle mr-1"></i> Создать товар</button>
+        <button onclick="navigate('chats')" class="hover:text-blue-500 transition"><i class="fas fa-comments mr-1"></i> Чаты</button>
+        <button onclick="navigate('profile')" class="hover:text-blue-500 transition"><i class="fas fa-user mr-1"></i> Профиль</button>
+        <button id="nav-admin-btn" onclick="navigate('admin-panel')" class="text-red-500 hidden hover:scale-110 transition">Admin Panel 😈</button>
     </div>
 
     <div class="flex items-center gap-4">
@@ -99,457 +92,318 @@
 
     <section id="sec-auth" class="section-fade max-w-md mx-auto py-12">
         <div class="glass p-8 rounded-[2rem] shadow-2xl">
-            <h2 class="text-3xl font-extrabold text-center mb-2">Добро пожаловать</h2>
-            <p class="text-gray-500 text-center text-sm mb-8">Создай свой уникальный профиль в Lyneok</p>
-            
+            <h2 class="text-3xl font-extrabold text-center mb-6 italic uppercase">Вход / Регистрация</h2>
             <div class="space-y-4">
                 <div class="flex justify-center mb-4">
                     <label class="relative cursor-pointer group">
                         <div class="w-24 h-24 rounded-full bg-gray-900 border-2 border-dashed border-gray-700 flex items-center justify-center overflow-hidden">
                             <img id="reg-preview" class="hidden w-full h-full object-cover">
-                            <i class="fas fa-camera text-gray-600 group-hover:text-blue-500 transition"></i>
+                            <i class="fas fa-image text-gray-600 group-hover:text-blue-500 transition"></i>
                         </div>
-                        <input type="file" id="reg-file" class="hidden" onchange="handleImgPreview(this)">
+                        <input type="file" id="reg-file" class="hidden" onchange="handleImgPreview(this, 'reg-preview')">
                     </label>
                 </div>
-                <input type="text" id="reg-nick" placeholder="Никнейм" class="w-full bg-gray-900/50 border border-border p-4 rounded-2xl focus:border-blue-500 outline-none">
-                <input type="password" id="reg-pass" placeholder="Пароль" class="w-full bg-gray-900/50 border border-border p-4 rounded-2xl focus:border-blue-500 outline-none">
-                <input type="email" id="reg-email" placeholder="Email" class="w-full bg-gray-900/50 border border-border p-4 rounded-2xl focus:border-blue-500 outline-none">
-                <button onclick="authAction()" class="w-full bg-blue-600 hover:bg-blue-700 py-4 rounded-2xl font-black text-white shadow-xl shadow-blue-600/20 transition-all">ЗАРЕГИСТРИРОВАТЬСЯ</button>
+                <input type="text" id="reg-nick" placeholder="Никнейм" class="w-full bg-gray-900 border border-border p-4 rounded-2xl outline-none focus:border-blue-500">
+                <input type="password" id="reg-pass" placeholder="Пароль" class="w-full bg-gray-900 border border-border p-4 rounded-2xl outline-none focus:border-blue-500">
+                <button onclick="authAction()" class="w-full bg-blue-600 py-4 rounded-2xl font-black text-white shadow-xl hover:bg-blue-700 transition">ВОЙТИ В СИСТЕМУ</button>
             </div>
         </div>
     </section>
 
     <section id="sec-market" class="section-fade hidden">
-        <div class="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
-            <div>
-                <h1 class="text-5xl font-black tracking-tighter uppercase italic text-white">Каталог</h1>
-                <p class="text-gray-500 font-medium">Найди лучшее предложение среди тысяч товаров</p>
-            </div>
-            <div class="flex gap-3 w-full md:w-auto">
-                <input type="text" placeholder="Поиск игры или категории..." class="flex-1 md:w-80 bg-gray-900 border border-border px-6 py-4 rounded-2xl focus:border-blue-500 outline-none">
-            </div>
-        </div>
+        <h1 class="text-4xl font-black tracking-tighter uppercase italic mb-8">Каталог игр</h1>
+        <div id="market-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
+    </section>
 
-        <div id="market-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            </div>
+    <section id="sec-reviews" class="section-fade hidden">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-3xl font-black uppercase italic">Отзывы</h2>
+            <button onclick="openModal('modal-review')" class="bg-blue-600 px-6 py-2 rounded-xl text-[10px] font-black uppercase">Оставить отзыв</button>
+        </div>
+        <div id="reviews-list" class="grid md:grid-cols-2 gap-4"></div>
     </section>
 
     <section id="sec-profile" class="section-fade hidden">
         <div class="grid lg:grid-cols-3 gap-8">
-            <div class="glass p-8 rounded-[2rem]">
-                <div class="text-center mb-6">
-                    <img id="prof-img" src="" class="w-32 h-32 rounded-full mx-auto border-4 border-blue-600 mb-4 object-cover">
-                    <h3 id="prof-nick" class="text-2xl font-black">NICKNAME</h3>
-                    <p id="prof-email" class="text-gray-500 text-sm italic">email@lyneok.com</p>
-                </div>
-                <div class="bg-gray-900/50 p-4 rounded-2xl mb-4">
-                    <p class="text-xs text-gray-500 font-bold uppercase mb-1">Твой баланс</p>
+            <div class="glass p-8 rounded-[2rem] text-center">
+                <img id="prof-img" src="" class="w-32 h-32 rounded-full mx-auto border-4 border-blue-600 mb-4 object-cover">
+                <h3 id="prof-nick" class="text-2xl font-black mb-4">NICKNAME</h3>
+                
+                <div class="bg-gray-900 p-4 rounded-2xl mb-6">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">Ваш кошелек</p>
                     <p id="prof-balance" class="text-3xl font-black text-green-400">0.00₽</p>
                 </div>
-                <button onclick="requestDeposit()" class="w-full bg-green-600 py-3 rounded-xl font-bold hover:bg-green-700 transition mb-2">ПОПОЛНИТЬ</button>
-                <button class="w-full bg-gray-800 py-3 rounded-xl font-bold hover:bg-gray-700 transition">ВЫВЕСТИ</button>
-            </div>
-            <div class="lg:col-span-2 glass p-8 rounded-[2rem]">
-                <h4 class="text-xl font-black mb-6 uppercase tracking-widest">Мои активные сделки</h4>
-                <div id="user-deals-list" class="space-y-4">
-                    <p class="text-gray-600 italic">Пока здесь пусто...</p>
+
+                <div class="space-y-2 mb-6">
+                    <input type="text" id="promo-input" placeholder="Введите промокод..." class="w-full bg-black/40 border border-border p-3 rounded-xl text-xs outline-none">
+                    <button onclick="applyPromo()" class="w-full bg-yellow-600 py-3 rounded-xl font-bold text-xs uppercase italic">Активировать промо</button>
                 </div>
+
+                <button onclick="navigate('reviews')" class="w-full bg-gray-800 py-3 rounded-xl font-bold mb-2 text-xs uppercase">Мои отзывы</button>
+                <button onclick="requestDeposit()" class="w-full bg-blue-600 py-3 rounded-xl font-bold text-xs uppercase">Пополнить</button>
+            </div>
+            
+            <div class="lg:col-span-2 glass p-8 rounded-[2rem]">
+                <h4 class="text-xl font-black mb-6 uppercase italic">История операций</h4>
+                <div id="user-deals-list" class="space-y-4 text-gray-500 italic text-sm">Здесь пока пусто...</div>
             </div>
         </div>
     </section>
 
     <section id="sec-admin" class="section-fade hidden">
         <div class="flex items-center gap-4 mb-8">
-            <div class="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg shadow-red-600/30">
-                <i class="fas fa-crown"></i>
-            </div>
-            <h2 class="text-4xl font-black italic uppercase tracking-tighter">Lyneok Control</h2>
+            <div class="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white"><i class="fas fa-crown"></i></div>
+            <h2 class="text-4xl font-black italic uppercase italic">Админ-Центр</h2>
         </div>
-
         <div class="grid grid-cols-12 gap-8">
             <div class="col-span-12 lg:col-span-3 space-y-2">
-                <button onclick="admTab('adm-users')" class="w-full flex items-center gap-4 p-5 rounded-2xl glass-hover font-bold text-sm uppercase tracking-wider border-l-4 border-transparent" id="btn-adm-users">
-                    <i class="fas fa-users text-blue-500"></i> Пользователи
-                </button>
-                <button onclick="admTab('adm-struct')" class="w-full flex items-center gap-4 p-5 rounded-2xl glass-hover font-bold text-sm uppercase tracking-wider border-l-4 border-transparent">
-                    <i class="fas fa-layer-group text-green-500"></i> Игры и Категории
-                </button>
-                <button onclick="admTab('adm-goods')" class="w-full flex items-center gap-4 p-5 rounded-2xl glass-hover font-bold text-sm uppercase tracking-wider border-l-4 border-transparent">
-                    <i class="fas fa-shopping-bag text-orange-500"></i> Создать Товар
-                </button>
-                <button onclick="admTab('adm-finance')" class="w-full flex items-center gap-4 p-5 rounded-2xl glass-hover font-bold text-sm uppercase tracking-wider border-l-4 border-transparent">
-                    <i class="fas fa-wallet text-yellow-500"></i> Заявки <span id="badge-finance" class="bg-red-600 text-[10px] px-2 py-0.5 rounded-full ml-auto">1</span>
-                </button>
-                <button onclick="admTab('adm-sys')" class="w-full flex items-center gap-4 p-5 rounded-2xl glass-hover font-bold text-sm uppercase tracking-wider border-l-4 border-transparent">
-                    <i class="fas fa-microchip text-red-500"></i> Система / ТП
-                </button>
+                <button onclick="admTab('adm-users')" class="w-full text-left p-5 rounded-2xl glass-hover font-bold text-xs uppercase tracking-wider">Юзеры</button>
+                <button onclick="admTab('adm-goods')" class="w-full text-left p-5 rounded-2xl glass-hover font-bold text-xs uppercase tracking-wider">Добавить товар</button>
+                <button onclick="admTab('adm-sys')" class="w-full text-left p-5 rounded-2xl glass-hover font-bold text-xs uppercase tracking-wider">Система</button>
             </div>
-
-            <div class="col-span-12 lg:col-span-9 glass p-8 rounded-[2.5rem] min-h-[600px]">
-                
+            <div class="col-span-12 lg:col-span-9 glass p-8 rounded-3xl min-h-[400px]">
                 <div id="adm-users" class="adm-content hidden">
-                    <div class="flex justify-between items-center mb-8">
-                        <h3 class="text-2xl font-black">Пользователи</h3>
-                        <input type="text" id="user-search" oninput="searchUsers(this.value)" placeholder="Найти по нику..." class="bg-gray-900 border border-border px-4 py-2 rounded-xl outline-none text-sm">
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left">
-                            <tr class="text-gray-500 text-xs uppercase tracking-widest border-b border-border">
-                                <th class="pb-4 px-2">ID</th>
-                                <th class="pb-4">Ник / Email</th>
-                                <th class="pb-4">Баланс</th>
-                                <th class="pb-4">Пароль</th>
-                                <th class="pb-4 text-right">Действия</th>
-                            </tr>
-                            <tbody id="adm-user-table-body">
-                                </tbody>
-                        </table>
-                    </div>
+                    <table class="w-full text-xs uppercase">
+                        <tr class="text-gray-500 border-b border-border">
+                            <th class="pb-4 text-left">Ник</th>
+                            <th class="pb-4 text-left">Баланс</th>
+                            <th class="pb-4 text-right">Статус</th>
+                        </tr>
+                        <tbody id="adm-user-table-body"></tbody>
+                    </table>
                 </div>
-
-                <div id="adm-struct" class="adm-content hidden">
-                    <h3 class="text-2xl font-black mb-8">Менеджер категорий</h3>
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="glass p-6 rounded-2xl">
-                            <h4 class="font-bold mb-4 text-blue-500">Добавить Игру</h4>
-                            <div class="space-y-4">
-                                <input type="text" id="new-game-name" placeholder="Название (Roblox, Brawl...)" class="w-full bg-gray-900 border border-border p-3 rounded-xl outline-none">
-                                <input type="text" id="new-game-img" placeholder="URL Картинки" class="w-full bg-gray-900 border border-border p-3 rounded-xl outline-none">
-                                <button onclick="admCreateGame()" class="w-full bg-blue-600 py-3 rounded-xl font-bold uppercase text-xs">Создать игру</button>
-                            </div>
-                        </div>
-                        <div class="glass p-6 rounded-2xl">
-                            <h4 class="font-bold mb-4 text-green-500">Добавить Категорию</h4>
-                            <div class="space-y-4">
-                                <select id="parent-game" class="w-full bg-gray-900 border border-border p-3 rounded-xl outline-none">
-                                    </select>
-                                <input type="text" id="new-cat-name" placeholder="Название (Аккаунты, Валюта...)" class="w-full bg-gray-900 border border-border p-3 rounded-xl outline-none">
-                                <button onclick="admCreateCat()" class="w-full bg-green-600 py-3 rounded-xl font-bold uppercase text-xs">Создать подкатегорию</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <div id="adm-goods" class="adm-content hidden">
-                    <h3 class="text-2xl font-black mb-8">Новый товар (Админ-панель)</h3>
-                    <div class="glass p-8 rounded-3xl space-y-6">
-                        <div class="grid md:grid-cols-2 gap-6">
-                            <input type="text" id="g-name" placeholder="Название товара" class="bg-gray-900 border border-border p-4 rounded-2xl outline-none">
-                            <input type="number" id="g-price" placeholder="Цена (₽)" class="bg-gray-900 border border-border p-4 rounded-2xl outline-none">
-                        </div>
-                        <textarea id="g-desc" placeholder="Описание товара..." class="w-full bg-gray-900 border border-border p-4 rounded-2xl h-32 outline-none"></textarea>
-                        <div class="grid md:grid-cols-2 gap-6">
-                            <select id="g-cat-select" class="bg-gray-900 border border-border p-4 rounded-2xl outline-none">
-                                <option>Выбери категорию</option>
-                            </select>
-                            <input type="text" id="g-seller" placeholder="Продавец (Ник)" class="bg-gray-900 border border-border p-4 rounded-2xl outline-none">
-                        </div>
-                        <button onclick="admCreateProduct()" class="w-full bg-orange-600 py-4 rounded-2xl font-black uppercase shadow-lg shadow-orange-600/20">Опубликовать на витрину</button>
+                    <h3 class="text-xl font-black mb-6">НОВЫЙ ТОВАР</h3>
+                    <div class="space-y-4">
+                        <label class="w-full h-32 rounded-2xl bg-gray-900 border-2 border-dashed border-gray-700 flex items-center justify-center overflow-hidden cursor-pointer">
+                            <img id="good-img-preview" class="hidden w-full h-full object-cover">
+                            <span id="good-ph" class="text-gray-600 font-bold uppercase text-[10px]">Прикрепить фото товара</span>
+                            <input type="file" class="hidden" onchange="handleImgPreview(this, 'good-img-preview')">
+                        </label>
+                        <input type="text" id="g-name" placeholder="Название" class="w-full bg-gray-900 border border-border p-4 rounded-xl outline-none">
+                        <input type="number" id="g-price" placeholder="Цена ₽" class="w-full bg-gray-900 border border-border p-4 rounded-xl outline-none">
+                        <button onclick="alert('Товар добавлен!')" class="w-full bg-blue-600 py-4 rounded-xl font-black uppercase">Опубликовать</button>
                     </div>
                 </div>
-
-                <div id="adm-finance" class="adm-content hidden">
-                    <h3 class="text-2xl font-black mb-8">Заявки на пополнение</h3>
-                    <div id="adm-dep-requests" class="space-y-6">
-                        <div class="glass p-6 rounded-[2rem] border-l-4 border-yellow-500">
-                            <div class="flex flex-col md:flex-row justify-between mb-6">
-                                <div>
-                                    <span class="nick-rainbow text-xl">Artem</span>
-                                    <p class="text-gray-500 text-sm">Хочет пополнить на: <b class="text-white">5,000₽</b></p>
-                                </div>
-                                <div class="text-right">
-                                    <span class="bg-yellow-500/20 text-yellow-500 px-3 py-1 rounded-full text-[10px] font-black uppercase">Ожидает оплаты</span>
-                                </div>
-                            </div>
-
-                            <div class="bg-black/40 rounded-2xl p-4 mb-4">
-                                <div class="chat-box" id="chat-dep-1">
-                                    <div class="msg msg-user">Привет! Хочу купить робуксы, куда переводить?</div>
-                                    <div class="msg msg-admin">Приветствуем в Lyneok! Переводи на СБП по номеру +79991234567. Пришли чек сюда.</div>
-                                </div>
-                            </div>
-                            
-                            <div class="flex gap-3">
-                                <input type="text" id="reply-dep-1" placeholder="Ответить как админ..." class="flex-1 bg-gray-900 border border-border p-4 rounded-xl outline-none">
-                                <button onclick="admSendMsg('chat-dep-1', 'reply-dep-1')" class="bg-blue-600 px-6 rounded-xl"><i class="fas fa-paper-plane"></i></button>
-                                <button class="bg-green-600 px-6 rounded-xl font-bold">ЗАЧИСЛИТЬ</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <div id="adm-sys" class="adm-content hidden">
-                    <h3 class="text-2xl font-black mb-8 text-red-500">Системный контроль</h3>
-                    <div class="grid md:grid-cols-2 gap-8">
-                        <div class="glass p-6 rounded-3xl">
-                            <h4 class="font-bold mb-4">Maintenance Mode</h4>
-                            <div class="space-y-4">
-                                <label class="flex items-center gap-4 cursor-pointer">
-                                    <input type="checkbox" onchange="admToggleMaintenance(this.checked)" class="w-6 h-6 accent-red-600">
-                                    <span class="font-bold uppercase text-xs">Активировать заглушку</span>
-                                </label>
-                                <input type="text" id="adm-mt-img" placeholder="URL картинки" class="w-full bg-gray-900 p-3 rounded-xl border border-border text-xs">
-                                <input type="text" id="adm-mt-title" placeholder="Заголовок" class="w-full bg-gray-900 p-3 rounded-xl border border-border text-xs">
-                                <textarea id="adm-mt-text" placeholder="Текст сообщения" class="w-full bg-gray-900 p-3 rounded-xl border border-border text-xs h-20"></textarea>
-                            </div>
-                        </div>
-                        <div class="glass p-6 rounded-3xl">
-                            <h4 class="font-bold mb-4">Интеграции</h4>
-                            <div class="space-y-4">
-                                <div class="p-3 bg-gray-900 rounded-xl">
-                                    <p class="text-[10px] text-gray-500 uppercase mb-2">Telegram Bot API</p>
-                                    <input type="text" placeholder="Token" class="w-full bg-transparent border-b border-border outline-none text-xs pb-1 mb-2">
-                                    <input type="text" placeholder="Admin Chat ID" class="w-full bg-transparent border-b border-border outline-none text-xs pb-1">
-                                </div>
-                                <div class="p-3 bg-gray-900 rounded-xl">
-                                    <p class="text-[10px] text-gray-500 uppercase mb-2">EmailJS Keys</p>
-                                    <input type="text" placeholder="Public Key" class="w-full bg-transparent border-b border-border outline-none text-xs pb-1">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <h3 class="text-xl font-black mb-6">ЗАГЛУШКА</h3>
+                    <input type="checkbox" onchange="toggleMT(this.checked)" class="mb-4"> Активировать перерыв
                 </div>
-
             </div>
         </div>
     </section>
 
 </main>
 
-<script>
-    // 🧠 ЛОКАЛЬНАЯ "БАЗА ДАННЫХ"
-    let db = {
-        currentUser: null,
-        maintenance: false,
-        users: [
-            { id: 1, nick: 'Artem', email: 'admin@lyneok.ru', pass: 'admin2026', balance: 15400, avatar: 'https://i.pravatar.cc/150?u=1', style: 'rainbow' },
-            { id: 2, nick: 'sswckk', email: 'user@lyneok.ru', pass: 'pass123', balance: 500, avatar: 'https://i.pravatar.cc/150?u=2', style: 'neon' }
-        ],
-        games: [
-            { id: 1, name: 'Roblox', img: 'https://i.postimg.cc/P5tY8H9D/roblox.jpg' },
-            { id: 2, name: 'Brawl Stars', img: 'https://i.postimg.cc/g2f7Xm3T/brawl.jpg' }
-        ],
-        categories: [
-            { id: 1, gameId: 1, name: 'Робуксы' },
-            { id: 2, gameId: 1, name: 'Аккаунты' },
-            { id: 3, gameId: 2, name: 'Гемы' }
-        ],
-        products: [
-            { id: 1, catId: 1, name: '1000 Robux (Мгновенно)', price: 800, seller: 'RobloxShop', desc: 'Лучший курс на рынке.' }
+<div id="modal-review" class="fixed inset-0 z-[200] bg-black/90 hidden flex items-center justify-center p-6">
+    <div class="glass max-w-md w-full p-8 rounded-3xl">
+        <h3 class="text-xl font-black uppercase mb-6 italic">Ваш отзыв</h3>
+        <div class="flex gap-2 mb-6" id="star-rating">
+            <i class="fas fa-star text-xl cursor-pointer star-active" onclick="setStar(1)"></i>
+            <i class="fas fa-star text-xl cursor-pointer star-active" onclick="setStar(2)"></i>
+            <i class="fas fa-star text-xl cursor-pointer star-active" onclick="setStar(3)"></i>
+            <i class="fas fa-star text-xl cursor-pointer star-active" onclick="setStar(4)"></i>
+            <i class="fas fa-star text-xl cursor-pointer star-active" onclick="setStar(5)"></i>
+        </div>
+        <textarea id="review-text" class="w-full bg-gray-900 p-4 rounded-xl h-24 outline-none mb-4 text-xs" placeholder="Текст отзыва..."></textarea>
+        <div class="flex gap-2">
+            <button onclick="closeModal('modal-review')" class="flex-1 bg-gray-800 py-3 rounded-xl font-bold uppercase text-[10px]">Закрыть</button>
+            <button onclick="submitReview()" class="flex-1 bg-blue-600 py-3 rounded-xl font-bold uppercase text-[10px]">Отправить</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI",
+        authDomain: "dogx-base.firebaseapp.com",
+        databaseURL: "https://dogx-base-default-rtdb.firebaseio.com",
+        projectId: "dogx-base",
+        storageBucket: "dogx-base.firebasestorage.app",
+        messagingSenderId: "81713249793",
+        appId: "1:81713249793:web:1b44a13e6faf5acfa78a00",
+        measurementId: "G-HDQEQRGLTK"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // 🧠 ГЛОБАЛЬНЫЙ ОБЪЕКТ
+    window.lyneok = {
+        user: null,
+        promos: { "START": 500, "LYNEOK2026": 1000, "ARTEM": 5000 },
+        usersList: [],
+        reviews: [
+            { user: 'Admin', text: 'Добро пожаловать!', stars: 5 }
         ]
     };
 
-    // 🚀 ИНИЦИАЛИЗАЦИЯ
+    // 🚀 СТАРТ
     window.onload = () => {
-        navigate('sec-auth');
+        window.navigate('sec-auth');
         renderMarket();
-        updateAdminSelects();
+        renderReviews();
     };
 
-    // 🔄 НАВИГАЦИЯ
-    function navigate(id) {
-        if(db.maintenance && id !== 'admin-panel' && id !== 'sec-auth') return;
-        
+    // НАВИГАЦИЯ
+    window.navigate = (id) => {
         document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-        
-        // Маппинг коротких имен на ID секций
-        const map = {
-            'market': 'sec-market',
-            'profile': 'sec-profile',
-            'admin-panel': 'sec-admin',
-            'auth': 'sec-auth'
-        };
-        
-        const target = map[id] || id;
-        document.getElementById(target).classList.remove('hidden');
-        
-        if(target === 'sec-profile') renderProfile();
-        if(target === 'sec-admin') admTab('adm-users');
+        const map = { 'market': 'sec-market', 'profile': 'sec-profile', 'admin-panel': 'sec-admin', 'auth': 'sec-auth', 'reviews': 'sec-reviews', 'adm-goods': 'sec-admin' };
+        document.getElementById(map[id] || id).classList.remove('hidden');
+        if(id === 'profile') renderProfile();
+        if(id === 'admin-panel') admTab('adm-users');
+    };
+
+    // АВТОРИЗАЦИЯ + ЗАЩИТА НИКОВ
+    window.authAction = async () => {
+        const nick = document.getElementById('reg-nick').value.trim();
+        const pass = document.getElementById('reg-pass').value.trim();
+        const avatar = document.getElementById('reg-preview').src;
+
+        if(!nick || !pass) return alert("Введите данные!");
+
+        const dbRef = ref(db);
+        const snapshot = await get(child(dbRef, `users/${nick}`));
+
+        if (snapshot.exists()) {
+            // Если юзер есть - проверяем пароль (Вход)
+            const existingUser = snapshot.val();
+            if(existingUser.pass === pass) {
+                window.lyneok.user = existingUser;
+            } else {
+                return alert("Этот ник уже занят другим пользователем или пароль неверный!");
+            }
+        } else {
+            // Если юзера нет - РЕГИСТРАЦИЯ
+            // Защита: нельзя регать owwner если ты не первый
+            if(nick.toLowerCase() === 'owwner') return alert("Регистрация под ником owwner запрещена!");
+
+            const newUser = {
+                nick, pass, balance: 0, 
+                avatar: avatar.includes('data') ? avatar : 'https://i.postimg.cc/mD3m6v90/user-default.png',
+                style: ''
+            };
+            await set(ref(db, 'users/' + nick), newUser);
+            window.lyneok.user = newUser;
+        }
+
+        if(window.lyneok.user.nick === 'owwner') {
+            document.getElementById('nav-admin-btn').classList.remove('hidden');
+        }
+
+        updateNav();
+        window.navigate('market');
+    };
+
+    // ПРОМОКОДЫ
+    window.applyPromo = async () => {
+        const code = document.getElementById('promo-input').value.toUpperCase();
+        if(window.lyneok.promos[code]) {
+            const reward = window.lyneok.promos[code];
+            window.lyneok.user.balance += reward;
+            delete window.lyneok.promos[code]; // Одноразовый для сессии
+            
+            // Сохраняем в Firebase
+            await set(ref(db, 'users/' + window.lyneok.user.nick), window.lyneok.user);
+            
+            alert(`Успех! Зачислено ${reward}₽`);
+            updateNav();
+            renderProfile();
+            document.getElementById('promo-input').value = '';
+        } else {
+            alert("Неверный или уже использованный промокод!");
+        }
+    };
+
+    function updateNav() {
+        const u = window.lyneok.user;
+        document.getElementById('nav-balance').innerText = u.balance.toLocaleString() + '₽';
+        document.getElementById('nav-nick').innerText = u.nick;
+        document.getElementById('nav-avatar').src = u.avatar;
+        if(u.nick === 'owwner') document.getElementById('nav-nick').className = 'nick-rainbow text-[9px] uppercase tracking-widest mt-1';
     }
 
-    // 📸 ПРЕДПРОСМОТР АВАТАРА
-    function handleImgPreview(input) {
+    function renderProfile() {
+        const u = window.lyneok.user;
+        document.getElementById('prof-img').src = u.avatar;
+        document.getElementById('prof-nick').innerText = u.nick;
+        document.getElementById('prof-balance').innerText = u.balance.toLocaleString() + '₽';
+    }
+
+    window.admTab = (id) => {
+        document.querySelectorAll('.adm-content').forEach(c => c.classList.add('hidden'));
+        document.getElementById(id).classList.remove('hidden');
+        if(id === 'adm-users') renderAdminUsers();
+    };
+
+    async function renderAdminUsers() {
+        const dbRef = ref(db);
+        const snapshot = await get(child(dbRef, `users`));
+        if(snapshot.exists()) {
+            const users = snapshot.val();
+            const body = document.getElementById('adm-user-table-body');
+            body.innerHTML = Object.values(users).map(u => `
+                <tr class="border-b border-border">
+                    <td class="py-4 font-bold ${u.nick === 'owwner' ? 'nick-rainbow' : 'text-blue-500'}">${u.nick}</td>
+                    <td class="py-4 text-green-400">${u.balance}₽</td>
+                    <td class="py-4 text-right"><button class="bg-red-600/20 text-red-500 px-2 py-1 rounded">Блокировать</button></td>
+                </tr>
+            `).join('');
+        }
+    }
+
+    // Вспомогательные функции
+    window.handleImgPreview = (input, imgId) => {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                const img = document.getElementById('reg-preview');
-                img.src = e.target.result;
-                img.classList.remove('hidden');
-                img.previousElementSibling.classList.add('hidden');
+                document.getElementById(imgId).src = e.target.result;
+                document.getElementById(imgId).classList.remove('hidden');
+                if(imgId === 'good-img-preview') document.getElementById('good-ph').classList.add('hidden');
             };
             reader.readAsDataURL(input.files[0]);
         }
-    }
+    };
 
-    // 🔐 АВТОРИЗАЦИЯ
-    function authAction() {
-        const nick = document.getElementById('reg-nick').value;
-        const pass = document.getElementById('reg-pass').value;
-        const email = document.getElementById('reg-email').value;
-        const avatar = document.getElementById('reg-preview').src;
+    window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
+    window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
-        if(!nick || !pass) return alert("Заполните данные!");
-
-        db.currentUser = {
-            id: Date.now(),
-            nick, email, pass, balance: 0, 
-            avatar: avatar.startsWith('data') ? avatar : 'https://i.postimg.cc/mD3m6v90/user-default.png',
-            style: ''
-        };
-        db.users.push(db.currentUser);
-        
-        updateNav();
-        navigate('market');
-    }
-
-    function updateNav() {
-        if(db.currentUser) {
-            document.getElementById('nav-balance').innerText = db.currentUser.balance.toLocaleString() + '₽';
-            document.getElementById('nav-nick').innerText = db.currentUser.nick;
-            document.getElementById('nav-avatar').src = db.currentUser.avatar;
-            
-            if(db.currentUser.style === 'rainbow') document.getElementById('nav-nick').className = 'nick-rainbow text-[9px] uppercase tracking-widest mt-1';
-        }
-    }
-
-    // 🛒 МАРКЕТ
     function renderMarket() {
-        const grid = document.getElementById('market-grid');
-        grid.innerHTML = db.games.map(game => `
-            <div class="glass-hover rounded-[2rem] overflow-hidden cursor-pointer group relative">
-                <img src="${game.img}" class="w-full h-48 object-cover group-hover:scale-110 transition duration-700">
-                <div class="absolute inset-0 bg-gradient-to-t from-[#0a0b10] to-transparent"></div>
-                <div class="absolute bottom-4 left-4">
-                    <h4 class="font-black text-xl italic uppercase">${game.name}</h4>
-                    <p class="text-[9px] text-blue-500 font-bold tracking-widest uppercase">Перейти в маркет</p>
+        const games = [
+            { name: 'Roblox', img: 'https://i.postimg.cc/P5tY8H9D/roblox.jpg' },
+            { name: 'Brawl Stars', img: 'https://i.postimg.cc/g2f7Xm3T/brawl.jpg' },
+            { name: 'Standoff 2', img: 'https://i.postimg.cc/mD3m6v90/user-default.png' }
+        ];
+        document.getElementById('market-grid').innerHTML = games.map(g => `
+            <div class="glass-hover rounded-3xl overflow-hidden h-40 relative cursor-pointer">
+                <img src="${g.img}" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-black/40 flex items-end p-4">
+                    <span class="font-black italic uppercase text-xs">${g.name}</span>
                 </div>
             </div>
         `).join('');
     }
 
-    // 👤 ПРОФИЛЬ
-    function renderProfile() {
-        const u = db.currentUser;
-        if(!u) return;
-        document.getElementById('prof-img').src = u.avatar;
-        document.getElementById('prof-nick').innerText = u.nick;
-        document.getElementById('prof-nick').className = (u.style === 'rainbow' ? 'nick-rainbow ' : u.style === 'neon' ? 'nick-neon ' : '') + 'text-2xl font-black';
-        document.getElementById('prof-email').innerText = u.email;
-        document.getElementById('prof-balance').innerText = u.balance.toLocaleString() + '₽';
-    }
+    window.submitReview = () => {
+        const text = document.getElementById('review-text').value;
+        if(!text) return;
+        window.lyneok.reviews.unshift({ user: window.lyneok.user.nick, text, stars: 5 });
+        renderReviews();
+        closeModal('modal-review');
+    };
 
-    function requestDeposit() {
-        alert("Заявка создана! Ожидайте сообщения от администратора в личном чате для получения реквизитов.");
-    }
-
-    // 😈 АДМИНКА
-    function admTab(id) {
-        document.querySelectorAll('.adm-content').forEach(c => c.classList.add('hidden'));
-        document.getElementById(id).classList.remove('hidden');
-        if(id === 'adm-users') renderAdminUsers();
-    }
-
-    function renderAdminUsers() {
-        const body = document.getElementById('adm-user-table-body');
-        body.innerHTML = db.users.map(u => `
-            <tr class="border-b border-border hover:bg-white/5 transition">
-                <td class="p-4 text-xs text-gray-600">#${u.id}</td>
-                <td class="p-4">
-                    <p class="${u.style === 'rainbow' ? 'nick-rainbow' : u.style === 'neon' ? 'nick-neon' : 'font-bold'}">${u.nick}</p>
-                    <p class="text-[10px] text-gray-500">${u.email}</p>
-                </td>
-                <td class="p-4 font-black text-green-400">${u.balance}₽</td>
-                <td class="p-4 font-mono text-[10px]">${u.pass}</td>
-                <td class="p-4 text-right">
-                    <button class="bg-blue-600/20 text-blue-500 text-[10px] px-3 py-1 rounded-lg uppercase font-bold hover:bg-blue-600 hover:text-white transition">ЛС</button>
-                    <button class="bg-red-600/20 text-red-500 text-[10px] px-3 py-1 rounded-lg uppercase font-bold hover:bg-red-600 hover:text-white transition ml-1">Бан</button>
-                </td>
-            </tr>
-        `).join('');
-    }
-
-    function updateAdminSelects() {
-        const gameSel = document.getElementById('parent-game');
-        gameSel.innerHTML = db.games.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
-        
-        const catSel = document.getElementById('g-cat-select');
-        catSel.innerHTML = db.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-    }
-
-    function admCreateGame() {
-        const name = document.getElementById('new-game-name').value;
-        const img = document.getElementById('new-game-img').value;
-        if(!name) return;
-        db.games.push({ id: Date.now(), name, img: img || 'https://via.placeholder.com/400x200' });
-        renderMarket();
-        updateAdminSelects();
-        alert("Игра добавлена!");
-    }
-
-    function admCreateCat() {
-        const gameId = document.getElementById('parent-game').value;
-        const name = document.getElementById('new-cat-name').value;
-        if(!name) return;
-        db.categories.push({ id: Date.now(), gameId: parseInt(gameId), name });
-        updateAdminSelects();
-        alert("Категория добавлена!");
-    }
-
-    function admCreateProduct() {
-        const name = document.getElementById('g-name').value;
-        const price = document.getElementById('g-price').value;
-        const desc = document.getElementById('g-desc').value;
-        const catId = document.getElementById('g-cat-select').value;
-        const seller = document.getElementById('g-seller').value;
-
-        if(!name || !price) return alert("Заполни данные!");
-
-        db.products.push({ id: Date.now(), catId, name, price, desc, seller });
-        alert("Товар опубликован!");
-    }
-
-    function admSendMsg(chatId, inputId) {
-        const input = document.getElementById(inputId);
-        const box = document.getElementById(chatId);
-        if(!input.value) return;
-        
-        box.innerHTML += `<div class="msg msg-admin">${input.value}</div>`;
-        input.value = "";
-        box.scrollTop = box.scrollHeight;
-    }
-
-    function admToggleMaintenance(val) {
-        db.maintenance = val;
-        const over = document.getElementById('maintenance-overlay');
-        if(val) {
-            document.getElementById('mt-title-display').innerText = document.getElementById('adm-mt-title').value || "Технический перерыв";
-            document.getElementById('mt-text-display').innerText = document.getElementById('adm-mt-text').value || "Мы скоро вернемся.";
-            if(document.getElementById('adm-mt-img').value) document.getElementById('mt-img-display').src = document.getElementById('adm-mt-img').value;
-            over.classList.remove('hidden');
-        } else {
-            over.classList.add('hidden');
-        }
-    }
-
-    function searchUsers(query) {
-        const filtered = db.users.filter(u => u.nick.toLowerCase().includes(query.toLowerCase()));
-        const body = document.getElementById('adm-user-table-body');
-        body.innerHTML = filtered.map(u => `
-            <tr class="border-b border-border hover:bg-white/5 transition">
-                <td class="p-4 text-xs text-gray-600">#${u.id}</td>
-                <td class="p-4">
-                    <p class="${u.style === 'rainbow' ? 'nick-rainbow' : 'font-bold'}">${u.nick}</p>
-                    <p class="text-[10px] text-gray-500">${u.email}</p>
-                </td>
-                <td class="p-4 font-black text-green-400">${u.balance}₽</td>
-                <td class="p-4 font-mono text-[10px]">${u.pass}</td>
-                <td class="p-4 text-right">
-                    <button class="bg-blue-600/20 text-blue-500 text-[10px] px-3 py-1 rounded-lg uppercase font-bold">ЛС</button>
-                </td>
-            </tr>
+    function renderReviews() {
+        document.getElementById('reviews-list').innerHTML = window.lyneok.reviews.map(r => `
+            <div class="glass p-4 rounded-2xl border-l-4 border-blue-600">
+                <div class="flex justify-between mb-2"><span class="font-bold text-[10px]">${r.user}</span><span class="text-yellow-500 text-[8px]">★★★★★</span></div>
+                <p class="text-xs text-gray-400 italic">"${r.text}"</p>
+            </div>
         `).join('');
     }
 </script>
+
 </body>
 </html>
