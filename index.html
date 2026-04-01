@@ -162,6 +162,11 @@
                 </div>
             </section>
 
+            <section class="glass p-6 mb-8 border-orange-600/20">
+                <h3 class="text-[11px] font-black text-orange-500 uppercase mb-5">Модерация товаров</h3>
+                <div id="ad_mod_list" class="space-y-4"></div>
+            </section>
+
             <section class="glass p-6 mb-8">
                 <h3 class="text-[11px] font-black uppercase mb-5 text-red-500">Слежка за пользователями</h3>
                 <input id="ad_u_search" oninput="renderAdmin()" placeholder="Поиск по нику..." class="mb-4 !py-3">
@@ -223,11 +228,9 @@
                 document.getElementById('loader').style.display = 'none';
                 if (sid && data.u && data.u[sid]) {
                     me = data.u[sid];
-                    // Обновляем онлайн
                     db.child(`u/${me.id}/online`).set(Date.now());
                 }
 
-                // Бан проверка
                 if(me && me.bannedUntil && me.bannedUntil > Date.now()) {
                     document.getElementById('ban_scr').classList.remove('hidden');
                     document.getElementById('ban_time_text').innerText = "До: " + new Date(me.bannedUntil).toLocaleString();
@@ -251,19 +254,16 @@
             document.getElementById('h_ava').src = me.ava;
             document.getElementById('p_ava').src = me.ava;
             
-            // Ник со стилем
             const nEl = document.getElementById('p_n');
             nEl.innerText = me.n;
             nEl.className = `text-3xl font-black f-${me.font||0} nick-${me.color||'none'}`;
             document.getElementById('p_badge').innerHTML = getBadgeHTML(me.badge);
             
-            // Рейтинг
             const uDeals = Object.values(data.d || {}).filter(d => d.sid === me.id && d.rating);
             const avg = uDeals.length ? (uDeals.reduce((a,b)=>a+b.rating,0)/uDeals.length).toFixed(1) : "5.0";
             document.getElementById('p_rating').innerText = avg + " ★";
             document.getElementById('p_rev_count').innerText = uDeals.length;
 
-            // Маркет Категории
             if(!curG) {
                 document.getElementById('cat_grid').innerHTML = Object.values(data.games || {}).map(g => `
                     <div class="glass p-3 text-center" onclick="openGame('${g.id}')">
@@ -272,7 +272,6 @@
                     </div>`).join('');
             }
 
-            // Сделки
             const deals = Object.values(data.d || {}).filter(d => d.bid === me.id || d.sid === me.id).reverse();
             document.getElementById('deals_list').innerHTML = deals.map(d => {
                 let btn = `<button onclick="openChat('${d.id}', '${d.t}')" class="bg-blue-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase">Чат</button>`;
@@ -282,7 +281,6 @@
                 return `<div class="glass p-5 flex justify-between items-center"><div><b class="text-sm">${d.t}</b><br><span class="text-[9px] opacity-40 uppercase">${d.status} | ${d.p}₽</span></div>${btn}</div>`;
             }).join('');
 
-            // Выбор игр при продаже
             document.getElementById('s_game').innerHTML = Object.values(data.games || {}).map(g => `<option value="${g.id}">${g.name}</option>`).join('');
             
             if(me.isAdmin || me.n.toLowerCase() === 'owwner') renderAdmin();
@@ -295,7 +293,6 @@
             return `<i class="fa-solid fa-check-double text-blue-400 ml-1"></i>`;
         }
 
-        // --- АДМИНКА ФУНКЦИИ ---
         function renderAdmin() {
             const search = document.getElementById('ad_u_search').value.toLowerCase();
             const users = Object.values(data.u || {}).filter(u => u.n.toLowerCase().includes(search));
@@ -320,7 +317,6 @@
                 </div>`;
             }).join('');
 
-            // Сделки за 24 часа
             const dayAgo = Date.now() - 86400000;
             const recentDeals = Object.values(data.d || {}).filter(d => (d.time || 0) > dayAgo);
             document.getElementById('ad_deals_list').innerHTML = recentDeals.map(d => `
@@ -333,7 +329,6 @@
                 </div>
             `).join('');
 
-            // Список игр для админа
             document.getElementById('ad_games_list').innerHTML = Object.values(data.games || {}).map(g => `
                 <div class="glass p-3 flex justify-between items-center">
                     <span class="text-xs font-black uppercase">${g.name}</span>
@@ -343,6 +338,36 @@
                     </div>
                 </div>
             `).join('');
+
+            // --- НОВЫЙ БЛОК: Модерация товаров ---
+            const pendingItems = Object.values(data.i || {}).filter(x => x.status === 'pending');
+            document.getElementById('ad_mod_list').innerHTML = pendingItems.length ? pendingItems.map(i => `
+                <div class="glass p-4">
+                    <div class="flex gap-3 mb-3">
+                        <img src="${i.img}" class="w-12 h-12 rounded-xl object-cover">
+                        <div>
+                            <b class="text-xs uppercase block">${i.t}</b>
+                            <span class="text-[10px] opacity-50">${i.p} ₽ | Продавец: ${data.u[i.sid]?.n || 'Unknown'}</span>
+                            <p class="text-[9px] opacity-40 mt-1 line-clamp-2">${i.desc}</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="admModItem('${i.id}', 'approved')" class="flex-1 bg-green-600/20 text-green-500 py-2 rounded-xl text-[10px] font-black uppercase">Одобрить</button>
+                        <button onclick="admModItem('${i.id}', 'rejected')" class="flex-1 bg-red-600/20 text-red-500 py-2 rounded-xl text-[10px] font-black uppercase">Отклонить</button>
+                    </div>
+                </div>
+            `).join('') : '<p class="text-[10px] opacity-40 text-center uppercase">Нет товаров на проверке</p>';
+        }
+
+        // --- НОВАЯ ФУНКЦИЯ: Действия с товаром ---
+        function admModItem(id, status) {
+            if(status === 'rejected') {
+                db.child(`i/${id}`).remove();
+                Tst.fire({icon:'info', title:'Товар отклонен и удален'});
+            } else {
+                db.child(`i/${id}/status`).set('approved');
+                Tst.fire({icon:'success', title:'Товар одобрен'});
+            }
         }
 
         async function admEditBal(uid) {
@@ -421,7 +446,6 @@
             Tst.fire({icon:'success', title:'Комиссия сохранена'});
         }
 
-        // --- ЛОГИКА МАРКЕТА ---
         function openGame(gid) {
             curG = gid;
             document.getElementById('market_main').classList.add('hidden');
@@ -436,7 +460,10 @@
             document.getElementById('items_view').classList.remove('hidden');
             
             const priceFilter = document.getElementById('m_filter_price').value;
-            let its = Object.values(data.i || {}).filter(x => x.game === curG && !x.sold);
+            
+            // --- ОБНОВЛЕННЫЙ ФИЛЬТР: Показываем только одобренные товары или старые без статуса ---
+            let its = Object.values(data.i || {}).filter(x => x.game === curG && !x.sold && (x.status === 'approved' || !x.status));
+            
             if(sid !== 'all') its = its.filter(x => x.sub === sid);
             
             if(priceFilter === '0-500') its = its.filter(x => x.p <= 500);
@@ -466,7 +493,6 @@
             }
         }
 
-        // Вспомогательные
         function calcCom() {
             const p = Number(document.getElementById('s_p').value);
             const perc = data.settings.com || 0;
@@ -485,9 +511,10 @@
                 desc: document.getElementById('s_acc').value,
                 game: document.getElementById('s_game').value,
                 sub: document.getElementById('s_subcat').value,
-                sold: false, time: Date.now()
+                sold: false, time: Date.now(),
+                status: 'pending' // --- ДОБАВЛЕН СТАТУС ОЖИДАНИЯ ---
             });
-            Tst.fire({icon:'success', title:'Опубликовано'});
+            Tst.fire({icon:'success', title:'Отправлено на модерацию'}); // --- ИЗМЕНЕН ТЕКСТ ---
             switchT('market');
         }
 
