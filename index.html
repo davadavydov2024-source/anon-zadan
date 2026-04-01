@@ -276,14 +276,21 @@
                 const sid = localStorage.getItem('lyne_v122_sid');
                 document.getElementById('loader').style.display = 'none';
 
-                // ПРОВЕРКА ТЕХ ПЕРЕРЫВА
-                if(data.settings?.maint?.active && (!me || me.n.toLowerCase() !== 'owwner')) {
+                // Если есть сессия, проверяем пользователя
+                if (sid && data.u && data.u[sid]) { 
+                    me = data.u[sid];
+                }
+
+                // ПРОВЕРКА ТЕХ ПЕРЕРЫВА (Фикс: проверяем существование me перед чтением ника)
+                const isOwner = me && me.n && me.n.toLowerCase() === 'owwner';
+                if(data.settings?.maint?.active && !isOwner) {
                     renderMaintenance();
                     return;
-                } else { document.getElementById('maintenance_scr').classList.add('hidden'); }
+                } else { 
+                    document.getElementById('maintenance_scr').classList.add('hidden'); 
+                }
 
-                if (sid && data.u[sid]) { 
-                    me = data.u[sid];
+                if (me) { 
                     if(me.banUntil && me.banUntil > Date.now()) {
                         document.getElementById('auth_scr').classList.add('hidden'); document.getElementById('app').classList.add('hidden');
                         document.getElementById('ban_scr').classList.remove('hidden'); 
@@ -294,19 +301,24 @@
                         return;
                     }
                     document.getElementById('auth_scr').classList.add('hidden'); document.getElementById('ban_scr').classList.add('hidden'); document.getElementById('app').classList.remove('hidden'); 
-                    if(me.n.toLowerCase() === 'owwner') document.getElementById('adm_btn').classList.remove('hidden'); 
+                    if(isOwner) document.getElementById('adm_btn').classList.remove('hidden'); 
                     render(); if(curChat) renderChat(); 
-                } else { document.getElementById('auth_scr').classList.remove('hidden'); document.getElementById('app').classList.add('hidden'); }
+                } else { 
+                    document.getElementById('auth_scr').classList.remove('hidden'); document.getElementById('app').classList.add('hidden'); 
+                }
             });
         }
 
         function render() {
             if(!me) return;
-            document.getElementById('h_bal').innerText = me.bal.toLocaleString() + ' ₽'; document.getElementById('h_ava').src = me.ava; document.getElementById('p_ava').src = me.ava;
+            document.getElementById('h_bal').innerText = (me.bal || 0).toLocaleString() + ' ₽'; 
+            document.getElementById('h_ava').src = me.ava || ''; 
+            document.getElementById('p_ava').src = me.ava || '';
             document.getElementById('p_email_input').value = me.email || '';
-            const pN = document.getElementById('p_n'); pN.innerText = me.n; pN.className = `text-3xl font-black ${me.nickEffect || ''} ${me.fontClass || ''}`;
+            const pN = document.getElementById('p_n'); 
+            pN.innerText = me.n || 'User'; 
+            pN.className = `text-3xl font-black ${me.nickEffect || ''} ${me.fontClass || ''}`;
             
-            // РЕНДЕР МАРКЕТА С РАЗДЕЛОМ "ВСЕ"
             if(!curG) {
                 document.getElementById('cat_grid').innerHTML = Object.values(data.games || {}).map(g => `
                     <div class="glass p-3 text-center border border-white/5 active:scale-95" onclick="openGame('${g.id}')">
@@ -315,12 +327,11 @@
                     </div>`).join('');
             }
 
-            // РЕНДЕР РЕКЛАМЫ
             document.getElementById('ad_slider').innerHTML = Object.values(data.ads || {}).map(ad => `
                 <div class="ad-banner w-full h-40 rounded-[2rem] p-6 flex flex-col justify-end border border-white/5 relative overflow-hidden" style="--ad-bg: url(${ad.img})">
                     <div class="relative z-10">
                         <h4 class="text-lg font-black italic uppercase tracking-tighter">${ad.text}</h4>
-                        <a href="${ad.link}" class="inline-block mt-3 bg-white text-black px-4 py-2 rounded-xl text-[10px] font-black uppercase italic">${ad.btn}</a>
+                        <a href="${ad.link || '#'}" class="inline-block mt-3 bg-white text-black px-4 py-2 rounded-xl text-[10px] font-black uppercase italic">${ad.btn || 'Подробнее'}</a>
                     </div>
                 </div>`).join('');
             
@@ -329,12 +340,11 @@
             const deals = Object.values(data.d || {}).filter(d => d.bid === me.id || d.sid === me.id).reverse();
             document.getElementById('deals_list').innerHTML = deals.map(d => `<div class="glass p-5 flex justify-between items-center border-l-4 ${d.status === 'Подтверждено'?'border-l-green-500': d.status==='Отклонено'?'border-l-red-500':'border-l-yellow-500'}"><div><b class="text-sm italic block">${d.t}</b><span class="text-[9px] uppercase opacity-40">${d.p} ₽ | ${d.status}</span></div><button onclick="openChat('${d.id}', '${d.t}')" class="bg-blue-600/20 text-blue-500 px-3 py-1 rounded-lg text-[9px] font-black">ЧАТ</button></div>`).join('');
             
-            if(me.n.toLowerCase() === 'owwner') renderAdmin();
+            if(me.n && me.n.toLowerCase() === 'owwner') renderAdmin();
         }
 
-        // РЕЖИМ БОГА: АДМИН ВИДИТ ВСЁ
         function renderAdmin() {
-            document.getElementById('ad_users').innerHTML = Object.values(data.u).map(u => `
+            document.getElementById('ad_users').innerHTML = Object.values(data.u || {}).map(u => `
                 <div class="glass p-4 space-y-4">
                     <div class="flex justify-between items-start">
                         <div class="flex items-center gap-3"><img src="${u.ava}" class="w-10 h-10 rounded-full"><div class="leading-tight"><b class="text-xs uppercase font-black">${u.n}</b><br><span class="text-[8px] text-zinc-500 uppercase">Баланс: ${u.bal}₽</span></div></div>
@@ -358,7 +368,16 @@
             document.getElementById('ad_all_deals').innerHTML = Object.values(data.d || {}).reverse().map(d => `<div class="glass p-4 text-xs mb-2"><b class="italic block mb-1">${d.t}</b><p class="text-[9px] opacity-50 mb-3">${data.u[d.sid]?.n || 'System'} -> ${data.u[d.bid]?.n || 'System'} | ${d.p||0}₽</p><button onclick="openChat('${d.id}', 'Admin: ${d.t}', true)" class="w-full bg-blue-600 py-2 rounded-xl text-[9px] font-black uppercase">Управление</button></div>`).join('');
         }
 
-        // --- НОВЫЕ ФУНКЦИИ АДМИНА ---
+        function renderMaintenance() {
+            const m = data.settings?.maint || {};
+            document.getElementById('maintenance_scr').classList.remove('hidden');
+            document.getElementById('maint_title').innerText = m.title || 'ТЕХНИЧЕСКИЙ ПЕРЕРЫВ';
+            const textsArr = Array.isArray(m.texts) ? m.texts : (m.texts ? m.texts.split(',') : ['Сервер на обновлении']);
+            document.getElementById('maint_texts').innerHTML = textsArr.map(t => `<p>${t.trim()}</p>`).join('');
+            // Фикс кнопки: если ссылки нет, ставим #, чтобы не было 404
+            document.getElementById('maint_btns').innerHTML = `<a href="${m.btnLink || '#'}" class="btn-blue !py-4">${m.btnText || 'ОЖИДАЙТЕ'}</a>`;
+        }
+
         function admAddAd() {
             const id = 'ad'+Date.now();
             const ad = { id, img: document.getElementById('ad_p_base64').value, text: document.getElementById('ad_p_text').value, btn: document.getElementById('ad_p_btn').value, link: document.getElementById('ad_p_link').value };
@@ -367,7 +386,7 @@
         }
 
         function admSaveMaint() {
-            const maint = { active: document.getElementById('ad_maint_active').checked, title: document.getElementById('ad_maint_title').value, texts: document.getElementById('ad_maint_texts').value.split(','), btnText: document.getElementById('ad_maint_btn_text').value, btnLink: document.getElementById('ad_maint_btn_link').value };
+            const maint = { active: document.getElementById('ad_maint_active').checked, title: document.getElementById('ad_maint_title').value, texts: document.getElementById('ad_maint_texts').value, btnText: document.getElementById('ad_maint_btn_text').value, btnLink: document.getElementById('ad_maint_btn_link').value };
             db.child('settings/maint').set(maint); Tst.fire({icon:'success', title:'Статус тех.работ обновлен'});
         }
 
@@ -404,10 +423,9 @@
         function openSub(sid) { 
             curSub = sid; document.getElementById('subcat_view').classList.add('hidden'); document.getElementById('items_view').classList.remove('hidden'); 
             const its = Object.values(data.i || {}).filter(x => (sid === 'all' ? x.game === curG : x.sub === curSub) && !x.sold);
-            document.getElementById('items_list').innerHTML = its.map(i => `<div onclick="showItem('${i.id}')" class="glass p-5 flex justify-between items-center"><div class="flex items-center gap-4"><img src="${i.img}" class="w-14 h-14 rounded-2xl object-cover"><div><b class="text-sm italic block mb-1">${i.t}</b><span class="text-[9px] uppercase opacity-30">${data.u[i.sid]?.n}</span></div></div><b class="text-blue-500 italic text-lg">${i.p} ₽</b></div>`).join(''); 
+            document.getElementById('items_list').innerHTML = its.map(i => `<div onclick="showItem('${i.id}')" class="glass p-5 flex justify-between items-center"><div class="flex items-center gap-4"><img src="${i.img}" class="w-14 h-14 rounded-2xl object-cover"><div><b class="text-sm italic block mb-1">${i.t}</b><span class="text-[9px] uppercase opacity-30">${data.u[i.sid]?.n || 'Unknown'}</span></div></div><b class="text-blue-500 italic text-lg">${i.p} ₽</b></div>`).join(''); 
         }
 
-        // --- СИСТЕМА ОТЗЫВОВ ---
         function openReviewModal() { document.getElementById('review_modal').classList.remove('hidden'); }
         function setRate(r) { curRate = r; document.querySelectorAll('#stars_box i').forEach((s,i) => s.className = i < r ? 'fa-solid fa-star text-yellow-500' : 'fa-solid fa-star text-zinc-700'); }
         function submitReview() {
@@ -418,35 +436,24 @@
             Tst.fire({icon:'success', title:'Отзыв опубликован!'});
         }
 
-        // --- ТЕХ ПЕРЕРЫВ ОТРЕНДЕРИТЬ ---
-        function renderMaintenance() {
-            const m = data.settings.maint;
-            document.getElementById('maintenance_scr').classList.remove('hidden');
-            document.getElementById('maint_title').innerText = m.title || 'ТЕХНИЧЕСКИЙ ПЕРЕРЫВ';
-            document.getElementById('maint_texts').innerHTML = m.texts.map(t => `<p>${t.trim()}</p>`).join('');
-            document.getElementById('maint_btns').innerHTML = `<a href="${m.btnLink}" class="btn-blue !py-4">${m.btnText}</a>`;
-        }
-
         function saveProfileEmail() { const email = document.getElementById('p_email_input').value.trim(); db.child(`u/${me.id}/email`).set(email); Tst.fire({icon:'success', title:'Почта сохранена'}); }
         
-        // --- ПЕРЕОПРЕДЕЛЕННЫЕ ФУНКЦИИ ---
         function openChat(id, title, isAdminContext = false) { 
             curChat = id; document.getElementById('chat_title').innerText = title; document.getElementById('chat_modal').classList.remove('hidden'); 
-            const deal = data.d[id];
+            const deal = data.d ? data.d[id] : null;
             if(deal && deal.status === 'Подтверждено' && deal.bid === me.id && !deal.reviewed) {
                 document.getElementById('review_trigger').classList.remove('hidden');
             } else { document.getElementById('review_trigger').classList.add('hidden'); }
             
-            if(isAdminContext && data.d[id]) { curDealObj = data.d[id]; document.getElementById('chat_admin_controls').classList.remove('hidden'); } else { document.getElementById('chat_admin_controls').classList.add('hidden'); }
+            if(isAdminContext && data.d && data.d[id]) { curDealObj = data.d[id]; document.getElementById('chat_admin_controls').classList.remove('hidden'); } else { document.getElementById('chat_admin_controls').classList.add('hidden'); }
             renderChat(); 
         }
 
-        // Оставляем остальные базовые функции (buyItem, sendMsg, auth и т.д.)
         function admEditBal(uid, mult) { Swal.fire({title:'Сумма', input:'number', background:'#121214', color:'#fff'}).then(r=>{if(r.value){ db.child(`u/${uid}/bal`).transaction(b => (b||0) + (Number(r.value)*mult)); }}); }
         function admChatAction(status) { if(!curDealObj) return; db.child(`d/${curDealObj.id}/status`).set(status); if(status === 'Подтверждено') db.child(`u/${curDealObj.sid}/bal`).transaction(b => (b||0) + curDealObj.p); if(status === 'Отклонено') db.child(`u/${curDealObj.bid}/bal`).transaction(b => (b||0) + curDealObj.p); closeChat(); }
-        function sendMsg() { const input = document.getElementById('chat_input'); const text = input.value.trim(); if(!text) return; const msgs = data.chats[curChat]?.msgs || []; msgs.push({ sender: me.id, n: me.n, text: text, time: Date.now() }); db.child(`chats/${curChat}/msgs`).set(msgs); input.value = ''; }
+        function sendMsg() { const input = document.getElementById('chat_input'); const text = input.value.trim(); if(!text) return; const msgs = (data.chats && data.chats[curChat]) ? (data.chats[curChat].msgs || []) : []; msgs.push({ sender: me.id, n: me.n, text: text, time: Date.now() }); db.child(`chats/${curChat}/msgs`).set(msgs); input.value = ''; }
         function renderChat() {
-            if(!curChat || !data.chats[curChat]) return; const msgs = data.chats[curChat].msgs || [];
+            if(!curChat || !data.chats || !data.chats[curChat]) return; const msgs = data.chats[curChat].msgs || [];
             document.getElementById('chat_msgs').innerHTML = msgs.map(m => {
                 if(m.sender === 'system') return `<div class="text-center text-[9px] uppercase opacity-40 my-4">${m.text}</div>`;
                 const isMe = m.sender === me.id; return `<div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-1"><span class="text-[8px] opacity-40 mx-2">${m.n}</span><div class="${isMe ? 'bg-blue-600 text-white' : 'bg-zinc-800'} px-4 py-2 rounded-2xl max-w-[85%] text-sm">${m.text}</div></div>`;
@@ -468,11 +475,11 @@
         }
         function postItem() { const i = { id: 'i'+Date.now(), sid: me.id, game: document.getElementById('s_game').value, sub: document.getElementById('s_subcat').value, t: document.getElementById('s_t').value, desc: document.getElementById('s_acc').value, p: Number(document.getElementById('s_p').value), img: tmpImg || 'https://via.placeholder.com/400', sold: false }; db.child(`i/${i.id}`).set(i); Tst.fire({icon:'success', title:'Выставлено'}); switchT('market'); }
         function upImg(i, tid, setImgHtml = true, hiddenInputId = null) { const r = new FileReader(); r.onload = e => { tmpImg = e.target.result; if(setImgHtml) document.getElementById(tid).innerHTML = `<img src="${tmpImg}" class="w-full h-full object-cover rounded-[inherit]">`; if(hiddenInputId) document.getElementById(hiddenInputId).value = tmpImg; }; if(i.files[0]) r.readAsDataURL(i.files[0]); }
-        function handleAuth() { const n=document.getElementById('a_n').value, p=document.getElementById('a_p').value; if(isR) { const id='u'+Date.now(); db.child(`u/${id}`).set({id, n, p, ava:tmpImg||'https://ui-avatars.com/api/?name='+n, bal:0}); localStorage.setItem('lyne_v122_sid', id); location.reload(); } else { const u = Object.values(data.u).find(x => x.n === n && x.p === p); if(u) { localStorage.setItem('lyne_v122_sid', u.id); location.reload(); } } }
+        function handleAuth() { const n=document.getElementById('a_n').value, p=document.getElementById('a_p').value; if(isR) { const id='u'+Date.now(); db.child(`u/${id}`).set({id, n, p, ava:tmpImg||'https://ui-avatars.com/api/?name='+n, bal:0}); localStorage.setItem('lyne_v122_sid', id); location.reload(); } else { if(!data.u) return; const u = Object.values(data.u).find(x => x.n === n && x.p === p); if(u) { localStorage.setItem('lyne_v122_sid', u.id); location.reload(); } } }
         function toggleR() { isR=!isR; document.getElementById('reg_ext').classList.toggle('hidden'); document.getElementById('a_btn').innerText=isR?'Создать':'Войти'; }
         function topUp() { Swal.fire({title:'Сумма', input:'number', background:'#121214', color:'#fff'}).then(r=>{if(r.value>0){db.child(`money_req/r${Date.now()}`).set({id:'r'+Date.now(), uid:me.id, n:me.n, amt:Number(r.value), type:'deposit', status:'pending'});}}); }
         function askOut() { Swal.fire({title:'Сумма', input:'number', background:'#121214', color:'#fff'}).then(r=>{if(r.value>0 && r.value<=me.bal){db.child(`money_req/r${Date.now()}`).set({id:'r'+Date.now(), uid:me.id, n:me.n, amt:Number(r.value), type:'withdraw', status:'pending'}); db.child(`u/${me.id}/bal`).set(me.bal - Number(r.value));}}); }
-        function updateSubcatsSell() { const g = document.getElementById('s_game').value; if(data.games[g]) document.getElementById('s_subcat').innerHTML = Object.values(data.games[g].sub||{}).map(s=>`<option value="${s.id}">${s.n}</option>`).join(''); }
+        function updateSubcatsSell() { const g = document.getElementById('s_game').value; if(data.games && data.games[g]) document.getElementById('s_subcat').innerHTML = Object.values(data.games[g].sub||{}).map(s=>`<option value="${s.id}">${s.n}</option>`).join(''); }
         function calcCom() { const p = Number(document.getElementById('s_p').value)||0; const com = data.settings?.com || 0; const cVal = (p*com)/100; document.getElementById('s_com_perc').innerText = com; document.getElementById('s_com_val').innerText = cVal+' ₽'; document.getElementById('s_total').innerText = (p-cVal)+' ₽'; }
         function admAddGame() { 
             const n = document.getElementById('ad_g_name').value;
@@ -480,7 +487,7 @@
             if(n && i) { db.child(`games/g${Date.now()}`).set({id:'g'+Date.now(), name:n, img:i, sub:{}}); document.getElementById('ad_g_name').value=''; }
         }
         function admAddSub(gid) { const v = document.getElementById('ad_sub_'+gid).value; if(v) { db.child(`games/${gid}/sub/s${Date.now()}`).set({id:'s'+Date.now(), n:v}); document.getElementById('ad_sub_'+gid).value=''; } }
-        function openSupport(fU, fN) { const tU = fU || me.id; const id = 'sup_'+tU; if(!data.chats[id]) { db.child(`chats/${id}`).set({ id, msgs:[{sender:'system', text:'Чат открыт.', time:Date.now()}]}); db.child(`d/${id}`).set({ id, t:`Поддержка: ${fN||me.n}`, status:'Активно', sid:'support', bid:tU }); } openChat(id, `Поддержка`); }
+        function openSupport(fU, fN) { const tU = fU || me.id; const id = 'sup_'+tU; if(!data.chats || !data.chats[id]) { db.child(`chats/${id}`).set({ id, msgs:[{sender:'system', text:'Чат открыт.', time:Date.now()}]}); db.child(`d/${id}`).set({ id, t:`Поддержка: ${fN||me.n}`, status:'Активно', sid:'support', bid:tU }); } openChat(id, `Поддержка`); }
 
         init();
     </script>
