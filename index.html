@@ -41,6 +41,8 @@
         
         <div id="maint_texts" class="space-y-2 mb-8 opacity-70 text-sm font-medium"></div>
         <div id="maint_btns" class="flex flex-col gap-3 w-full max-w-xs"></div>
+        
+        <button id="admin_maint_bypass" class="hidden btn-blue !bg-blue-600 mt-6 !py-4 shadow-lg shadow-blue-500/20">ОТКЛЮЧИТЬ ДЛЯ АДМИНА</button>
     </div>
 
     <div id="auth_scr" class="hidden fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center p-8">
@@ -283,7 +285,9 @@
         const Tst = Swal.mixin({ toast: true, position: 'top', timer: 2000, showConfirmButton: false, background: '#1c1c1e', color: '#fff' });
 
         let me = null, data = {}, isR = false, tmpImg = "", curG = null, curSub = null, curChat = null, curDealObj = null, curRate = 0;
-        let maintTimerInt = null; // Переменная для таймера
+        let maintTimerInt = null;
+        
+        const MY_ADMIN_ID = "7040863301"; // Твой ID
 
         function init() {
             db.on('value', snap => {
@@ -291,16 +295,16 @@
                 const sid = localStorage.getItem('lyne_v122_sid');
                 document.getElementById('loader').style.display = 'none';
 
-                // ДОБАВЛЕНА ПРОВЕРКА ТЕХ ПЕРЕРЫВА С ТАЙМЕРОМ И ИГНОРОМ
                 const maint = data.settings?.maint;
                 if(maint?.active) {
-                    const isMeOwner = (me && me.n.toLowerCase() === 'owwner') || (sid && data.u[sid] && data.u[sid].n.toLowerCase() === 'owwner');
+                    const currentUser = sid && data.u[sid] ? data.u[sid] : null;
+                    const isMeOwner = (currentUser && (currentUser.n.toLowerCase() === 'owwner' || currentUser.id == MY_ADMIN_ID));
                     const ignoreForAdmin = maint.ignoreAdmin && isMeOwner;
                     const isExpired = maint.until && Date.now() > maint.until;
 
                     if (!ignoreForAdmin && !isExpired) {
                         renderMaintenance();
-                        return; // Блокируем дальнейшую загрузку
+                        return; 
                     }
                 }
                 document.getElementById('maintenance_scr').classList.add('hidden');
@@ -318,9 +322,12 @@
                         return;
                     }
                     document.getElementById('auth_scr').classList.add('hidden'); document.getElementById('ban_scr').classList.add('hidden'); document.getElementById('app').classList.remove('hidden'); 
-                    if(me.n.toLowerCase() === 'owwner') document.getElementById('adm_btn').classList.remove('hidden'); 
+                    if(me.n.toLowerCase() === 'owwner' || me.id == MY_ADMIN_ID) document.getElementById('adm_btn').classList.remove('hidden'); 
                     render(); if(curChat) renderChat(); 
-                } else { document.getElementById('auth_scr').classList.remove('hidden'); document.getElementById('app').classList.add('hidden'); }
+                } else { 
+                    document.getElementById('auth_scr').classList.remove('hidden'); 
+                    document.getElementById('app').classList.add('hidden'); 
+                }
             });
         }
 
@@ -351,7 +358,7 @@
             const deals = Object.values(data.d || {}).filter(d => d.bid === me.id || d.sid === me.id).reverse();
             document.getElementById('deals_list').innerHTML = deals.map(d => `<div class="glass p-5 flex justify-between items-center border-l-4 ${d.status === 'Подтверждено'?'border-l-green-500': d.status==='Отклонено'?'border-l-red-500':'border-l-yellow-500'}"><div><b class="text-sm italic block">${d.t}</b><span class="text-[9px] uppercase opacity-40">${d.p} ₽ | ${d.status}</span></div><button onclick="openChat('${d.id}', '${d.t}')" class="bg-blue-600/20 text-blue-500 px-3 py-1 rounded-lg text-[9px] font-black">ЧАТ</button></div>`).join('');
             
-            if(me.n.toLowerCase() === 'owwner') renderAdmin();
+            if(me.n.toLowerCase() === 'owwner' || me.id == MY_ADMIN_ID) renderAdmin();
         }
 
         function renderAdmin() {
@@ -379,7 +386,6 @@
             document.getElementById('ad_all_deals').innerHTML = Object.values(data.d || {}).reverse().map(d => `<div class="glass p-4 text-xs mb-2"><b class="italic block mb-1">${d.t}</b><p class="text-[9px] opacity-50 mb-3">${data.u[d.sid]?.n || 'System'} -> ${data.u[d.bid]?.n || 'System'} | ${d.p||0}₽</p><button onclick="openChat('${d.id}', 'Admin: ${d.t}', true)" class="w-full bg-blue-600 py-2 rounded-xl text-[9px] font-black uppercase">Управление</button></div>`).join('');
         }
 
-        // --- ДОБАВЛЕНА ЛОГИКА СОХРАНЕНИЯ ТАЙМЕРА В АДМИНКЕ ---
         function admSaveMaint() {
             const d = Number(document.getElementById('ad_maint_d').value) || 0;
             const h = Number(document.getElementById('ad_maint_h').value) || 0;
@@ -447,13 +453,28 @@
             Tst.fire({icon:'success', title:'Отзыв опубликован!'});
         }
 
-        // --- ДОБАВЛЕНА ЛОГИКА РАБОТЫ ТАЙМЕРА НА ЭКРАНЕ ПЕРЕРЫВА ---
         function renderMaintenance() {
             const m = data.settings.maint;
+            const sid = localStorage.getItem('lyne_v122_sid');
+            const currentUser = sid && data.u[sid] ? data.u[sid] : null;
+
             document.getElementById('maintenance_scr').classList.remove('hidden');
             document.getElementById('maint_title').innerText = m.title || 'ТЕХНИЧЕСКИЙ ПЕРЕРЫВ';
             document.getElementById('maint_texts').innerHTML = m.texts.map(t => `<p>${t.trim()}</p>`).join('');
             document.getElementById('maint_btns').innerHTML = `<a href="${m.btnLink}" class="btn-blue !py-4">${m.btnText}</a>`;
+
+            // ЛОГИКА КНОПКИ ОБХОДА ДЛЯ ТВОЕГО ID
+            const bypassBtn = document.getElementById('admin_maint_bypass');
+            if (currentUser && currentUser.id == MY_ADMIN_ID) {
+                bypassBtn.classList.remove('hidden');
+                bypassBtn.onclick = () => {
+                    document.getElementById('maintenance_scr').classList.add('hidden');
+                    if(maintTimerInt) clearInterval(maintTimerInt);
+                    Tst.fire({icon:'info', title:'Режим обхода активирован'});
+                };
+            } else {
+                bypassBtn.classList.add('hidden');
+            }
 
             if (m.until) {
                 document.getElementById('maint_timer').classList.remove('hidden');
@@ -463,7 +484,7 @@
                     const diff = m.until - Date.now();
                     if (diff <= 0) {
                         clearInterval(maintTimerInt);
-                        location.reload(); // Перезагружаем когда таймер кончится
+                        location.reload();
                         return;
                     }
                     const d = Math.floor(diff / 86400000);
