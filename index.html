@@ -41,9 +41,11 @@
     <div id="maintenance_scr" class="hidden fixed inset-0 z-[20000] bg-black flex flex-col items-center justify-center p-8 text-center overflow-y-auto">
         <div class="mb-6"><i class="fa-solid fa-screwdriver-wrench text-6xl text-yellow-500 animate-pulse"></i></div>
         <h1 id="maint_title" class="text-4xl font-black italic uppercase text-yellow-500 mb-4">ТЕХНИЧЕСКИЙ ПЕРЕРЫВ</h1>
-        <div id="maint_texts" class="text-white opacity-70 text-sm font-medium mb-8 max-w-sm">Сервера временно недоступны. Мы работаем над обновлением!</div>
+        <div id="maint_texts" class="text-white opacity-70 text-sm font-medium mb-4 max-w-sm">Сервера временно недоступны. Мы работаем над обновлением!</div>
+        <div id="maint_timer" class="text-blue-500 font-black text-xl mb-8"></div>
         <div id="maint_btns" class="flex flex-col gap-3 w-full max-w-xs">
             <a id="maint_link" href="#" class="btn-blue text-center">УЗНАТЬ ПОДРОБНОСТИ</a>
+            <button id="maint_adm_off" onclick="disableMaintForMe()" class="hidden text-[10px] font-black text-zinc-600 uppercase mt-4">ОТКЛЮЧИТЬ ДЛЯ МЕНЯ (АДМИН)</button>
         </div>
     </div>
 
@@ -113,10 +115,10 @@
                 <input id="s_t" placeholder="Название">
                 <textarea id="s_acc" rows="3" placeholder="Описание товара"></textarea>
                 <div>
-                    <input id="s_p" type="number" placeholder="Цена ₽" oninput="calcCom()">
+                    <input id="s_p" type="number" placeholder="Цена ₽ (от 70₽)" oninput="calcCom()">
                     <p class="text-[9px] font-black uppercase text-zinc-500 mt-2">Комиссия (<span id="s_com_perc">0</span>%): <span id="s_com_val">0 ₽</span></p>
                 </div>
-                <button onclick="postItem()" class="btn-blue">Опубликовать</button>
+                <button onclick="postItem()" class="btn-blue">Опубликовать (На модерацию)</button>
             </div>
         </main>
 
@@ -142,21 +144,45 @@
         <main id="tab_admin" class="tab-content">
             <h1 class="text-4xl font-black italic mb-8">TITAN <span class="text-red-500">SYSTEM</span></h1>
             
+            <section class="glass p-6 mb-8 border-blue-500/20">
+                <h3 class="text-[11px] font-black uppercase mb-4 text-blue-500">Настройки Telegram Уведомлений</h3>
+                <div class="space-y-3">
+                    <input id="ad_bot_token" placeholder="Bot Token" class="!py-3 !text-xs">
+                    <input id="ad_bot_admin" placeholder="Admin Chat ID" class="!py-3 !text-xs">
+                    <div class="flex items-center justify-between bg-zinc-900 p-4 rounded-xl">
+                        <span class="text-[10px] font-black uppercase">Уведомлять юзеров</span>
+                        <input type="checkbox" id="ad_bot_users" class="!w-6 !h-6">
+                    </div>
+                    <button onclick="admSaveBot()" class="btn-blue !py-3 !text-[10px]">Сохранить Бота</button>
+                </div>
+            </section>
+
             <section class="glass p-6 mb-8 border-yellow-500/20">
-                <h3 class="text-[11px] font-black uppercase mb-4 text-yellow-500">Brawl Тех. Перерыв</h3>
+                <h3 class="text-[11px] font-black uppercase mb-4 text-yellow-500">Тех. Перерыв</h3>
                 <div class="space-y-3">
                     <div class="flex items-center justify-between bg-zinc-900 p-4 rounded-xl">
-                        <span class="text-[10px] font-black uppercase">Статус перерыва</span>
+                        <span class="text-[10px] font-black uppercase">Активен</span>
                         <input type="checkbox" id="ad_maint_active" class="!w-6 !h-6">
                     </div>
-                    <input id="ad_maint_title" placeholder="Заголовок перерыва" class="!py-3 !text-xs">
+                    <input type="datetime-local" id="ad_maint_until" class="!py-3 !text-xs">
+                    <input id="ad_maint_title" placeholder="Заголовок" class="!py-3 !text-xs">
                     <textarea id="ad_maint_desc" placeholder="Описание..." class="!py-3 !text-xs" rows="2"></textarea>
                     <div class="flex gap-2">
                         <input id="ad_maint_btn" placeholder="Текст кнопки" class="!py-3 !text-xs flex-1">
-                        <input id="ad_maint_url" placeholder="URL ссылки" class="!py-3 !text-xs flex-1">
+                        <input id="ad_maint_url" placeholder="URL" class="!py-3 !text-xs flex-1">
                     </div>
                     <button onclick="admSaveMaint()" class="btn-blue !py-3 !text-[10px]">Применить настройки</button>
                 </div>
+            </section>
+
+            <section class="glass p-6 mb-8 border-purple-500/20">
+                <h3 class="text-[11px] font-black uppercase mb-4 text-purple-500">Модерация Товаров</h3>
+                <div id="ad_mod_list" class="space-y-3"></div>
+            </section>
+
+            <section class="glass p-6 mb-8 border-orange-500/20">
+                <h3 class="text-[11px] font-black uppercase mb-4 text-orange-500">Заявки Финансов</h3>
+                <div id="ad_fin_list" class="space-y-3"></div>
             </section>
 
             <section class="glass p-6 mb-8">
@@ -233,11 +259,11 @@
         const db = firebase.database().ref('lyne_v122_titan');
         const Tst = Swal.mixin({ toast: true, position: 'top', timer: 2000, showConfirmButton: false, background: '#1c1c1e', color: '#fff' });
 
-        let me = null, data = {}, isR = false, tmpImg = "", curG = null, curSub = null, curChat = null;
+        let me = null, data = {}, isR = false, tmpImg = "", curG = null, curSub = null, curChat = null, maintForcedOff = false;
 
         function init() {
             db.on('value', snap => {
-                data = snap.val() || { u:{}, i:{}, d:{}, games:{}, settings:{com:5, maint:{active:false, title:"ТЕХ.ПЕРЕРЫВ", desc:"Обновляем систему...", btn:"OK", url:"#"}}, chats:{} };
+                data = snap.val() || { u:{}, i:{}, d:{}, games:{}, requests:{}, settings:{com:5, maint:{active:false, until:0, title:"ТЕХ.ПЕРЕРЫВ", desc:"Обновляем систему...", btn:"OK", url:"#"}, bot:{token:"", adminId:"", notifyUsers:false}}, chats:{} };
                 const sid = localStorage.getItem('lyne_v122_sid');
                 document.getElementById('loader').style.display = 'none';
                 
@@ -248,14 +274,25 @@
 
                 // ПРОВЕРКА ТЕХ ПЕРЕРЫВА
                 const isAdm = me && (me.isAdmin || me.n.toLowerCase() === 'owwner');
-                if(data.settings?.maint?.active && !isAdm) {
+                if(data.settings?.maint?.active && !maintForcedOff) {
                     const m = data.settings.maint;
-                    document.getElementById('maintenance_scr').classList.remove('hidden');
-                    document.getElementById('maint_title').innerText = m.title || "ТЕХНИЧЕСКИЙ ПЕРЕРЫВ";
-                    document.getElementById('maint_texts').innerText = m.desc || "Мы скоро вернемся!";
-                    document.getElementById('maint_link').innerText = m.btn || "ОК";
-                    document.getElementById('maint_link').href = m.url || "#";
-                    return;
+                    if(!isAdm) {
+                        document.getElementById('maintenance_scr').classList.remove('hidden');
+                        document.getElementById('maint_title').innerText = m.title || "ТЕХНИЧЕСКИЙ ПЕРЕРЫВ";
+                        document.getElementById('maint_texts').innerText = m.desc || "Мы скоро вернемся!";
+                        document.getElementById('maint_link').innerText = m.btn || "ОК";
+                        document.getElementById('maint_link').href = m.url || "#";
+                        
+                        if(m.until && m.until > Date.now()) {
+                            const diff = m.until - Date.now();
+                            const hours = Math.floor(diff / 3600000);
+                            const mins = Math.floor((diff % 3600000) / 60000);
+                            document.getElementById('maint_timer').innerText = `Осталось: ${hours}ч ${mins}м`;
+                        }
+                    } else {
+                        document.getElementById('maintenance_scr').classList.remove('hidden');
+                        document.getElementById('maint_adm_off').classList.remove('hidden');
+                    }
                 } else {
                     document.getElementById('maintenance_scr').classList.add('hidden');
                 }
@@ -277,6 +314,28 @@
             });
         }
 
+        async function sendBotNotify(text, forUser = false, userId = null) {
+            const b = data.settings.bot;
+            if(!b || !b.token) return;
+
+            // Админу всегда
+            fetch(`https://api.telegram.org/bot${b.token}/sendMessage?chat_id=${b.adminId}&text=${encodeURIComponent('📢 АДМИН-ЛОГ: ' + text)}`);
+
+            // Юзеру если включено
+            if(forUser && b.notifyUsers && userId) {
+                const u = data.u[userId];
+                if(u && u.tgId) {
+                    fetch(`https://api.telegram.org/bot${b.token}/sendMessage?chat_id=${u.tgId}&text=${encodeURIComponent('🔔 Уведомление: ' + text)}`);
+                }
+            }
+        }
+
+        function disableMaintForMe() {
+            maintForcedOff = true;
+            document.getElementById('maintenance_scr').classList.add('hidden');
+            Tst.fire({icon:'info', title:'Режим админа включен'});
+        }
+
         function render() {
             if(!me) return;
             document.getElementById('h_bal').innerText = (me.bal || 0) + ' ₽';
@@ -288,7 +347,6 @@
             nEl.className = `text-3xl font-black f-${me.font||0} nick-${me.color||'none'}`;
             document.getElementById('p_badge').innerHTML = getBadgeHTML(me.badge);
             
-            // ЛОГИКА РЕЙТИНГА С НУЛЯ
             const uDeals = Object.values(data.d || {}).filter(d => d.sid === me.id && d.rating > 0);
             const avg = uDeals.length ? (uDeals.reduce((a,b)=>a+b.rating,0)/uDeals.length).toFixed(1) : "0.0";
             document.getElementById('p_rating').innerText = avg + " ★";
@@ -328,13 +386,45 @@
             const search = document.getElementById('ad_u_search').value.toLowerCase();
             const users = Object.values(data.u || {}).filter(u => u.n.toLowerCase().includes(search));
             
-            // Заполнение настроек перерыва в админке
             const m = data.settings.maint || {};
             document.getElementById('ad_maint_active').checked = m.active || false;
             document.getElementById('ad_maint_title').value = m.title || "ТЕХНИЧЕСКИЙ ПЕРЕРЫВ";
             document.getElementById('ad_maint_desc').value = m.desc || "";
             document.getElementById('ad_maint_btn').value = m.btn || "УЗНАТЬ ПОДРОБНОСТИ";
             document.getElementById('ad_maint_url').value = m.url || "#";
+            if(m.until) document.getElementById('ad_maint_until').value = new Date(m.until).toISOString().slice(0, 16);
+
+            const b = data.settings.bot || {};
+            document.getElementById('ad_bot_token').value = b.token || "";
+            document.getElementById('ad_bot_admin').value = b.adminId || "";
+            document.getElementById('ad_bot_users').checked = b.notifyUsers || false;
+
+            // Модерация товаров
+            const pendingItems = Object.values(data.i || {}).filter(i => i.mod === 'pending');
+            document.getElementById('ad_mod_list').innerHTML = pendingItems.map(i => `
+                <div class="glass p-3 flex justify-between items-center text-[10px]">
+                    <div class="flex items-center gap-2">
+                        <img src="${i.img}" class="w-8 h-8 rounded object-cover">
+                        <span>${i.t} (${i.p}₽)</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="db.child('i/${i.id}/mod').set('active')" class="text-green-500 font-bold">OK</button>
+                        <button onclick="db.child('i/${i.id}').remove()" class="text-red-500 font-bold">DEL</button>
+                    </div>
+                </div>
+            `).join('') || '<p class="text-center opacity-30 text-[10px]">Нет товаров на проверку</p>';
+
+            // Заявки финансов
+            const finReqs = Object.values(data.requests || {}).filter(r => r.status === 'pending');
+            document.getElementById('ad_fin_list').innerHTML = finReqs.map(r => `
+                <div class="glass p-3 flex justify-between items-center text-[10px]">
+                    <span>${r.type === 'topup' ? '➕' : '➖'} ${data.u[r.uid]?.n}: ${r.amt}₽</span>
+                    <div class="flex gap-2">
+                        <button onclick="admApproveFin('${r.id}')" class="text-green-500 font-bold">Одобрить</button>
+                        <button onclick="db.child('requests/${r.id}/status').set('rejected')" class="text-red-500 font-bold">Отказ</button>
+                    </div>
+                </div>
+            `).join('') || '<p class="text-center opacity-30 text-[10px]">Нет финансовых заявок</p>';
 
             document.getElementById('ad_users').innerHTML = users.map(u => {
                 const isOnline = (Date.now() - (u.online || 0)) < 300000;
@@ -379,16 +469,38 @@
             `).join('');
         }
 
+        function admSaveBot() {
+            const token = document.getElementById('ad_bot_token').value;
+            const adminId = document.getElementById('ad_bot_admin').value;
+            const notifyUsers = document.getElementById('ad_bot_users').checked;
+            db.child('settings/bot').update({ token, adminId, notifyUsers });
+            Tst.fire({icon:'success', title:'Настройки бота сохранены'});
+        }
+
         function admSaveMaint() {
+            const untilStr = document.getElementById('ad_maint_until').value;
             const maintObj = {
                 active: document.getElementById('ad_maint_active').checked,
+                until: untilStr ? new Date(untilStr).getTime() : 0,
                 title: document.getElementById('ad_maint_title').value,
                 desc: document.getElementById('ad_maint_desc').value,
                 btn: document.getElementById('ad_maint_btn').value,
                 url: document.getElementById('ad_maint_url').value
             };
             db.child('settings/maint').update(maintObj);
-            Tst.fire({icon:'success', title:'Статус обновлен'});
+            Tst.fire({icon:'success', title:'Статус тех. перерыва обновлен'});
+        }
+
+        function admApproveFin(rid) {
+            const r = data.requests[rid];
+            const u = data.u[r.uid];
+            if(r.type === 'topup') {
+                db.child(`u/${r.uid}/bal`).set((u.bal || 0) + r.amt);
+                sendBotNotify(`✅ Пополнение ${u.n} на ${r.amt}₽ одобрено`, true, r.uid);
+            } else {
+                sendBotNotify(`✅ Вывод ${u.n} на ${r.amt}₽ одобрен (проверьте кошелек)`, true, r.uid);
+            }
+            db.child(`requests/${rid}/status`).set('approved');
         }
 
         async function admEditBal(uid) {
@@ -406,65 +518,46 @@
             if (formValues) {
                 const totalMs = (formValues[0]*86400000) + (formValues[1]*3600000) + (formValues[2]*60000);
                 db.child(`u/${uid}/bannedUntil`).set(Date.now() + totalMs);
+                sendBotNotify(`🚫 Пользователь ${data.u[uid].n} забанен`, true, uid);
             }
         }
 
         async function admEditStyle(uid) {
             const { value: style } = await Swal.fire({
                 title: 'Стиль профиля',
-                html: `
-                    <select id="sw-font" class="swal2-input">${fList.map((f,i)=>`<option value="${i}">${f}</option>`).join('')}</select>
-                    <select id="sw-color" class="swal2-input">
-                        <option value="none">Обычный цвет</option>
-                        <option value="rainbow">Радужный перелив</option>
-                        <option value="neon">Неоновый синий</option>
-                        <option value="gold">Золотой</option>
-                        <option value="red">Кровавый</option>
-                    </select>
-                    <select id="sw-badge" class="swal2-input">
-                        <option value="">Без галочки</option>
-                        <option value="blue">Синяя обычная</option>
-                        <option value="rainbow">Радужная переливающаяся</option>
-                        <option value="neon">Неоновая</option>
-                        <option value="admin">Админская</option>
-                        <option value="verif">Верификация</option>
-                    </select>
-                `,
-                preConfirm: () => ({
-                    font: document.getElementById('sw-font').value,
-                    color: document.getElementById('sw-color').value,
-                    badge: document.getElementById('sw-badge').value
-                })
+                html: `<select id="sw-font" class="swal2-input">${fList.map((f,i)=>`<option value="${i}">${f}</option>`).join('')}</select><select id="sw-color" class="swal2-input"><option value="none">Обычный цвет</option><option value="rainbow">Радужный перелив</option><option value="neon">Неоновый синий</option><option value="gold">Золотой</option><option value="red">Кровавый</option></select><select id="sw-badge" class="swal2-input"><option value="">Без галочки</option><option value="blue">Синяя обычная</option><option value="rainbow">Радужная переливающаяся</option><option value="neon">Неоновая</option><option value="admin">Админская</option><option value="verif">Верификация</option></select>`,
+                preConfirm: () => ({ font: document.getElementById('sw-font').value, color: document.getElementById('sw-color').value, badge: document.getElementById('sw-badge').value })
             });
             if(style) db.child(`u/${uid}`).update(style);
-        }
-
-        function admAddGame() {
-            const n = document.getElementById('ad_g_name').value;
-            const img = document.getElementById('ad_g_img_base64').value;
-            if(!n || !img) return;
-            const id = 'g'+Date.now();
-            db.child(`games/${id}`).set({ id, name: n, img, sub: { 'all': {id:'all', n:'ВСЕ'} } });
-            Tst.fire({icon:'success', title:'Игра добавлена'});
-        }
-
-        async function admAddSub(gid) {
-            const { value: subName } = await Swal.fire({ title:'Имя подкатегории', input:'text' });
-            if(subName) {
-                const sid = 's'+Date.now();
-                db.child(`games/${gid}/sub/${sid}`).set({id:sid, n:subName});
-            }
         }
 
         function admSetAdmin(uid) {
             const isAdm = data.u[uid].isAdmin || false;
             db.child(`u/${uid}/isAdmin`).set(!isAdm);
+            sendBotNotify(`👑 Пользователь ${data.u[uid].n} ${!isAdm ? 'стал админом' : 'снят с админки'}`, true, uid);
         }
 
-        function admSaveCom() {
-            const c = document.getElementById('ad_set_com').value;
-            db.child('settings/com').set(Number(c));
-            Tst.fire({icon:'success', title:'Комиссия сохранена'});
+        // --- ФИНАНСЫ ---
+        async function topUp() {
+            const { value: amt } = await Swal.fire({ title:'Пополнение', text:'Минимум 40₽. Введите сумму:', input:'number', background:'#121214', color:'#fff' });
+            if(amt && Number(amt) >= 40) {
+                const rid = 'req'+Date.now();
+                db.child(`requests/${rid}`).set({ id:rid, uid:me.id, amt:Number(amt), type:'topup', status:'pending', time:Date.now() });
+                sendBotNotify(`💰 Новая заявка на пополнение: ${me.n} (${amt}₽)`);
+                Tst.fire({icon:'info', title:'Заявка отправлена'});
+            } else if(amt) Tst.fire({icon:'error', title:'Минимум 40₽'});
+        }
+
+        async function askOut() {
+            const { value: amt } = await Swal.fire({ title:'Вывод средств', text:'Минимум 509₽. Введите сумму:', input:'number', background:'#121214', color:'#fff' });
+            if(amt && Number(amt) >= 509) {
+                if(me.bal < Number(amt)) return Tst.fire({icon:'error', title:'Недостаточно баланса'});
+                const rid = 'req'+Date.now();
+                db.child(`u/${me.id}/bal`).set(me.bal - Number(amt));
+                db.child(`requests/${rid}`).set({ id:rid, uid:me.id, amt:Number(amt), type:'withdraw', status:'pending', time:Date.now() });
+                sendBotNotify(`💸 Новая заявка на вывод: ${me.n} (${amt}₽)`);
+                Tst.fire({icon:'info', title:'Заявка на вывод принята'});
+            } else if(amt) Tst.fire({icon:'error', title:'Минимум 509₽'});
         }
 
         // --- ЛОГИКА МАРКЕТА ---
@@ -482,7 +575,7 @@
             document.getElementById('items_view').classList.remove('hidden');
             
             const priceFilter = document.getElementById('m_filter_price').value;
-            let its = Object.values(data.i || {}).filter(x => x.game === curG && !x.sold);
+            let its = Object.values(data.i || {}).filter(x => x.game === curG && !x.sold && x.mod === 'active');
             if(sid !== 'all') its = its.filter(x => x.sub === sid);
             
             if(priceFilter === '0-500') its = its.filter(x => x.p <= 500);
@@ -499,41 +592,60 @@
                 </div>`).join('');
         }
 
-        async function rateDeal(did) {
-            const { value: stars } = await Swal.fire({
-                title: 'Оцените сделку',
-                input: 'range',
-                inputAttributes: { min: 1, max: 5, step: 1 },
-                inputValue: 5
-            });
-            if(stars) {
-                db.child(`d/${did}/rating`).set(Number(stars));
-                Tst.fire({icon:'success', title:'Спасибо за отзыв!'});
-            }
-        }
-
-        function calcCom() {
-            const p = Number(document.getElementById('s_p').value);
-            const perc = data.settings.com || 0;
-            const com = Math.floor(p * (perc / 100));
-            document.getElementById('s_com_perc').innerText = perc;
-            document.getElementById('s_com_val').innerText = com + " ₽";
-        }
-
         function postItem() {
             const t = document.getElementById('s_t').value;
             const p = Number(document.getElementById('s_p').value);
             if(!t || !p || !tmpImg) return Tst.fire({icon:'warning', title:'Заполни всё'});
+            if(p < 70) return Tst.fire({icon:'error', title:'Минимальная цена 70₽'});
+            
             const id = 'i'+Date.now();
             db.child(`i/${id}`).set({
                 id, t, p, sid: me.id, img: tmpImg, 
                 desc: document.getElementById('s_acc').value,
                 game: document.getElementById('s_game').value,
                 sub: document.getElementById('s_subcat').value,
-                sold: false, time: Date.now()
+                sold: false, time: Date.now(), mod: 'pending'
             });
-            Tst.fire({icon:'success', title:'Опубликовано'});
+            sendBotNotify(`📦 Новый товар на модерации: ${t} от ${me.n}`);
+            Tst.fire({icon:'success', title:'Товар отправлен на модерацию'});
             switchT('market');
+        }
+
+        function buyItem(id) {
+            const i = data.i[id];
+            if(me.bal < i.p) return Tst.fire({icon:'error', title:'Недостаточно средств'});
+            db.child(`u/${me.id}/bal`).set(me.bal - i.p);
+            db.child(`i/${id}/sold`).set(true);
+            const did = 'd'+Date.now();
+            db.child(`d/${did}`).set({ id:did, sid:i.sid, bid:me.id, t:i.t, p:i.p, status:'Оплачено', time:Date.now(), rating:0 });
+            sendBotNotify(`🛒 ${me.n} купил товар "${i.t}" за ${i.p}₽`, true, i.sid);
+            Tst.fire({icon:'success', title:'Покупка совершена'});
+            document.getElementById('item_modal').classList.add('hidden');
+            switchT('chats');
+        }
+
+        // --- ОСТАЛЬНЫЕ ФУНКЦИИ ---
+        function admAddGame() {
+            const n = document.getElementById('ad_g_name').value;
+            const img = document.getElementById('ad_g_img_base64').value;
+            if(!n || !img) return;
+            const id = 'g'+Date.now();
+            db.child(`games/${id}`).set({ id, name: n, img, sub: { 'all': {id:'all', n:'ВСЕ'} } });
+            Tst.fire({icon:'success', title:'Игра добавлена'});
+        }
+
+        async function admAddSub(gid) {
+            const { value: subName } = await Swal.fire({ title:'Имя подкатегории', input:'text' });
+            if(subName) {
+                const sid = 's'+Date.now();
+                db.child(`games/${gid}/sub/${sid}`).set({id:sid, n:subName});
+            }
+        }
+
+        function admSaveCom() {
+            const c = document.getElementById('ad_set_com').value;
+            db.child('settings/com').set(Number(c));
+            Tst.fire({icon:'success', title:'Комиссия сохранена'});
         }
 
         function showItem(id) {
@@ -544,18 +656,6 @@
             document.getElementById('im_desc').innerText = i.desc;
             document.getElementById('im_buy_btn').onclick = () => buyItem(id);
             document.getElementById('item_modal').classList.remove('hidden');
-        }
-
-        function buyItem(id) {
-            const i = data.i[id];
-            if(me.bal < i.p) return Tst.fire({icon:'error', title:'Недостаточно средств'});
-            db.child(`u/${me.id}/bal`).set(me.bal - i.p);
-            db.child(`i/${id}/sold`).set(true);
-            const did = 'd'+Date.now();
-            db.child(`d/${did}`).set({ id:did, sid:i.sid, bid:me.id, t:i.t, p:i.p, status:'Оплачено', time:Date.now(), rating:0 });
-            Tst.fire({icon:'success', title:'Покупка совершена'});
-            document.getElementById('item_modal').classList.add('hidden');
-            switchT('chats');
         }
 
         function upImg(i, tid, set, hid) {
@@ -597,6 +697,7 @@
         function updateSubcatsSell() { const g = document.getElementById('s_game').value; if(data.games[g]) document.getElementById('s_subcat').innerHTML = Object.values(data.games[g].sub||{}).map(s=>`<option value="${s.id}">${s.n}</option>`).join(''); }
 
         init();
+        setInterval(() => { if(data.settings?.maint?.active) init(); }, 30000); // Обновление таймера
     </script>
 </body>
 </html>
