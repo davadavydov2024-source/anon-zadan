@@ -7,15 +7,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Press+Start+2P&family=Ruslan+Display&family=Kelly+Slab&family=Underdog&family=Lobster&family=Pacifico&family=Monoton&family=Jura:wght@700&family=Playfair+Display:wght@900&family=Courier+Prime&family=Zeyada&family=Dancing+Script:wght@700&family=EB+Garamond:ital@1&family=Montserrat+Alternates:wght@900&family=Caveat:wght@700&family=Unbounded:wght@900&family=Russo+One&family=Bad+Script&family=Bungee+Shade&family=Rubik+Glitch&family=Creepster&family=Nosifer&family=Rubik+Microbe&family=Silkscreen&display=swap" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
         :root { --bg: #050505; --card: #121214; --text: #ffffff; --blue: #007aff; --gray: #1c1c1e; }
         
-        /* СЕЗОННЫЕ ТЕМЫ */
         body.theme-winter { --bg: #0a192f; --blue: #00d4ff; background-image: url('https://images.unsplash.com/photo-1418985991508-e47386d96a71?q=80&w=2070&auto=format&fit=crop'); }
         body.theme-summer { --bg: #0b2e13; --blue: #ffcc00; background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2073&auto=format&fit=crop'); }
         body.theme-halloween { --bg: #1a0f00; --blue: #ff6600; background-image: url('https://images.unsplash.com/photo-1508361705456-d6f4b634877a?q=80&w=2070&auto=format&fit=crop'); }
@@ -34,16 +37,10 @@
         input, textarea, select { background: var(--gray); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 16px; color: white; width: 100%; outline: none; font-size: 14px; transition: 0.3s; } input:focus { border-color: var(--blue); }
         .btn-blue { background: var(--blue); color: white; border-radius: 18px; font-weight: 900; padding: 18px; width: 100%; border: none; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-style: italic; } 
         
-        #event_overlay { position: fixed; inset: 0; z-index: 50000; background: black; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
-        #event_overlay video, #event_overlay img { max-width: 100%; max-height: 80vh; border-radius: 30px; box-shadow: 0 0 50px var(--blue); }
-
         #loader { background: #000; z-index: 10000; position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .badge-rainbow { background: linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: rainbow_anim 3s linear infinite; background-size: 200%; }
-        .badge-neon { color: #00f3ff; text-shadow: 0 0 10px #00f3ff; }
         .nick-rainbow { background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: rainbow_anim 3s linear infinite; background-size: 200%; font-weight: 900; }
         @keyframes rainbow_anim { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-
-        /* ДОБАВЛЕННЫЕ СТИЛИ ДЛЯ НОВЫХ ФУНКЦИЙ */
         .online-dot { width:8px; height:8px; background:#34c759; border-radius:50%; display:inline-block; box-shadow:0 0 8px #34c759; }
         .item-boosted { border: 2px solid #eab308 !important; box-shadow: 0 0 15px rgba(234, 179, 8, 0.2); background: linear-gradient(180deg, rgba(234,179,8,0.1) 0%, transparent 100%); }
     </style>
@@ -53,22 +50,6 @@
     <div id="loader"><div class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div></div>
 
     <img id="holiday_pixel" src="" class="hidden fixed top-24 right-6 z-[4000] w-12 animate-bounce pointer-events-none drop-shadow-2xl">
-
-    <div id="event_overlay">
-        <div id="event_container" class="w-full h-full flex flex-col items-center justify-center p-6"></div>
-        <button onclick="document.getElementById('event_overlay').style.display='none'" class="absolute top-12 right-8 text-white/50 text-4xl">&times;</button>
-    </div>
-
-    <div id="maintenance_scr" class="hidden fixed inset-0 z-[20000] bg-black flex flex-col items-center justify-center p-8 text-center overflow-y-auto">
-        <div class="mb-6"><i class="fa-solid fa-screwdriver-wrench text-6xl text-yellow-500 animate-pulse"></i></div>
-        <h1 id="maint_title" class="text-4xl font-black italic uppercase text-yellow-500 mb-4">ТЕХНИЧЕСКИЙ ПЕРЕРЫВ</h1>
-        <div id="maint_texts" class="text-white opacity-70 text-sm font-medium mb-4 max-w-sm">Сервера временно недоступны. Мы работаем над обновлением!</div>
-        <div id="maint_timer" class="text-blue-500 font-black text-xl mb-8"></div>
-        <div id="maint_btns" class="flex flex-col gap-3 w-full max-w-xs">
-            <a id="maint_link" href="#" class="btn-blue text-center">УЗНАТЬ ПОДРОБНОСТИ</a>
-            <button id="maint_adm_off" onclick="disableMaintForMe()" class="hidden text-[10px] font-black text-zinc-600 uppercase mt-4">ОТКЛЮЧИТЬ ДЛЯ МЕНЯ (АДМИН)</button>
-        </div>
-    </div>
 
     <div id="auth_scr" class="hidden fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center p-8">
         <h1 id="auth_logo" class="text-5xl font-black mb-16 italic tracking-tighter">LYNEOK<span class="text-blue-500">.</span></h1>
@@ -81,14 +62,24 @@
             <input id="a_p" type="password" placeholder="Пароль">
             <button onclick="handleAuth()" id="a_btn" class="btn-blue">Войти</button>
             <p onclick="toggleR()" id="a_tog" class="text-center text-[11px] font-black text-zinc-500 uppercase cursor-pointer pt-4">Создать новый аккаунт</p>
+            
+            <div class="relative py-2"><div class="absolute inset-0 flex items-center"><span class="w-full border-t border-white/10"></span></div><div class="relative flex justify-center text-[10px] uppercase"><span class="bg-[#121214] px-2 text-zinc-500">Или</span></div></div>
+            <button onclick="authGoogle()" class="w-full bg-white text-black py-4 rounded-2xl font-black text-xs uppercase flex items-center justify-center gap-3"><img src="https://www.gstatic.com/images/branding/product/1x/googleg_48dp.png" class="w-4 h-4"> Войти через Google</button>
         </div>
     </div>
 
-    <div id="ban_scr" class="hidden fixed inset-0 z-[9998] bg-red-950 flex flex-col items-center justify-center p-8 text-center">
-        <i class="fa-solid fa-hand text-6xl text-red-500 mb-6"></i>
-        <h1 class="text-3xl font-black mb-2 uppercase italic text-red-500">БЛОКИРОВКА</h1>
-        <p class="text-xs font-black text-white mb-8" id="ban_time_text"></p>
-        <button onclick="logout()" class="btn-blue !bg-red-600">Выйти</button>
+    <div id="google_setup_scr" class="hidden fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center p-8">
+        <h2 class="text-3xl font-black italic mb-6 text-center">Создание<br><span class="text-blue-500">Профиля</span></h2>
+        <div class="w-full glass p-8 space-y-4 text-center">
+            <p class="text-[10px] text-zinc-400 uppercase mb-4">Настрой свой профиль LYNEOK</p>
+            <input type="file" id="gs_ava" class="hidden" accept="image/*" onchange="upImg(this, 'l_gs_ava', true)">
+            <label for="gs_ava" id="l_gs_ava" class="w-24 h-24 bg-zinc-900 mx-auto rounded-full flex items-center justify-center cursor-pointer border-2 border-dashed border-zinc-800 overflow-hidden mb-4"><img id="gs_ava_preview" class="w-full h-full object-cover"></label>
+            <input id="gs_n" placeholder="Придумай Никнейм">
+            <input id="gs_p" type="password" placeholder="Придумай Пароль">
+            <input type="hidden" id="gs_email">
+            <input type="hidden" id="gs_uid">
+            <button onclick="finishGoogleSetup()" class="btn-blue mt-4">Завершить</button>
+        </div>
     </div>
 
     <div id="app" class="hidden h-screen flex flex-col">
@@ -101,31 +92,15 @@
         </header>
 
         <main id="tab_market" class="tab-content active">
-            <div id="promo_alert" class="hidden mb-6 bg-yellow-500/20 border border-yellow-500/30 p-4 rounded-2xl flex items-center justify-between">
-                <div><p class="text-[10px] font-black uppercase text-yellow-500">Акция активна!</p><p id="promo_text" class="text-xs font-bold"></p></div>
-                <i class="fa-solid fa-fire text-yellow-500 text-xl animate-pulse"></i>
-            </div>
-
             <div id="market_main">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-black italic">Маркет</h2>
-                    <select id="m_filter_price" onchange="render()" class="!p-2 !text-[10px] !w-24">
-                        <option value="all">Все цены</option>
-                        <option value="0-500">до 500₽</option>
-                        <option value="500-2000">500-2000₽</option>
-                        <option value="2000+">2000₽+</option>
-                    </select>
+                    <select id="m_filter_price" onchange="render()" class="!p-2 !text-[10px] !w-24"><option value="all">Все цены</option><option value="0-500">до 500₽</option><option value="500-2000">500-2000₽</option><option value="2000+">2000₽+</option></select>
                 </div>
                 <div id="cat_grid" class="grid grid-cols-3 gap-3"></div> 
             </div>
-            <div id="subcat_view" class="hidden space-y-6">
-                <button onclick="closeSubcat()" class="text-blue-500 text-xs font-bold uppercase"><i class="fa-solid fa-chevron-left mr-1"></i> Назад</button>
-                <div id="subcat_grid" class="grid grid-cols-1 gap-3"></div>
-            </div>
-            <div id="items_view" class="hidden space-y-6">
-                <button onclick="closeCat()" class="text-blue-500 text-xs font-bold uppercase"><i class="fa-solid fa-chevron-left mr-1"></i> К категориям</button>
-                <div id="items_list" class="space-y-4"></div>
-            </div>
+            <div id="subcat_view" class="hidden space-y-6"><button onclick="closeSubcat()" class="text-blue-500 text-xs font-bold uppercase"><i class="fa-solid fa-chevron-left mr-1"></i> Назад</button><div id="subcat_grid" class="grid grid-cols-1 gap-3"></div></div>
+            <div id="items_view" class="hidden space-y-6"><button onclick="closeCat()" class="text-blue-500 text-xs font-bold uppercase"><i class="fa-solid fa-chevron-left mr-1"></i> К категориям</button><div id="items_list" class="space-y-4"></div></div>
         </main>
 
         <main id="tab_sell" class="tab-content">
@@ -136,10 +111,7 @@
                 <div class="grid grid-cols-2 gap-3"><select id="s_game" onchange="updateSubcatsSell()"></select><select id="s_subcat"></select></div>
                 <input id="s_t" placeholder="Название">
                 <textarea id="s_acc" rows="3" placeholder="Описание товара"></textarea>
-                <div>
-                    <input id="s_p" type="number" placeholder="Цена ₽ (от 70₽)" oninput="calcCom()">
-                    <p class="text-[9px] font-black uppercase text-zinc-500 mt-2">Комиссия (<span id="s_com_perc">0</span>%): <span id="s_com_val">0 ₽</span></p>
-                </div>
+                <div><input id="s_p" type="number" placeholder="Цена ₽ (от 70₽)" oninput="calcCom()"><p class="text-[9px] font-black uppercase text-zinc-500 mt-2">Комиссия (<span id="s_com_perc">0</span>%): <span id="s_com_val">0 ₽</span></p></div>
                 <button onclick="postItem()" class="btn-blue">Опубликовать</button>
             </div>
         </main>
@@ -153,13 +125,9 @@
             <div class="glass p-8 mb-6 text-center border border-white/5 relative">
                 <img id="p_ava" class="w-28 h-28 mx-auto mb-6 rounded-full object-cover border-4 border-zinc-900 shadow-2xl">
                 <div class="flex items-center justify-center gap-2 mb-4"><span id="p_n" class="text-3xl font-black">...</span><span id="p_badge"></span></div>
-                <div class="flex justify-center mb-8 gap-4">
-                    <div class="text-center"><p class="text-[9px] opacity-40 uppercase">Рейтинг</p><b id="p_rating" class="text-yellow-500">0.0 ★</b></div>
-                    <div class="text-center"><p class="text-[9px] opacity-40 uppercase">Отзывы</p><b id="p_rev_count">0</b></div>
-                </div>
                 <div class="grid grid-cols-2 gap-4"><button onclick="topUp()" class="bg-white text-black py-4 rounded-2xl font-black text-xs uppercase italic">Пополнить</button><button onclick="askOut()" class="bg-zinc-800 text-white py-4 rounded-2xl font-black text-xs uppercase italic">Вывести</button></div>
                 
-                <button id="tg_connect_btn" onclick="connectTgBot()" class="hidden w-full bg-blue-500/10 text-blue-400 py-4 rounded-2xl font-black text-[10px] uppercase mt-4 border border-blue-500/20"><i class="fa-brands fa-telegram mr-2"></i>Подключить уведомления</button>
+                <button onclick="openSupport()" class="w-full bg-blue-600/20 text-blue-400 py-4 rounded-2xl font-black text-[10px] uppercase mt-4 border border-blue-500/30"><i class="fa-solid fa-headset mr-2"></i>Служба Поддержки</button>
             </div>
             <button id="adm_btn" onclick="switchT('admin')" class="hidden w-full bg-red-600/10 text-red-500 py-5 rounded-3xl font-black mb-4 border border-red-600/20 uppercase text-xs italic"><i class="fa-solid fa-crown mr-2"></i>TITAN PANEL</button>
             <button onclick="logout()" class="w-full py-4 text-zinc-600 text-[10px] font-black uppercase">Выйти</button>
@@ -168,140 +136,23 @@
         <main id="tab_admin" class="tab-content">
             <h1 class="text-4xl font-black italic mb-8">TITAN <span class="text-red-500">SYSTEM</span></h1>
             
+            <section class="glass p-6 mb-8 border-blue-500/20">
+                <h3 class="text-[11px] font-black uppercase mb-4 text-blue-500">Чат Поддержки (Запросы)</h3>
+                <div id="ad_support_list" class="space-y-3"></div>
+            </section>
+
             <section class="glass p-6 mb-8 border-pink-500/20">
                 <h3 class="text-[11px] font-black uppercase mb-4 text-pink-500">Управление Праздниками</h3>
                 <select id="ad_holiday_sel" class="!py-3 !text-xs mb-3">
-                    <option value="none">Нет праздника</option>
-                    <option value="ny">Новый год 🎄</option>
-                    <option value="easter">Пасха 🥚</option>
-                    <option value="day67">День 67 🌀</option>
-                    <option value="may">Май 🍖</option>
-                    <option value="bday_adm">ДР Админа 👑</option>
-                    <option value="spring">Весна 🌸</option>
-                    <option value="summer">Лето ☀️</option>
-                    <option value="flies">День мух 🪰</option>
-                    <option value="poop">День какашек 💩</option>
-                    <option value="april">1 Апреля 🤡</option>
-                    <option value="bday_lyneok">ДР Lyneok 💎</option>
+                    <option value="none">Нет</option><option value="ny">Новый год 🎄</option><option value="easter">Пасха 🥚</option><option value="summer">Лето ☀️</option>
                 </select>
-                <button onclick="admSetHoliday()" class="bg-pink-600 text-white font-black uppercase text-[10px] py-3 px-4 rounded-xl w-full">Применить праздник</button>
+                <button onclick="admSetHoliday()" class="bg-pink-600 text-white font-black uppercase text-[10px] py-3 px-4 rounded-xl w-full">Применить</button>
             </section>
-
-            <section class="glass p-6 mb-8 border-yellow-500/20">
-                <h3 class="text-[11px] font-black uppercase mb-4 text-yellow-500">Акции и Бусты</h3>
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center bg-zinc-900 p-4 rounded-xl"><span class="text-[10px] uppercase font-black">Бесплатный Буст (Товары)</span><input type="checkbox" id="ad_promo_boost" class="!w-6 !h-6"></div>
-                    <input id="ad_limit_boost" type="number" placeholder="Лимит бустов (шт)" class="!py-3 !text-xs">
-                    <div class="flex justify-between items-center bg-zinc-900 p-4 rounded-xl"><span class="text-[10px] uppercase font-black">Бесплатная Галочка</span><input type="checkbox" id="ad_promo_tick" class="!w-6 !h-6"></div>
-                    <input id="ad_limit_tick" type="number" placeholder="Лимит заявок (шт)" class="!py-3 !text-xs">
-                    <button onclick="admSetPromos()" class="bg-yellow-600 text-white font-black uppercase text-[10px] py-3 px-4 rounded-xl w-full">Сохранить акции</button>
-                </div>
-            </section>
-
-            <section class="glass p-6 mb-8 border-purple-500/20">
-                <h3 class="text-[11px] font-black uppercase mb-4 text-purple-500">Глобальные Ивенты (На весь экран)</h3>
-                <div class="space-y-3">
-                    <select id="ad_ev_type">
-                        <option value="text">Просто Текст</option>
-                        <option value="image">Фото из файлов</option>
-                        <option value="video">Видео из файлов</option>
-                    </select>
-                    <textarea id="ad_ev_text" placeholder="Текст ивента" class="!py-3 !text-xs"></textarea>
-                    <input type="file" id="ad_ev_file" class="hidden" onchange="upImg(this, null, false, 'ad_ev_file_base64')">
-                    <label for="ad_ev_file" class="block bg-zinc-900 p-4 rounded-xl text-center text-[10px] cursor-pointer border border-dashed border-zinc-700 font-black uppercase">ВЫБРАТЬ ФАЙЛ (ФОТО/ВИДЕО)</label>
-                    <input type="hidden" id="ad_ev_file_base64">
-                    <input id="ad_ev_dur" type="number" placeholder="Время показа (сек)" class="!py-3 !text-xs">
-                    <button onclick="admPushEvent()" class="btn-blue !bg-purple-600 !py-3">ЗАПУСТИТЬ ДЛЯ ВСЕХ</button>
-                </div>
-            </section>
-
-            <section class="glass p-6 mb-8 border-blue-500/20">
-                <h3 class="text-[11px] font-black uppercase mb-4 text-blue-500">Стиль Сайта и Погода</h3>
-                <div class="space-y-4">
-                    <input id="ad_logo_text" placeholder="Название логотипа (LYNEOK)">
-                    <div class="flex items-center gap-3"><label class="text-[9px] uppercase font-black opacity-40">Цвет лого:</label><input id="ad_logo_color" type="color" class="!w-24 !h-12 !p-1"></div>
-                    <select id="ad_logo_font"></select>
-                    <select id="ad_theme">
-                        <option value="default">Обычная тема</option>
-                        <option value="winter">Зима (Снег)</option>
-                        <option value="summer">Лето</option>
-                        <option value="halloween">Хэллоуин</option>
-                        <option value="spring">Весна (Пасха)</option>
-                        <option value="autumn">Осень</option>
-                    </select>
-                    <button onclick="admSaveBranding()" class="btn-blue !py-3">ОБНОВИТЬ СТИЛЬ</button>
-                </div>
-            </section>
-
-            <section class="glass p-6 mb-8 border-blue-500/20">
-                <h3 class="text-[11px] font-black uppercase mb-4 text-blue-500">Настройки Telegram</h3>
-                <div class="space-y-3">
-                    <input id="ad_bot_token" placeholder="Bot Token" class="!py-3 !text-xs">
-                    <input id="ad_bot_admin" placeholder="Admin Chat ID" class="!py-3 !text-xs">
-                    <div class="flex items-center justify-between bg-zinc-900 p-4 rounded-xl"><span class="text-[10px] font-black uppercase">Разрешить юзерам бота</span><input type="checkbox" id="ad_bot_users" class="!w-6 !h-6"></div>
-                    <button onclick="admSaveBot()" class="btn-blue !py-3 !text-[10px]">Сохранить Бота</button>
-                </div>
-            </section>
-
-            <section class="glass p-6 mb-8 border-yellow-500/20">
-                <h3 class="text-[11px] font-black uppercase mb-4 text-yellow-500">Тех. Перерыв</h3>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between bg-zinc-900 p-4 rounded-xl"><span class="text-[10px] font-black uppercase">Активен</span><input type="checkbox" id="ad_maint_active" class="!w-6 !h-6"></div>
-                    <input type="datetime-local" id="ad_maint_until" class="!py-3 !text-xs">
-                    <input id="ad_maint_title" placeholder="Заголовок" class="!py-3 !text-xs">
-                    <textarea id="ad_maint_desc" placeholder="Описание..." class="!py-3 !text-xs" rows="2"></textarea>
-                    <div class="flex gap-2">
-                        <input id="ad_maint_btn" placeholder="Текст кнопки" class="!py-3 !text-xs flex-1">
-                        <input id="ad_maint_url" placeholder="URL" class="!py-3 !text-xs flex-1">
-                    </div>
-                    <button onclick="admSaveMaint()" class="btn-blue !py-3 !text-[10px]">Применить настройки</button>
-                </div>
-            </section>
-
+            
             <section class="glass p-6 mb-8 border-purple-500/20">
                 <h3 class="text-[11px] font-black uppercase mb-4 text-purple-500">Модерация Товаров</h3>
                 <div id="ad_mod_list" class="space-y-3"></div>
             </section>
-
-            <section class="glass p-6 mb-8 border-orange-500/20">
-                <h3 class="text-[11px] font-black uppercase mb-4 text-orange-500">Заявки Финансов</h3>
-                <div id="ad_fin_list" class="space-y-3"></div>
-            </section>
-
-            <section class="glass p-6 mb-8">
-                <h3 class="text-[11px] font-black uppercase mb-4 text-blue-500">Настройки системы</h3>
-                <div class="flex gap-2">
-                    <input id="ad_set_com" type="number" placeholder="Комиссия %" class="!py-3 flex-1">
-                    <button onclick="admSaveCom()" class="bg-blue-600 px-4 rounded-xl text-[10px] font-black uppercase">Save</button>
-                </div>
-            </section>
-
-            <section class="glass p-6 mb-8 border-green-600/20">
-                <h3 class="text-[11px] font-black text-green-500 uppercase mb-5">Управление играми</h3>
-                <div class="space-y-4">
-                    <div class="flex gap-2">
-                        <input id="ad_g_name" placeholder="Имя игры" class="!py-3 !text-xs flex-1">
-                        <input type="file" id="ad_g_img_file" class="hidden" onchange="upImg(this, 'l_ad_g_img', false, 'ad_g_img_base64')">
-                        <label for="ad_g_img_file" id="l_ad_g_img" class="bg-zinc-900 px-4 rounded-xl flex items-center text-[10px] cursor-pointer">ФОТО</label>
-                        <input type="hidden" id="ad_g_img_base64">
-                        <button onclick="admAddGame()" class="bg-green-600 px-5 rounded-xl text-[10px] font-black uppercase">ADD</button>
-                    </div>
-                    <div id="ad_games_list" class="space-y-3"></div>
-                </div>
-            </section>
-
-            <section class="glass p-6 mb-8">
-                <h3 class="text-[11px] font-black uppercase mb-5 text-red-500">Слежка за пользователями</h3>
-                <input id="ad_u_search" oninput="renderAdmin()" placeholder="Поиск по нику..." class="mb-4 !py-3 bg-zinc-900 border border-white/10 rounded-xl">
-                <div id="ad_users" class="space-y-4"></div>
-            </section>
-
-            <section class="glass p-6 mb-8">
-                <h3 class="text-[11px] font-black uppercase mb-5 text-yellow-500">Сделки (24 часа)</h3>
-                <div id="ad_deals_list" class="space-y-4"></div>
-            </section>
-
-            <button onclick="admFullReset()" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase text-[10px] italic">WIPE DATA</button>
         </main>
 
         <nav class="nav-bar">
@@ -319,147 +170,107 @@
             <span id="im_price" class="text-3xl text-blue-500 font-black mb-6 block"></span>
             <p id="im_desc" class="glass p-6 text-sm opacity-60 mb-6"></p>
             <button id="im_buy_btn" class="btn-blue mb-3">Купить</button>
-            <button id="im_boost_btn" class="hidden w-full bg-yellow-500 text-black py-4 rounded-2xl font-black uppercase text-xs">🔥 Улучшить товар</button>
+        </div>
+    </div>
+
+    <div id="chat_modal" class="hidden fixed inset-0 z-[10005] bg-black flex flex-col">
+        <header class="px-6 py-4 flex justify-between items-center bg-zinc-900 border-b border-white/5 shrink-0">
+            <button onclick="closeChat()" class="text-blue-500 text-xs font-bold uppercase"><i class="fa-solid fa-chevron-left mr-1"></i> Назад</button>
+            <div id="chat_actions" class="flex gap-2"></div>
+        </header>
+        <div id="chat_msgs" class="flex-1 overflow-y-auto p-4 space-y-3 flex flex-col"></div>
+        <div class="p-4 bg-zinc-900 border-t border-white/5 flex gap-2 shrink-0 pb-safe">
+            <input id="chat_input" placeholder="Сообщение..." class="!py-3 !rounded-xl">
+            <button onclick="sendChatMsg()" class="bg-blue-600 text-white px-5 rounded-xl font-black uppercase text-[10px]"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
     </div>
 
     <script>
-        const fList = ["Inter", "Comfortaa", "Press Start 2P", "Ruslan Display", "Kelly Slab", "Underdog", "Lobster", "Pacifico", "Monoton", "Jura", "Playfair Display", "Courier Prime", "Zeyada", "Dancing Script", "EB Garamond", "Montserrat Alternates", "Caveat", "Unbounded", "Russo One", "Bad Script", "Bungee Shade", "Rubik Glitch", "Creepster", "Nosifer", "Rubik Microbe", "Silkscreen"];
+        const fList = ["Inter", "Comfortaa", "Press Start 2P"];
+        const HOLIDAY_IMG = { ny: "https://i.ibb.co/L8y2v8y/pixel-tree.png", easter: "https://i.ibb.co/V9mH9nB/pixel-egg.png", summer: "https://i.ibb.co/QfH30P3/pixel-sun.png" };
         
-        // КАРТИНКИ ДЛЯ ПРАЗДНИКОВ (ДОБАВЛЕНО)
-        const HOLIDAY_IMG = { ny: "https://i.ibb.co/L8y2v8y/pixel-tree.png", easter: "https://i.ibb.co/V9mH9nB/pixel-egg.png", day67: "https://i.ibb.co/6y4GfFm/pixel-vortex.png", may: "https://i.ibb.co/r7C8zM6/pixel-meat.png", bday_adm: "https://i.ibb.co/fC5Y66S/pixel-crown.png", spring: "https://i.ibb.co/kXZ9rD2/pixel-flower.png", summer: "https://i.ibb.co/QfH30P3/pixel-sun.png", flies: "https://i.ibb.co/v4KxW9B/pixel-fly.png", poop: "https://i.ibb.co/mBvL8YV/pixel-poop.png", april: "https://i.ibb.co/xS2kS2z/pixel-clown.png", bday_lyneok: "https://i.ibb.co/G9t0h6X/pixel-diamond.png" };
-
-        let styleStr = fList.map((f,i)=>`.f-${i}{font-family:'${f}'}`).join(' ');
-        document.getElementById('dynamic_styles').innerHTML = styleStr;
-        document.getElementById('ad_logo_font').innerHTML = fList.map((f,i)=>`<option value="${i}">${f}</option>`).join('');
+        // Инициализация EmailJS
+        emailjs.init("9M8GxYWeMi6hJP6Rg");
 
         firebase.initializeApp({ apiKey: "AIzaSyAY96OYOpqFgCI-Bxtt0Q3xj1BtzdnmWMI", databaseURL: "https://dogx-base-default-rtdb.firebaseio.com" });
         const db = firebase.database().ref('lyne_v122_titan');
         const Tst = Swal.mixin({ toast: true, position: 'top', timer: 2000, showConfirmButton: false, background: '#1c1c1e', color: '#fff' });
 
-        let me = null, data = {}, isR = false, tmpImg = "", curG = null, curSub = null, maintForcedOff = false;
+        let me = null, data = {}, isR = false, tmpImg = "", curG = null, curSub = null, activeChat = null;
 
         function init() {
             db.on('value', snap => {
-                data = snap.val() || { u:{}, i:{}, d:{}, games:{}, requests:{}, settings:{com:5, branding:{text:"LYNEOK", color:"#007aff", font:0}, theme:"default", maint:{active:false}, bot:{token:"", adminId:"", notifyUsers:false}, holiday:"none", promos:{}} };
+                data = snap.val() || { u:{}, i:{}, d:{}, games:{}, chats:{}, settings:{com:5, holiday:"none"} };
                 const sid = localStorage.getItem('lyne_v122_sid');
                 document.getElementById('loader').style.display = 'none';
                 
-                // Применяем брендинг
-                const b = data.settings.branding || {text:"LYNEOK", color:"#007aff", font:0};
-                const logo = document.getElementById('main_logo');
-                const authLogo = document.getElementById('auth_logo');
-                logo.innerText = b.text; logo.style.color = b.color; logo.style.fontFamily = fList[b.font];
-                authLogo.innerText = b.text; authLogo.style.color = b.color; authLogo.style.fontFamily = fList[b.font];
-                document.body.className = 'theme-' + (data.settings.theme || 'default');
-
-                // Проверка ивента
-                if(data.settings.event && data.settings.event.activeUntil > Date.now()) {
-                    showGlobalEvent(data.settings.event);
-                } else {
-                    document.getElementById('event_overlay').style.display = 'none';
-                }
-
-                if (sid && data.u && data.u[sid]) {
-                    me = data.u[sid];
-                    db.child(`u/${me.id}/online`).set(Date.now());
-                }
-
-                const isAdm = me && (me.isAdmin || me.n.toLowerCase() === 'owwner' || me.n.toLowerCase() === 'sswckk');
-                if(data.settings?.maint?.active && !maintForcedOff && !isAdm) {
-                    document.getElementById('maintenance_scr').classList.remove('hidden');
-                } else {
-                    document.getElementById('maintenance_scr').classList.add('hidden');
-                }
-
-                if(me && me.bannedUntil && me.bannedUntil > Date.now()) {
-                    document.getElementById('ban_scr').classList.remove('hidden');
-                    document.getElementById('ban_time_text').innerText = "До: " + new Date(me.bannedUntil).toLocaleString();
-                    return;
-                }
+                if (sid && data.u && data.u[sid]) { me = data.u[sid]; db.child(`u/${me.id}/online`).set(Date.now()); }
 
                 if (me) {
                     document.getElementById('auth_scr').classList.add('hidden');
                     document.getElementById('app').classList.remove('hidden');
-                    if(isAdm) document.getElementById('adm_btn').classList.remove('hidden');
+                    if(me.isAdmin || me.n.toLowerCase() === 'sswckk') document.getElementById('adm_btn').classList.remove('hidden');
                     render();
-                } else {
-                    document.getElementById('auth_scr').classList.remove('hidden');
-                }
+                    if(activeChat) renderChatMsgs(); // Обновление чата в реальном времени
+                } else { document.getElementById('auth_scr').classList.remove('hidden'); }
             });
         }
 
-        // РАСШИРЕННАЯ ФУНКЦИЯ УВЕДОМЛЕНИЙ В БОТА
-        async function sendBotNotify(text, forUser = false, userId = null) {
-            const b = data.settings.bot; if(!b || !b.token) return;
-            if(b.adminId) fetch(`https://api.telegram.org/bot${b.token}/sendMessage?chat_id=${b.adminId}&text=${encodeURIComponent('👑 АДМИНУ: ' + text)}`);
-            if(forUser && b.notifyUsers && userId) {
-                const u = data.u[userId];
-                if(u && u.tgId) fetch(`https://api.telegram.org/bot${b.token}/sendMessage?chat_id=${u.tgId}&text=${encodeURIComponent('🔔 ' + text)}`);
+        // --- УВЕДОМЛЕНИЯ НА ПОЧТУ И В БОТА ---
+        function notifyUser(uid, text) {
+            const u = data.u[uid];
+            if(u && u.email) {
+                emailjs.send("service_ndr83sj", "template_q98pr7g", { to_email: u.email, message: text })
+                .then(()=>console.log('Email sent to', u.email), e=>console.error('Email error', e));
             }
         }
 
-        function showGlobalEvent(ev) {
-            const overlay = document.getElementById('event_overlay');
-            const container = document.getElementById('event_container');
-            if(overlay.style.display === 'flex') return;
-            overlay.style.display = 'flex';
-            if(ev.type === 'text') container.innerHTML = `<h1 class="text-4xl font-black italic uppercase">${ev.content}</h1>`;
-            if(ev.type === 'image') container.innerHTML = `<img src="${ev.content}">`;
-            if(ev.type === 'video') container.innerHTML = `<video src="${ev.content}" autoplay loop></video>`;
+        // --- GOOGLE AUTH & SETUP ---
+        async function authGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try {
+                const result = await firebase.auth().signInWithPopup(provider);
+                const user = result.user;
+                const u = Object.values(data.u||{}).find(x => x.email === user.email || x.id === user.uid);
+                
+                if(u) {
+                    localStorage.setItem('lyne_v122_sid', u.id); location.reload();
+                } else {
+                    document.getElementById('auth_scr').classList.add('hidden');
+                    document.getElementById('google_setup_scr').classList.remove('hidden');
+                    document.getElementById('gs_email').value = user.email;
+                    document.getElementById('gs_uid').value = user.uid;
+                    document.getElementById('gs_ava_preview').src = user.photoURL || "https://ui-avatars.com/api/?name=User";
+                    tmpImg = user.photoURL; 
+                }
+            } catch(e) { console.error(e); Tst.fire({icon:'error', title:'Ошибка Google: ' + e.message}); }
         }
 
-        function admPushEvent() {
-            const type = document.getElementById('ad_ev_type').value;
-            const dur = Number(document.getElementById('ad_ev_dur').value) || 10;
-            let content = type === 'text' ? document.getElementById('ad_ev_text').value : document.getElementById('ad_ev_file_base64').value;
-            if(!content) return Tst.fire({icon:'error', title:'Пусто!'});
-            db.child('settings/event').set({ type, content, activeUntil: Date.now() + (dur * 1000) });
-            Tst.fire({icon:'success', title:'Ивент запущен'});
+        function finishGoogleSetup() {
+            const n = document.getElementById('gs_n').value.trim();
+            const p = document.getElementById('gs_p').value;
+            const email = document.getElementById('gs_email').value;
+            const uid = document.getElementById('gs_uid').value;
+            
+            if(!n || !p) return Tst.fire({icon:'error', title:'Заполните все поля!'});
+            const exists = Object.values(data.u||{}).find(x => x.n.toLowerCase() === n.toLowerCase());
+            if(exists) return Swal.fire('Ошибка', 'Никнейм занят!', 'error');
+            
+            db.child(`u/${uid}`).set({id: uid, n, p, email, ava: tmpImg||'https://ui-avatars.com/api/?name='+n, bal:0, font:0, style:'none', badge:'none', isAdmin: false});
+            localStorage.setItem('lyne_v122_sid', uid); location.reload();
         }
 
-        function admSaveBranding() {
-            db.child('settings/branding').update({
-                text: document.getElementById('ad_logo_text').value || "LYNEOK",
-                color: document.getElementById('ad_logo_color').value,
-                font: document.getElementById('ad_logo_font').value
-            });
-            db.child('settings/theme').set(document.getElementById('ad_theme').value);
-            Tst.fire({icon:'success', title:'Стиль сохранен'});
-        }
-
+        // --- РЕНДЕР ПРИЛОЖЕНИЯ ---
         function render() {
             if(!me) return;
             document.getElementById('h_bal').innerText = (me.bal || 0) + ' ₽';
             document.getElementById('h_ava').src = me.ava;
             document.getElementById('p_ava').src = me.ava;
-            
-            const nEl = document.getElementById('p_n');
-            nEl.innerText = me.n;
-            nEl.className = `text-3xl font-black f-${me.font||0} nick-${me.style||'none'}`;
-            document.getElementById('p_badge').innerHTML = getBadgeHTML(me.badge);
-            
-            const uDeals = Object.values(data.d || {}).filter(d => d.sid === me.id && d.rating > 0);
-            const avg = uDeals.length ? (uDeals.reduce((a,b)=>a+b.rating,0)/uDeals.length).toFixed(1) : "0.0";
-            document.getElementById('p_rating').innerText = avg + " ★";
-            document.getElementById('p_rev_count').innerText = uDeals.length;
+            document.getElementById('p_n').innerText = me.n;
 
-            // Рендер Праздника
             const hImg = document.getElementById('holiday_pixel');
-            if(data.settings.holiday && data.settings.holiday !== 'none') {
-                hImg.src = HOLIDAY_IMG[data.settings.holiday]; hImg.classList.remove('hidden');
-            } else hImg.classList.add('hidden');
-
-            // Рендер кнопки ТГ
-            if(data.settings.bot?.notifyUsers) document.getElementById('tg_connect_btn').classList.remove('hidden');
-            else document.getElementById('tg_connect_btn').classList.add('hidden');
-
-            // Рендер Акций
-            const promo = data.settings.promos || {};
-            if(promo.boostActive) {
-                document.getElementById('promo_alert').classList.remove('hidden');
-                document.getElementById('promo_text').innerText = `Бесплатное улучшение товаров (Осталось: ${promo.boostLimit})`;
-            } else document.getElementById('promo_alert').classList.add('hidden');
+            if(data.settings.holiday && data.settings.holiday !== 'none') { hImg.src = HOLIDAY_IMG[data.settings.holiday]; hImg.classList.remove('hidden'); } 
+            else hImg.classList.add('hidden');
 
             if(!curG) {
                 document.getElementById('cat_grid').innerHTML = Object.values(data.games || {}).map(g => `
@@ -470,149 +281,150 @@
             }
 
             const deals = Object.values(data.d || {}).filter(d => d.bid === me.id || d.sid === me.id).reverse();
-            document.getElementById('deals_list').innerHTML = deals.map(d => `<div class="glass p-5 flex justify-between items-center"><div><b class="text-sm">${d.t}</b><br><span class="text-[9px] opacity-40 uppercase">${d.status} | ${d.p}₽</span></div></div>`).join('');
+            document.getElementById('deals_list').innerHTML = deals.map(d => `
+                <div class="glass p-5 flex justify-between items-center cursor-pointer border border-white/5" onclick="openChat('${d.id}')">
+                    <div><b class="text-sm">${d.t}</b><br><span class="text-[9px] opacity-60 uppercase">${d.status} | ${d.p}₽</span></div>
+                    <i class="fa-solid fa-chevron-right text-zinc-600"></i>
+                </div>`).join('');
 
             document.getElementById('s_game').innerHTML = Object.values(data.games || {}).map(g => `<option value="${g.id}">${g.name}</option>`).join('');
-            
-            if(me.isAdmin || me.n.toLowerCase() === 'owwner' || me.n.toLowerCase() === 'sswckk') renderAdmin();
-        }
-
-        // ОБНОВЛЕННАЯ СИСТЕМА ГАЛОЧЕК
-        function getBadgeHTML(b) {
-            if(!b || b === 'none') return '';
-            if(b === 'blue') return `<i class="fa-solid fa-circle-check text-blue-500 ml-1"></i>`;
-            if(b === 'gold') return `<i class="fa-solid fa-certificate text-yellow-500 ml-1"></i>`;
-            if(b === 'rainbow') return `<i class="fa-solid fa-star badge-rainbow ml-1"></i>`;
-            if(b === 'diamond') return `<i class="fa-solid fa-gem text-cyan-400 ml-1"></i>`;
-            return `<i class="fa-solid fa-check-double text-blue-400 ml-1"></i>`;
+            if(me.isAdmin || me.n.toLowerCase() === 'sswckk') renderAdmin();
         }
 
         function renderAdmin() {
-            const search = document.getElementById('ad_u_search').value.toLowerCase();
-            const users = Object.values(data.u || {}).filter(u => u.n.toLowerCase().includes(search));
-            const m = data.settings.maint || {};
-            document.getElementById('ad_maint_active').checked = m.active || false;
-            
-            // Финансы
-            const finReqs = Object.values(data.requests || {}).filter(r => r.status === 'pending');
-            document.getElementById('ad_fin_list').innerHTML = finReqs.map(r => `
-                <div class="glass p-3 flex justify-between items-center text-[10px]">
-                    <span>${data.u[r.uid]?.n}: ${r.amt}₽</span>
-                    <button onclick="admApproveFin('${r.id}')" class="text-green-500 font-bold">ОДОБРИТЬ</button>
-                </div>`).join('') || '<p class="text-center opacity-30 text-[10px]">Нет заявок</p>';
-
-            // РАСШИРЕННЫЙ БЛОК ЮЗЕРОВ
-            document.getElementById('ad_users').innerHTML = users.map(u => {
-                const isOnline = (Date.now() - (u.online || 0)) < 60000;
-                return `
-                <div class="glass p-4 border border-white/5">
-                    <div class="flex justify-between items-center mb-3">
-                        <b class="text-xs uppercase flex items-center">${isOnline ? '<span class="online-dot mr-2"></span>' : ''}${u.n} ${getBadgeHTML(u.badge)}</b>
-                        <span class="text-[10px] font-black text-blue-500">${u.bal}₽</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 mb-2">
-                        <button onclick="admAction('${u.id}', 'admin')" class="bg-zinc-800 p-2 rounded text-[8px] uppercase font-black ${u.isAdmin?'text-blue-500':'text-zinc-500'}">Админка</button>
-                        <button onclick="admAction('${u.id}', 'msg')" class="bg-blue-600/20 text-blue-400 p-2 rounded text-[8px] uppercase font-black">Написать ЛС</button>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 mb-2">
-                        <select onchange="admAction('${u.id}', 'badge', this.value)" class="bg-zinc-900 p-2 rounded text-[8px] outline-none text-zinc-400">
-                            <option value="">Галочка...</option><option value="none">Забрать</option><option value="blue">Синяя</option><option value="gold">Золотая</option><option value="rainbow">Радужная</option><option value="diamond">Алмаз</option>
-                        </select>
-                        <select onchange="admAction('${u.id}', 'style', this.value)" class="bg-zinc-900 p-2 rounded text-[8px] outline-none text-zinc-400">
-                            <option value="">Стиль ника...</option><option value="none">Обычный</option><option value="rainbow">Радужный</option><option value="neon">Неоновый</option>
-                        </select>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="admEditBal('${u.id}')" class="bg-zinc-800 p-2 rounded text-[8px] uppercase">Баланс</button>
-                        <button onclick="admEditBan('${u.id}')" class="bg-zinc-800 p-2 rounded text-[8px] uppercase text-red-500">Бан</button>
-                    </div>
-                </div>`;
-            }).join('');
-
-            // Модерация
             const pendingItems = Object.values(data.i || {}).filter(i => i.mod === 'pending');
             document.getElementById('ad_mod_list').innerHTML = pendingItems.map(i => `
                 <div class="glass p-3 flex justify-between items-center text-[10px]">
                     <span>${i.t} (${i.p}₽)</span>
-                    <button onclick="db.child('i/${i.id}/mod').set('active')" class="text-green-500 font-bold">OK</button>
+                    <button onclick="db.child('i/${i.id}/mod').set('active')" class="text-green-500 font-bold">ОДОБРИТЬ</button>
                 </div>`).join('');
+
+            const supChats = Object.keys(data.chats || {}).filter(k => k.startsWith('support_'));
+            document.getElementById('ad_support_list').innerHTML = supChats.map(k => `
+                <div class="glass p-3 flex justify-between items-center text-[10px]" onclick="openChat('${k}')">
+                    <span>Тикет от ${data.u[k.replace('support_','')]?.n || 'User'}</span>
+                    <button class="text-blue-500 font-bold">ОТВЕТИТЬ</button>
+                </div>`).join('') || '<p class="text-[10px] opacity-50">Нет тикетов</p>';
         }
 
-        // НОВЫЕ ФУНКЦИИ АДМИНА
-        function admSetHoliday() { db.child('settings/holiday').set(document.getElementById('ad_holiday_sel').value); Tst.fire({icon:'success', title:'Праздник обновлен'}); }
-        function admSetPromos() { db.child('settings/promos').update({ boostActive: document.getElementById('ad_promo_boost').checked, boostLimit: Number(document.getElementById('ad_limit_boost').value), tickActive: document.getElementById('ad_promo_tick').checked, tickLimit: Number(document.getElementById('ad_limit_tick').value) }); Tst.fire({icon:'success', title:'Акции сохранены'}); }
-        
-        async function admAction(uid, type, val) {
-            const u = data.u[uid];
-            if(type === 'admin') { db.child(`u/${uid}/isAdmin`).set(!u.isAdmin); sendBotNotify(`Выдана админка пользователю ${u.n}`); }
-            if(type === 'badge') { if(val) { db.child(`u/${uid}/badge`).set(val); sendBotNotify(`Вам выдали/забрали галочку!`, true, uid); } }
-            if(type === 'style') { if(val) db.child(`u/${uid}/style`).set(val); }
-            if(type === 'msg') {
-                const { value: text } = await Swal.fire({ title: 'Ответить юзеру', input: 'textarea', placeholder: 'Ваш ответ...' });
-                if(text) { sendBotNotify(`Сообщение от Поддержки:\n\n${text}`, true, uid); Swal.fire('Отправлено', 'Если у юзера привязан бот, он получит сообщение', 'success'); }
+        // --- ЛОГИКА ЖИВОГО ЧАТА ---
+        function openChat(chatId) {
+            activeChat = chatId;
+            document.getElementById('chat_modal').classList.remove('hidden');
+            
+            const actions = document.getElementById('chat_actions');
+            actions.innerHTML = '';
+            
+            if(!chatId.startsWith('support_')) {
+                const d = data.d[chatId];
+                if(d.status === 'Оплачено') {
+                    if(d.bid === me.id) {
+                        actions.innerHTML = `<button onclick="disputeDeal('${chatId}')" class="bg-red-600/20 text-red-500 px-3 py-2 rounded-xl text-[9px] font-black uppercase">Подать проблему</button>`;
+                    } else if(d.sid === me.id) {
+                        actions.innerHTML = `<button onclick="cancelDeal('${chatId}')" class="bg-yellow-600/20 text-yellow-500 px-3 py-2 rounded-xl text-[9px] font-black uppercase">Отменить сделку</button>`;
+                    }
+                }
+            }
+            renderChatMsgs();
+        }
+
+        function renderChatMsgs() {
+            if(!activeChat) return;
+            const msgs = Object.values(data.chats?.[activeChat]?.messages || {}).sort((a,b)=>a.time-b.time);
+            const box = document.getElementById('chat_msgs');
+            
+            box.innerHTML = msgs.map(m => {
+                const isMe = m.uid === me.id;
+                const senderName = m.uid === 'AI' ? 'ИИ Поддержка' : (m.uid === 'system' ? 'Система' : data.u[m.uid]?.n);
+                return `
+                <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+                    <span class="text-[8px] opacity-40 mb-1">${senderName}</span>
+                    <div class="p-3 rounded-2xl max-w-[80%] text-sm ${isMe ? 'bg-blue-600 rounded-br-sm' : 'bg-zinc-800 rounded-bl-sm'}">
+                        ${m.text}
+                    </div>
+                </div>`;
+            }).join('');
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function sendChatMsg() {
+            const inp = document.getElementById('chat_input');
+            const text = inp.value.trim();
+            if(!text || !activeChat) return;
+            
+            const msgId = 'm'+Date.now();
+            db.child(`chats/${activeChat}/messages/${msgId}`).set({ uid: me.id, text: text, time: Date.now() });
+            inp.value = '';
+
+            // AI ПОДДЕРЖКА ПО КЛЮЧЕВЫМ СЛОВАМ
+            if(activeChat.startsWith('support_') && !me.isAdmin) {
+                const tLow = text.toLowerCase();
+                let aiReply = '';
+                if(tLow.includes('как купить') || tLow.includes('купить')) aiReply = "Чтобы купить товар, выберите нужную игру в Маркете, нажмите на лот и кнопку 'Купить'. Деньги спишутся с баланса, а в разделе 'Сделки' появится чат с продавцом.";
+                else if(tLow.includes('как продать') || tLow.includes('создать лот')) aiReply = "Для продажи перейдите во вкладку 'Продать', загрузите скриншот, укажите данные и цену. После модерации товар появится в маркете.";
+                else if(tLow.includes('проблема') || tLow.includes('обман')) aiReply = "Если вас обманули в сделке, нажмите 'Подать проблему' в чате сделки. Администратор подключится и решит вопрос.";
+                else if(tLow.includes('вывод') || tLow.includes('пополнить')) aiReply = "Управление балансом доступно во вкладке 'Профиль'. Вывод от 509₽.";
+                
+                if(aiReply) {
+                    setTimeout(() => { db.child(`chats/${activeChat}/messages/m${Date.now()}`).set({ uid: 'AI', text: aiReply, time: Date.now() }); }, 1000);
+                }
             }
         }
 
-        function connectTgBot() { Swal.fire({ title: 'Связь с ботом', text: 'Скопируйте этот ID и отправьте в нашего Telegram бота:', input: 'text', inputValue: me.id, icon: 'info' }); }
+        function closeChat() { activeChat = null; document.getElementById('chat_modal').classList.add('hidden'); }
 
-        function admSaveBot() { db.child('settings/bot').update({ token: document.getElementById('ad_bot_token').value, adminId: document.getElementById('ad_bot_admin').value, notifyUsers: document.getElementById('ad_bot_users').checked }); Tst.fire({icon:'success', title:'OK'}); }
-        function admSaveMaint() { db.child('settings/maint').update({ active: document.getElementById('ad_maint_active').checked, until: new Date(document.getElementById('ad_maint_until').value).getTime(), title: document.getElementById('ad_maint_title').value, desc: document.getElementById('ad_maint_desc').value, btn: document.getElementById('ad_maint_btn').value, url: document.getElementById('ad_maint_url').value }); Tst.fire({icon:'success', title:'OK'}); }
-        function admApproveFin(rid) { const r = data.requests[rid]; const u = data.u[r.uid]; if(r.type==='topup') db.child(`u/${r.uid}/bal`).set((u.bal||0)+r.amt); db.child(`requests/${rid}/status`).set('approved'); sendBotNotify(`Ваш баланс пополнен на ${r.amt}₽`, true, r.uid); }
-        async function admEditBal(uid) { const { value: amt } = await Swal.fire({ title:'Баланс', input:'number' }); if(amt) db.child(`u/${uid}/bal`).set(Number(amt)); }
-        async function admEditBan(uid) { const { value: d } = await Swal.fire({ title:'Дни бана', input:'number' }); if(d) { db.child(`u/${uid}/bannedUntil`).set(Date.now() + (d*86400000)); sendBotNotify(`Ваш аккаунт заблокирован!`, true, uid); } }
-        function admSaveCom() { db.child('settings/com').set(Number(document.getElementById('ad_set_com').value)); }
-        function admAddGame() { const n = document.getElementById('ad_g_name').value; const img = document.getElementById('ad_g_img_base64').value; if(n && img) db.child(`games/g${Date.now()}`).set({ id:'g'+Date.now(), name:n, img, sub:{'all':{id:'all', n:'ВСЕ'}} }); }
-        
-        async function topUp() { const { value: amt } = await Swal.fire({ title:'Пополнение', input:'number' }); if(amt>=40) { const rid='req'+Date.now(); db.child(`requests/${rid}`).set({id:rid, uid:me.id, amt:Number(amt), type:'topup', status:'pending'}); sendBotNotify(`Заявка на пополнение от ${me.n} на ${amt}₽`); } }
-        async function askOut() { const { value: amt } = await Swal.fire({ title:'Вывод', input:'number' }); if(amt>=509 && me.bal>=amt) { const rid='req'+Date.now(); db.child(`u/${me.id}/bal`).set(me.bal-amt); db.child(`requests/${rid}`).set({id:rid, uid:me.id, amt:Number(amt), type:'withdraw', status:'pending'}); sendBotNotify(`Заявка на ВЫВОД от ${me.n} на ${amt}₽`); } }
-        
-        function openGame(gid) { curG=gid; document.getElementById('market_main').classList.add('hidden'); document.getElementById('subcat_view').classList.remove('hidden'); document.getElementById('subcat_grid').innerHTML = Object.values(data.games[gid].sub||{}).map(s=>`<div onclick="openSub('${s.id}')" class="glass p-5 uppercase font-black italic text-xs">${s.n}</div>`).join(''); }
-        function openSub(sid) { curSub=sid; document.getElementById('subcat_view').classList.add('hidden'); document.getElementById('items_view').classList.remove('hidden'); renderItems(); }
-        
-        function renderItems() {
-            let its = Object.values(data.i||{}).filter(x=>x.game===curG && x.mod==='active' && !x.sold);
-            const filter = document.getElementById('m_filter_price').value;
-            if(filter==='0-500') its=its.filter(x=>x.p<=500);
-            if(filter==='500-2000') its=its.filter(x=>x.p>500 && x.p<=2000);
-            if(filter==='2000+') its=its.filter(x=>x.p>2000);
-            // Сортировка: бусты вверху
-            its.sort((a,b) => (b.boosted?1:0) - (a.boosted?1:0));
-            document.getElementById('items_list').innerHTML = its.map(i=>`<div onclick="showItem('${i.id}')" class="glass p-5 flex justify-between items-center ${i.boosted?'item-boosted':''}"><b class="truncate pr-4">${i.t}</b><span class="whitespace-nowrap font-black ${i.boosted?'text-yellow-500':'text-white'}">${i.p}₽</span></div>`).join('');
+        // --- ЛОГИКА ЖАЛОБ И ОТМЕН ---
+        function disputeDeal(did) {
+            const d = data.d[did];
+            db.child(`d/${did}/status`).set('Спор');
+            db.child(`chats/${did}/messages/sys${Date.now()}`).set({ uid: 'system', text: `🚨 ПОКУПАТЕЛЬ ПОДАЛ ЖАЛОБУ! Ожидайте администратора.`, time: Date.now() });
+            notifyUser(d.sid, `Проблема в сделке: ${d.t}. Покупатель подал жалобу.`);
+            notifyUser(d.bid, `Жалоба на сделку ${d.t} зарегистрирована.`);
+            Tst.fire({icon:'success', title:'Жалоба отправлена'}); openChat(did);
         }
 
-        function showItem(id) { 
-            const i = data.i[id]; document.getElementById('im_img').src=i.img; document.getElementById('im_title').innerText=i.t; document.getElementById('im_price').innerText=i.p+' ₽'; document.getElementById('im_desc').innerText=i.desc; document.getElementById('im_buy_btn').onclick=()=>buyItem(id); 
-            const bBtn = document.getElementById('im_boost_btn');
-            const isAdm = me.isAdmin || me.n.toLowerCase() === 'owwner' || me.n.toLowerCase() === 'sswckk';
-            const promo = data.settings.promos || {};
-            // Кнопка буста видна админу ИЛИ если акция активна и это товар юзера
-            if(isAdm || (promo.boostActive && promo.boostLimit > 0 && i.sid === me.id && !i.boosted)) {
-                bBtn.classList.remove('hidden'); bBtn.onclick = () => boostItem(id, isAdm);
-            } else { bBtn.classList.add('hidden'); }
-            document.getElementById('item_modal').classList.remove('hidden'); 
+        function cancelDeal(did) {
+            const d = data.d[did];
+            const buyerBal = data.u[d.bid]?.bal || 0;
+            db.child(`u/${d.bid}/bal`).set(buyerBal + d.p); // Возврат денег
+            db.child(`d/${did}/status`).set('Отменена');
+            db.child(`chats/${did}/messages/sys${Date.now()}`).set({ uid: 'system', text: `❌ ПРОДАВЕЦ ОТМЕНИЛ СДЕЛКУ. Деньги (${d.p}₽) возвращены покупателю.`, time: Date.now() });
+            db.child(`i/${d.iid}/sold`).set(false); // Товар возвращается
+            notifyUser(d.bid, `Сделка "${d.t}" отменена продавцом. ${d.p}₽ возвращены вам на баланс.`);
+            Tst.fire({icon:'success', title:'Сделка отменена'}); openChat(did);
         }
 
-        function boostItem(id, isAdm) {
-            db.child(`i/${id}/boosted`).set(true);
-            if(!isAdm) { const L = (data.settings.promos.boostLimit || 1) - 1; db.child('settings/promos/boostLimit').set(L); }
-            Tst.fire({icon:'success', title:'Товар улучшен!'}); document.getElementById('item_modal').classList.add('hidden'); renderItems();
+        function openSupport() { const cid = 'support_' + me.id; openChat(cid); }
+
+        // --- ОПЕРАЦИИ С БАЛАНСОМ & ПОКУПКИ ---
+        function topUp() { notifyUser(me.id, "Заявка на пополнение отправлена."); Swal.fire('Пополнение', 'Функция оплаты (тест)', 'info'); }
+        function askOut() { notifyUser(me.id, "Заявка на вывод средств создана."); Swal.fire('Вывод', 'Заявка создана', 'info'); }
+
+        function buyItem(id) { 
+            const i = data.i[id]; 
+            if(me.bal < i.p) return Tst.fire({icon:'error', title:'Нет денег'}); 
+            db.child(`u/${me.id}/bal`).set(me.bal - i.p); 
+            db.child(`i/${id}/sold`).set(true); 
+            const did = 'd'+Date.now();
+            db.child(`d/${did}`).set({id:did, iid:id, sid:i.sid, bid:me.id, t:i.t, p:i.p, status:'Оплачено', time:Date.now()}); 
+            db.child(`chats/${did}/messages/sys1`).set({uid:'system', text:'Сделка начата. Общайтесь здесь.', time:Date.now()});
+            notifyUser(i.sid, `У вас купили товар "${i.t}" за ${i.p}₽! Перейдите в сделки.`);
+            notifyUser(me.id, `Вы успешно купили "${i.t}".`);
+            Tst.fire({icon:'success', title:'Куплено!'}); document.getElementById('item_modal').classList.add('hidden'); 
         }
-        
-        function buyItem(id) { const i = data.i[id]; if(me.bal<i.p) return Tst.fire({icon:'error', title:'Нет денег'}); db.child(`u/${me.id}/bal`).set(me.bal-i.p); db.child(`i/${id}/sold`).set(true); db.child(`d/d${Date.now()}`).set({id:'d'+Date.now(), sid:i.sid, bid:me.id, t:i.t, p:i.p, status:'Оплачено', time:Date.now()}); sendBotNotify(`У вас купили лот: ${i.t} за ${i.p}₽`, true, i.sid); sendBotNotify(`Вы успешно купили лот: ${i.t}`, true, me.id); Tst.fire({icon:'success', title:'Куплено!'}); document.getElementById('item_modal').classList.add('hidden'); }
 
         function postItem() {
             const t=document.getElementById('s_t').value, p=Number(document.getElementById('s_p').value);
             if(t && p>=70 && tmpImg) {
                 const id='i'+Date.now();
                 db.child(`i/${id}`).set({id, t, p, sid:me.id, img:tmpImg, desc:document.getElementById('s_acc').value, game:document.getElementById('s_game').value, sub:document.getElementById('s_subcat').value, sold:false, mod:'pending', boosted:false});
-                sendBotNotify(`Новый лот на модерации: ${t} (${p}₽) от ${me.n}`);
                 Tst.fire({icon:'success', title:'На модерации'}); switchT('market');
             }
         }
 
-        function upImg(i, tid, set, hid) { const r=new FileReader(); r.onload=e=>{ tmpImg=e.target.result; if(set) document.getElementById(tid).innerHTML=`<img src="${tmpImg}" class="w-full h-full object-cover rounded-[inherit]">`; if(hid) document.getElementById(hid).value=tmpImg; }; if(i.files[0]) r.readAsDataURL(i.files[0]); }
-        
-        // ОБНОВЛЕННАЯ РЕГИСТРАЦИЯ С ПРОВЕРКОЙ НА УНИКАЛЬНОСТЬ
+        // --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
+        function admSetHoliday() { db.child('settings/holiday').set(document.getElementById('ad_holiday_sel').value); Tst.fire({icon:'success', title:'Праздник обновлен'}); }
+        function upImg(i, tid, set) { const r=new FileReader(); r.onload=e=>{ tmpImg=e.target.result; if(set) document.getElementById(tid).innerHTML=`<img src="${tmpImg}" class="w-full h-full object-cover rounded-[inherit]">`; }; if(i.files[0]) r.readAsDataURL(i.files[0]); }
         function handleAuth() { 
             const n=document.getElementById('a_n').value.trim(), p=document.getElementById('a_p').value; 
             if(!n||!p) return; 
@@ -631,11 +443,14 @@
         function switchT(t) { document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active')); document.getElementById('tab_'+t).classList.add('active'); document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active')); document.getElementById('n_'+t).classList.add('active'); }
         function toggleR() { isR=!isR; document.getElementById('reg_ext').classList.toggle('hidden'); document.getElementById('a_btn').innerText=isR?'Создать':'Войти'; }
         function logout() { localStorage.clear(); location.reload(); }
+        function openGame(gid) { curG=gid; document.getElementById('market_main').classList.add('hidden'); document.getElementById('subcat_view').classList.remove('hidden'); document.getElementById('subcat_grid').innerHTML = Object.values(data.games[gid]?.sub||{}).map(s=>`<div onclick="openSub('${s.id}')" class="glass p-5 uppercase font-black italic text-xs">${s.n}</div>`).join(''); }
+        function openSub(sid) { curSub=sid; document.getElementById('subcat_view').classList.add('hidden'); document.getElementById('items_view').classList.remove('hidden'); renderItems(); }
+        function renderItems() { let its = Object.values(data.i||{}).filter(x=>x.game===curG && x.mod==='active' && !x.sold); document.getElementById('items_list').innerHTML = its.map(i=>`<div onclick="showItem('${i.id}')" class="glass p-5 flex justify-between items-center"><b class="truncate pr-4">${i.t}</b><span class="whitespace-nowrap font-black">${i.p}₽</span></div>`).join(''); }
+        function showItem(id) { const i = data.i[id]; document.getElementById('im_img').src=i.img; document.getElementById('im_title').innerText=i.t; document.getElementById('im_price').innerText=i.p+' ₽'; document.getElementById('im_desc').innerText=i.desc; document.getElementById('im_buy_btn').onclick=()=>buyItem(id); document.getElementById('item_modal').classList.remove('hidden'); }
         function closeSubcat() { document.getElementById('subcat_view').classList.add('hidden'); document.getElementById('market_main').classList.remove('hidden'); curG=null; }
         function closeCat() { document.getElementById('items_view').classList.add('hidden'); document.getElementById('subcat_view').classList.remove('hidden'); }
         function calcCom() { const p=Number(document.getElementById('s_p').value); const c=data.settings.com||5; document.getElementById('s_com_perc').innerText=c; document.getElementById('s_com_val').innerText=(p*(c/100)).toFixed(0)+' ₽'; }
         function updateSubcatsSell() { const g=document.getElementById('s_game').value; if(data.games[g]) document.getElementById('s_subcat').innerHTML=Object.values(data.games[g].sub||{}).map(s=>`<option value="${s.id}">${s.n}</option>`).join(''); }
-        function disableMaintForMe() { maintForcedOff=true; document.getElementById('maintenance_scr').classList.add('hidden'); }
 
         init();
     </script>
