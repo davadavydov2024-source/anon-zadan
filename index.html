@@ -37,8 +37,8 @@
 
     <div id="terminal">
         <div class="status">[system] 💞💞💞💞💞💞💞💞💞💞..</div>
-        <div class="glitch">> One encrypted package found.</div>
-        <button onclick="checkPassword()">Decrypt Message</button>
+        <div class="glitch">> введи пароль.</div>
+        <button onclick="checkPassword()"ввести пароль" </button>
     </div>
 
     <div id="message-overlay">I LOVE YOU :3</div>
@@ -58,11 +58,11 @@
         resize();
 
         function checkPassword() {
-            const pass = prompt("Enter Decryption Key :");
+            const pass = prompt("введи пароль :");
             if (pass === "1111", "3333") {
                 startAnimation();
             } else {
-                alert("ACCESS DENIED");
+                alert("неверный код");
             }
         }
 
